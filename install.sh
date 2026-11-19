@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Enfolo Lead Finder installer: sets up the environment and starts the web UI.
+# Enfolo Lead Finder installer: sets up the environment (start the UI afterwards with ./lf ui).
 set -e
 cd "$(dirname "$0")"
 
@@ -31,5 +31,5 @@ command -v claude >/dev/null || echo "WARN: 'claude' CLI not on PATH - the web U
 
 ./env/bin/python tests/test_core.py >/dev/null && echo "Tests OK" || echo "WARN: core tests failed."
 
-echo "Starting web UI at http://127.0.0.1:8787"
-exec ./lf ui "$@"
+echo
+echo "Install complete. Next: fill in your API keys in .env (all optional), then start the UI with:  ./lf ui"
