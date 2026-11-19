@@ -9,7 +9,7 @@ Before you need it: Claude Code installed and logged in, Python 3.10+, git. Dock
 ```
 Install the Enfolo Lead Finder for me and start its web UI. Do these steps in order and stop to tell me if one fails:
 
-1. Clone the repository: git clone <REPO_URL> leads   then cd into leads.
+1. Clone the repository: git clone https://github.com/NikantYadav/leadfinder leads   then cd into leads.
    (If the folder already exists, git pull in it instead.)
 2. Check prerequisites: python3 --version (needs 3.10+), git, and `claude --version`.
    Check whether Docker is installed and running. If it isn't, tell me that free OpenSERP search
