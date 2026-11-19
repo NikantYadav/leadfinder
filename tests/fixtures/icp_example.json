@@ -1,0 +1,61 @@
+{
+  "_comment": "Your A/B/C personas as a template. For each new industry, /find-leads copies this, adapts titles/keywords/what-they-buy to that industry, and asks you to approve before searching. company_rule: exhibitor_3plus | exhibitor | visitor | visitor_or_exhibitor | any. find_via: company_list (search people at known companies) | industry_search (search titles x sector x location).",
+  "industry": "<industry>",
+  "geo": "India + export markets",
+  "product_context": "Enfolo (enfolo.com) - helps sales teams keep the context of every buyer conversation (trade-show leads, long multi-touch deals). Validation goal: interview people who feel this memory/follow-up pain.",
+  "icps": [
+    {
+      "code": "A",
+      "name": "Event-led sellers",
+      "description": "B2B companies that exhibit at 3+ trade shows a year; deals close ~2 months after the show.",
+      "company_rule": "exhibitor_3plus",
+      "find_via": "company_list",
+      "titles": ["VP Sales", "Head of Sales", "National Sales Head", "Sales Ops Manager", "CRM Manager",
+                 "Regional Sales Manager", "Area Sales Manager", "Sales Engineer", "Business Development Manager",
+                 "Export Manager"],
+      "title_keywords": ["sales", "business development", "bdm", "export", "crm", "marketing head",
+                         "commercial", "key account", "channel"],
+      "search_keywords": ["sales head", "export manager", "business development", "sales manager"],
+      "exclude_keywords": ["intern", "trainee", "student", "salesforce developer"]
+    },
+    {
+      "code": "C",
+      "name": "Procurement teams at events",
+      "description": "Buyers who walk shows to source capital equipment, components, tooling, raw-material suppliers.",
+      "company_rule": "visitor",
+      "find_via": "company_list",
+      "titles": ["Purchase Head", "Procurement Manager", "Sourcing Manager", "Category Manager",
+                 "Head of Supply Chain", "Plant Head"],
+      "title_keywords": ["purchase", "procurement", "sourcing", "category manager", "supply chain",
+                         "plant head", "buyer", "materials manager", "vendor development", "commodity"],
+      "search_keywords": ["purchase", "procurement", "sourcing", "plant head"],
+      "exclude_keywords": ["intern", "trainee", "student"],
+      "buys_at_shows": ["capital equipment", "components", "tooling", "raw-material suppliers"]
+    },
+    {
+      "code": "B2",
+      "name": "Continuous-cycle field sellers",
+      "description": "Steady pipeline of multi-month (>2 months) deals with many stakeholders; the memory problem is keeping context across dozens of touches.",
+      "company_rule": "any",
+      "find_via": "industry_search",
+      "titles": ["VP Sales", "Head of Sales", "Country Manager", "Key Account Manager", "Field Sales Manager",
+                 "Enterprise Account Manager", "Client Partner"],
+      "title_keywords": ["key account", "field sales", "country manager", "client partner", "enterprise account",
+                         "zonal sales", "sales head", "vp sales"],
+      "search_keywords": ["key account manager", "field sales manager", "zonal sales manager"],
+      "exclude_keywords": ["intern", "trainee", "student"]
+    },
+    {
+      "code": "B1",
+      "name": "Inside / video-call sellers (SaaS, IT services)",
+      "description": "Comparison group only - tech sellers on video calls. Disabled by default for non-tech industries.",
+      "enabled": false,
+      "company_rule": "any",
+      "find_via": "industry_search",
+      "titles": ["Account Executive", "Enterprise AE", "RevOps Manager", "Sales Enablement", "CRO"],
+      "title_keywords": ["account executive", "revops", "revenue operations", "sales enablement", "cro"],
+      "search_keywords": ["account executive", "revops"],
+      "exclude_keywords": ["intern", "trainee"]
+    }
+  ]
+}

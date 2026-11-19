@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enfolo Lead Finder</title>
+<link rel="icon" href="data:,">
+<script>try { const t = localStorage.getItem("lf2_theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch {}</script>
+<style>
+:root{--bg:#f5f6f8;--panel:#fff;--panel2:#fafbfc;--ink:#18202e;--muted:#6b7280;--line:#e5e7eb;--accent:#2f5bd3;--accent-ink:#fff;--soft:#eef2ff;
+--ok:#0f7b55;--ok-soft:#e7f6ef;--warn:#b45309;--warn-soft:#fff4e5;--bad:#b42318;--bad-soft:#fdecea;--code:#0f172a;--codeink:#e2e8f0;
+--shadow:0 1px 2px rgba(16,24,40,.06);--shadow2:0 12px 32px rgba(16,24,40,.18)}
+:root[data-theme="dark"]{--bg:#0d1117;--panel:#161b22;--panel2:#11161d;--ink:#e6edf3;--muted:#8b949e;--line:#2a313c;--accent:#7b98ff;--accent-ink:#0d1117;
+--soft:#1c2540;--ok:#3fb950;--ok-soft:#12261b;--warn:#d29922;--warn-soft:#2a2111;--bad:#f85149;--bad-soft:#2d1517;--code:#0a0e13;--codeink:#c9d1d9;--shadow:none;--shadow2:0 12px 32px rgba(0,0,0,.5)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1117;--panel:#161b22;--panel2:#11161d;--ink:#e6edf3;--muted:#8b949e;--line:#2a313c;--accent:#7b98ff;--accent-ink:#0d1117;
+--soft:#1c2540;--ok:#3fb950;--ok-soft:#12261b;--warn:#d29922;--warn-soft:#2a2111;--bad:#f85149;--bad-soft:#2d1517;--code:#0a0e13;--codeink:#c9d1d9;--shadow:none;--shadow2:0 12px 32px rgba(0,0,0,.5)}}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+a{color:var(--accent)}h1,h2,h3{margin:0}button{font:inherit}
+.app{display:grid;grid-template-columns:268px minmax(0,1fr);min-height:100vh}
+.side{background:var(--panel);border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:10px;position:sticky;top:0;height:100vh}
+@media (max-width:860px){.app{display:block}.side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}.slist{max-height:170px}}
+.brand{font-weight:700;font-size:15px;padding:0 6px 6px}.brand span{color:var(--muted);font-weight:400;font-size:12px;display:block}
+.slist{display:flex;flex-direction:column;gap:4px;overflow:auto}
+.sitem{padding:9px 10px;border-radius:10px;cursor:pointer;border:1px solid transparent}.sitem:hover{background:var(--soft)}
+.sitem.on{background:var(--soft);border-color:var(--line)}.sitem b{display:block;font-size:13px}.sitem small{color:var(--muted)}
+.sidefoot{margin-top:auto;display:flex;flex-direction:column;gap:6px;padding:0 4px}
+.content{padding:24px 28px;max-width:1240px;width:100%;min-width:0}@media (max-width:860px){.content{padding:16px}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.muted{color:var(--muted)}.small{font-size:12px}.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.btn{white-space:nowrap;background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:9px 15px;cursor:pointer;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn.big{font-size:16px;padding:13px 22px}.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}.btn.ghost:hover{background:var(--soft)}
+.btn.sm{padding:5px 10px;font-size:12px;border-radius:8px}.btn:disabled{opacity:.5;cursor:not-allowed}
+.linkbtn{background:none;border:0;color:var(--muted);cursor:pointer;padding:4px 2px;text-align:left;font-size:12px}.linkbtn:hover{color:var(--ink)}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
+textarea{min-height:100px;resize:vertical}label.f{display:block;font-weight:600;margin:14px 0 6px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.row>*{flex:1}
+.ex{display:inline-block;margin:4px 6px 0 0;padding:5px 10px;border-radius:999px;background:var(--soft);cursor:pointer;font-size:12px}
+.choice{display:flex;gap:10px;flex-wrap:wrap}.choice label{flex:1 1 220px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.choice input{width:auto;margin-right:6px}.choice label.on{border-color:var(--accent);background:var(--soft)}
+.hdr{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}.hdr .acts{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.persona{border-left:3px solid var(--accent);padding:4px 12px;margin:10px 0;white-space:pre-wrap}
+.chip{display:inline-block;padding:2px 9px;border-radius:999px;background:var(--soft);font-size:11px;white-space:nowrap}
+.steps{display:grid;gap:2px}.step{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:start;padding:8px 4px;border-bottom:1px dashed var(--line)}.step:last-child{border-bottom:0}
+.ico{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;border:2px solid var(--line);color:var(--muted)}
+.ico.done{background:var(--ok);border-color:var(--ok);color:#fff}.ico.failed{background:var(--bad);border-color:var(--bad);color:#fff}.ico.warn{background:var(--warn);border-color:var(--warn);color:#fff}
+.ico.running{border-color:var(--accent);border-top-color:transparent;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.summarybar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+pre.log{background:var(--code);color:var(--codeink);padding:12px;border-radius:10px;max-height:45vh;overflow:auto;white-space:pre-wrap;font-size:12px}
+details summary{cursor:pointer;font-weight:600;padding:4px 0;font-size:13px}.empty{text-align:center;padding:40px;color:var(--muted)}
+.banner{border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--soft)}
+.banner.warn{background:var(--warn-soft)}
+.tabs{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.tabs button{border:0;background:none;padding:6px 14px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:600}.tabs button.on{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.qf{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 10px}
+.qf button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:13px}
+.qf button b{margin-left:4px}.qf button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.toolbar input{flex:1 1 260px}.toolbar select{flex:0 1 190px}
+.plist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:10px}
+.prow{display:grid;grid-template-columns:44px minmax(0,1.6fr) minmax(0,1.1fr) minmax(0,1fr) 150px;gap:14px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer;background:var(--panel)}
+.prow:last-child{border-bottom:0}.prow:hover{background:var(--panel2)}
+@media (max-width:980px){.prow{grid-template-columns:40px minmax(0,1fr) 130px}.prow .c-company,.prow .c-contact{display:none}}
+.av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;color:#fff;flex:none}
+.pname{font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.pname a{color:inherit;text-decoration:none}.pname a:hover{text-decoration:underline}
+.sub{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-soft{background:var(--soft);color:var(--ink)}
+.email{display:flex;gap:6px;align-items:center;min-width:0}.email span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px}
+.iconbtn{border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:2px 7px;cursor:pointer;color:var(--muted);font-size:12px}.iconbtn:hover{color:var(--ink)}
+select.status{border-radius:999px;padding:5px 10px;font-size:12px;font-weight:600;border:0}
+.more{text-align:center;padding:12px}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;z-index:30}.scrim.on{display:block}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:min(520px,100vw);background:var(--panel);border-left:1px solid var(--line);box-shadow:var(--shadow2);z-index:31;transform:translateX(100%);transition:transform .2s ease;overflow:auto;visibility:hidden}
+.drawer.on{transform:none;visibility:visible}.dhead{padding:20px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+.dbody{padding:18px 22px;display:flex;flex-direction:column;gap:18px}.dsec h4{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.ev{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}.ev .k{font-weight:600;font-size:13px}.ev .s{font-size:12px;color:var(--muted);margin-top:4px}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:6px 10px;font-size:13px}.kv div:nth-child(odd){color:var(--muted)}
+.ctable{width:100%;border-collapse:collapse;font-size:13px}.ctable td,.ctable th{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}.ctable th{font-size:12px;color:var(--muted)}
+.ctable tr.click{cursor:pointer}.ctable tr.click:hover{background:var(--panel2)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;display:none;z-index:50}
+.ico.skipped,.ico.skipping{background:var(--panel2);border-style:dashed}
+.ico.stopped{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 14px}
+.checks{display:flex;flex-wrap:wrap;gap:6px}.checks label{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer;font-size:12.5px}
+.checks input{width:auto;margin:0}.checks label:has(input:checked){background:var(--soft);border-color:var(--accent)}
+details.more{text-align:left;margin-top:14px;border:1px solid var(--line);border-radius:12px;padding:6px 14px 14px}details.more summary{padding:8px 0}
+.hint{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.keyrow td:first-child{padding-left:22px;color:var(--muted)}.svc td{border-bottom:0;padding-top:16px}
+.src{font-size:10.5px;padding:1px 6px;border-radius:6px;background:var(--soft);color:var(--muted);margin-left:6px}
+.modal .card{max-height:92vh;overflow:auto}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;place-items:center;z-index:40;padding:16px}.modal .card{max-width:640px;width:100%}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">Enfolo Lead Finder<span>Find people to interview</span></div>
+    <button class="btn" id="newbtn">+ New search</button>
+    <div class="muted small" style="padding:6px 6px 0">Your searches</div>
+    <div class="slist" id="slist"></div>
+    <div class="sidefoot">
+      <button class="btn ghost sm" id="themeBtn" title="Switch between system, light and dark theme"></button>
+      <button class="linkbtn" id="creditsLink">Free credits</button>
+    </div>
+  </aside>
+  <section class="content" id="view"></section>
+</div>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Person details"></aside>
+<div class="modal" id="modal"><div class="card" id="modalBody"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => (s ?? "").toString().replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const api = async (path, opt = {}) => {
+  const r = await fetch(path, {...opt, headers: {"Content-Type":"application/json","X-Requested-With":"leadfinder"}});
+  if (!r.ok) { const t = (await r.text()).replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim(); toast(t.slice(0,220)); throw new Error(t); }
+  return r.json();
+};
+const toast = m => { const t = $("#toast"); t.textContent = m; t.style.display = "block"; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = "none", 3200); };
+const store = { get: k => { try { return localStorage.getItem("lf2_"+k); } catch { return null; } }, set: (k,v) => { try { localStorage.setItem("lf2_"+k, v); } catch {} } };
+const S = { view: store.get("view") || "new", slug: store.get("slug"), searches: [], leads: [], showLog: false,
+            qf: "all", q: "", icp: "", sort: "best", limit: 50, tab: "people", company: null, openPid: null };
+const ago = t => { if (!t) return ""; const s = (Date.now() - Date.parse(t)) / 1000; return s < 90 ? "just now" : s < 5400 ? Math.round(s/60) + " min ago" : s < 129600 ? Math.round(s/3600) + " h ago" : Math.round(s/86400) + " days ago"; };
+const dur = s => s == null ? "" : s < 90 ? `${s}s` : `${Math.round(s/60)} min`;
+const copy = async (text, what) => { try { await navigator.clipboard.writeText(text); toast(`${what} copied`); } catch { prompt(`Copy ${what.toLowerCase()}:`, text); } };
+
+// ---------- theme ----------
+const THEMES = ["system", "light", "dark"], THEME_LABEL = {system:"Theme: System", light:"Theme: Light", dark:"Theme: Dark"};
+function applyTheme(t){ if (t === "system") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t; $("#themeBtn").textContent = THEME_LABEL[t]; }
+let theme = store.get("theme") || "system"; applyTheme(theme);
+$("#themeBtn").onclick = () => { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; store.set("theme", theme); applyTheme(theme); };
+
+// ---------- sidebar ----------
+async function loadSearches(){
+  S.searches = await api("/api/searches");
+  $("#slist").innerHTML = S.searches.map(s => {
+    const running = s.running_job, attn = s.stages.some(x => ["failed","warn"].includes(x.status)), done = s.stages.every(x => ["done","skipped"].includes(x.status));
+    const st = running ? `<span class="warn">● running</span>` : attn ? `<span class="warn">needs a look</span>` : done ? `<span class="ok">✓ ready</span>` : `<span class="muted">not run</span>`;
+    return `<div class="sitem ${S.view==="search"&&S.slug===s.slug?"on":""}" data-s="${s.slug}"><b>${esc(s.name)}</b><small>${st} · ${s.people} people · ${s.emails} emails</small></div>`;
+  }).join("") || `<div class="muted small" style="padding:6px">No searches yet.</div>`;
+  document.querySelectorAll(".sitem").forEach(el => el.onclick = () => go("search", el.dataset.s));
+}
+function go(view, slug){ S.view = view; if (slug && slug !== S.slug) { S.slug = slug; S.qf = "all"; S.q = ""; S.icp = ""; S.company = null; S.tab = "people"; S.limit = 50; }
+  S.showLog = false; store.set("view", view); if (slug) store.set("slug", slug); closeDrawer(); loadSearches(); render(); }
+$("#newbtn").onclick = () => go("new");
+$("#creditsLink").onclick = () => go("credits");
+
+// ---------- new search ----------
+const EXAMPLES = [
+  "Purchase heads and procurement managers at auto-component manufacturers who visit machine-tool trade shows",
+  "Sales heads and export managers at Indian packaging-machinery makers that exhibit at 3+ trade shows a year",
+  "Key account and field sales managers selling industrial equipment on long, multi-month deals",
+];
+function depthChoice(cur){ return `<div class="choice" id="depth">
+  <label class="${cur!=="deep"?"on":""}"><input type="radio" name="d" value="routine" ${cur!=="deep"?"checked":""}><b>Standard</b><div class="small muted">Sonnet 5, low effort. Recommended for routine runs.</div></label>
+  <label class="${cur==="deep"?"on":""}"><input type="radio" name="d" value="deep" ${cur==="deep"?"checked":""}><b>Deep research</b><div class="small muted">Opus, high effort. Slower, uses more of your Claude plan.</div></label></div>`; }
+function bindDepth(){ document.querySelectorAll("#depth input").forEach(r => r.onchange = () => document.querySelectorAll("#depth label").forEach(l => l.classList.toggle("on", l.querySelector("input").checked))); }
+// ---------- targeting (who / where) ----------
+const joinL = a => (a || []).join(", ");
+function targetFields(t){
+  const moreOpen = ["titles","exclude_titles","sectors","seniority","functions","headcount","exclude_locations","company_rule"].some(k => (t[k]||"").length);
+  return `<div class="tgrid">
+      <div><label class="f">Countries <span class="hint">comma-separated</span></label><input id="t_countries" value="${esc(joinL(t.countries))}" placeholder="India, UAE"></div>
+      <div><label class="f">Focus cities / hubs <span class="hint">optional</span></label><input id="t_cities" value="${esc(joinL(t.cities))}" placeholder="Pune, Chennai, Ahmedabad"></div></div>
+    <details class="more" ${moreOpen?"open":""}><summary>More control over the people <span class="hint">all optional; empty = the description decides</span></summary>
+      <div class="tgrid">
+        <div><label class="f">Job titles to include</label><input id="t_titles" value="${esc(joinL(t.titles))}" placeholder="Purchase Head, Procurement Manager"></div>
+        <div><label class="f">Exclude titles / words</label><input id="t_exclude_titles" value="${esc(joinL(t.exclude_titles))}" placeholder="intern, trainee, HR"></div>
+        <div><label class="f">Company sectors</label><input id="t_sectors" value="${esc(joinL(t.sectors))}" placeholder="auto components, forging"></div>
+        <div><label class="f">Exclude locations</label><input id="t_exclude_locations" value="${esc(joinL(t.exclude_locations))}" placeholder="Delhi"></div></div>
+      <div class="tgrid">
+        <div><label class="f">Seniority</label><input id="t_seniority" value="${esc(joinL(t.seniority))}" placeholder="Head, GM, Director, Founder"></div>
+        <div><label class="f">Department / function</label><input id="t_functions" value="${esc(joinL(t.functions))}" placeholder="Procurement, Supply chain, Exports"></div>
+        <div><label class="f">Company size (employees)</label><input id="t_headcount" value="${esc(joinL(t.headcount))}" placeholder="50-500, 1000+"></div>
+        <div><label class="f">Trade shows</label><input id="t_company_rule" value="${esc(t.company_rule||"")}" placeholder="e.g. exhibits at 3+ shows a year, or no requirement"></div></div>
+      <p class="small muted" style="margin:10px 0 0">Write anything, in your own words. Where it matches a LinkedIn filter (e.g. “Head” → Director, “50-500” → company size), that filter is used too.</p>
+    </details>`;
+}
+function readTarget(){
+  const v = id => ($("#t_"+id)?.value || "").split(/[,;\n]+/).map(x => x.trim()).filter(Boolean);
+  return {countries: v("countries"), cities: v("cities"), titles: v("titles"), exclude_titles: v("exclude_titles"),
+          sectors: v("sectors"), exclude_locations: v("exclude_locations"), seniority: v("seniority"),
+          functions: v("functions"), headcount: v("headcount"), company_rule: ($("#t_company_rule")?.value || "").trim()};
+}
+function targetSummary(t){
+  const bits = [];
+  if ((t.countries||[]).length) bits.push(joinL(t.countries));
+  if ((t.cities||[]).length) bits.push("focus: " + joinL(t.cities));
+  if ((t.seniority||[]).length) bits.push(t.seniority.join("/"));
+  if ((t.functions||[]).length) bits.push(t.functions.join("/"));
+  if ((t.headcount||[]).length) bits.push(t.headcount.join(", ") + " employees");
+  if (t.company_rule) bits.push(t.company_rule);
+  if ((t.exclude_titles||[]).length) bits.push("not: " + joinL(t.exclude_titles));
+  return bits.map(esc).join(" · ");
+}
+function viewNew(){
+  return `<div class="card"><h2 style="font-size:22px">Who do you want to talk to?</h2>
+    <p class="muted">Describe the people in plain words: their role, the kind of company, and anything like “visits trade shows”. The tool finds the shows, companies and people, checks them and finds their emails.</p>
+    <textarea id="persona" placeholder="e.g. Purchase heads at auto-component manufacturers in Pune who visit trade shows"></textarea>
+    <div>${EXAMPLES.map(e => `<span class="ex">${esc(e)}</span>`).join("")}</div>
+    ${targetFields({countries:["India"]})}
+    <div class="row" style="margin-top:6px">
+      <div><label class="f">Find emails for the top</label><select id="emails"><option value="0">No emails</option><option value="10">10 people</option><option value="25" selected>25 people</option><option value="50">50 people</option></select></div>
+      <div><label class="f">Name (optional)</label><input id="title" placeholder="e.g. Pune auto-component buyers"></div></div>
+    <label class="f">Research depth</label>${depthChoice("routine")}
+    <div style="margin-top:20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap"><button class="btn big" id="go">Find people</button>
+      <div class="muted small" style="flex:1 1 240px">Usually takes 20–40 minutes. You can close this tab; it keeps running on this computer.</div></div></div>`;
+}
+function bindNew(){
+  document.querySelectorAll(".ex").forEach(e => e.onclick = () => { $("#persona").value = e.textContent; $("#persona").focus(); });
+  bindDepth();
+  $("#go").onclick = async () => {
+    const body = {persona: $("#persona").value, target: readTarget(), emails: +$("#emails").value, title: $("#title").value,
+                  model: document.querySelector("#depth input:checked").value};
+    $("#go").disabled = true;
+    try { const r = await api("/api/searches", {method:"POST", body: JSON.stringify(body)}); toast("Started"); go("search", r.slug); }
+    finally { const b = $("#go"); if (b) b.disabled = false; }
+  };
+}
+
+// ---------- search: header + progress ----------
+const ICON = {done:"✓", failed:"!", warn:"!", skipped:"↷", skipping:"↷", stopped:"❚❚"};
+function stageText(st){
+  const d = st.detail || {};
+  if (st.status === "skipped" || st.status === "skipping") return `<span class="muted">${st.status === "skipping" ? "Skipping…" : esc(d.note || "Skipped by you.")}</span>`;
+  if (st.status === "stopped") return `<span class="warn">${esc(d.note || "Stopped. Resume continues from here.")}</span>`;
+  if (st.status === "failed") return `<span class="bad">${esc(d.error || "failed")}</span>`;
+  if (st.status !== "done" && st.status !== "warn") return "";
+  if (d.warning) return `<span class="warn">${esc(d.warning)}</span>` + (d.note ? `<br>${esc(d.note)}` : "");
+  if (d.skipped) return esc(d.skipped);
+  const k = st.key;
+  if (k === "persona") return esc((d.icps||[]).join(" · ") || d.note || "");
+  if (k === "research") return `${d.shows ?? 0} shows · ${d.companies ?? 0} companies`;
+  if (k === "linkedin") return (d.note ? esc(d.note) + " · " : "") + Object.entries(d).filter(([,v]) => typeof v === "object").map(([c,v]) => `${v.people_added_or_matched ?? v.title_searches_planned ?? 0} people`).join(" · ");
+  if (k === "web") return `${d.done ?? 0} searches · ${d.people_added ?? 0} people`;
+  if (k === "verify") return d.checked != null ? `${d.checked} checked · ${d.flagged ?? 0} flagged` : esc(d.note || "");
+  if (k === "emails") return `${d.found ?? 0} emails found of ${d.tried ?? 0} tried`;
+  if (k === "export") return `${d.leads ?? 0} people ready`;
+  return "";
+}
+async function viewSearch(){
+  const s = await api(`/api/searches/${S.slug}`); S.cur = s;
+  const running = !!s.running_job, stopped = !running && s.stages.some(x => x.status === "stopped"), attn = s.stages.find(x => x.status === "failed") || s.stages.find(x => x.status === "warn");
+  const allDone = !running && s.stages.every(x => x.status !== "pending" && x.status !== "running");
+  const started = s.stages.find(x => x.started_at)?.started_at, ended = [...s.stages].reverse().find(x => x.ended_at)?.ended_at;
+  const steps = s.stages.map(st => `<div class="step"><div class="ico ${st.status}">${ICON[st.status]||""}</div>
+      <div><b style="font-weight:${st.status==="running"?700:500}">${esc(st.label)}</b><div class="small muted">${stageText(st)}</div></div>
+      <div class="small muted" style="display:flex;gap:8px;align-items:center;justify-content:flex-end">${["done","warn"].includes(st.status)?dur(st.detail?.seconds):st.status==="running"?"working…":""}
+        ${st.status==="skipped" ? `<button class="iconbtn" data-include="${st.key}" title="Run this step again">Include</button>`
+          : ["pending","running","failed","warn","stopped"].includes(st.status) && !(st.key==="persona" && !s.icps.length) ? `<button class="iconbtn" data-skip="${st.key}" title="${st.status==="running"?"Interrupt this step and continue with the next":"Don't run this step"}">Skip</button>` : ""}</div></div>`).join("");
+  const progressOpen = running || stopped || !allDone || attn || S.showSteps;
+  return `<div class="card"><div class="hdr"><div style="flex:1 1 380px;min-width:0"><h2 style="font-size:20px">${esc(s.name)}</h2>
+      ${s.persona?`<div class="persona">${esc(s.persona)}</div>`:`<div class="muted small">Created from the command line.</div>`}
+      <div class="small muted">${targetSummary(s.target||{}) || "Region: " + esc(s.region)} · ${s.icps.map(i => `<span class="chip" title="${esc(i.titles.join(", "))}">${esc(i.name)}</span>`).join(" ")}</div></div>
+      <div class="acts"><button class="btn ghost" id="edit" ${running?"disabled":""}>Edit &amp; re-run</button>
+        ${running ? `<button class="btn ghost" id="stop" ${s.stopping?"disabled":""}>Stop</button>`
+                  : `<button class="btn ${stopped?"":"ghost"}" id="rerun">${stopped?"Resume":"Run again"}</button>`}
+        <a class="btn ghost" href="/download/${s.slug}.xlsx">Excel</a></div></div></div>
+    ${running?`<div class="banner"><div class="ico running" style="flex:0 0 24px"></div><div><b>Working on it</b> <span class="muted">· started ${ago(started)} · people appear below as they're found · you can close this tab, or Stop and resume later</span></div></div>`:""}
+    ${stopped?`<div class="banner warn"><b class="warn">❚❚</b><div><b>Stopped.</b> <span class="muted">Finished steps and everyone found so far are kept. “Resume” continues from “${esc(s.stages.find(x => x.status==="stopped").label)}”.</span></div></div>`:""}
+    ${!running && attn?`<div class="banner warn"><b class="warn">!</b><div><b>${esc(attn.label)}:</b> ${esc(attn.detail?.warning || attn.detail?.error || "did not finish")} <span class="muted">· “Run again” retries steps that didn't produce results.</span></div></div>`:""}
+    <div class="card" style="padding:${progressOpen?"20px":"12px 20px"}">
+      ${progressOpen ? `<div class="row" style="margin-bottom:6px"><h3>Progress</h3>${allDone && !attn?`<div style="flex:0"><button class="linkbtn" id="hideSteps">Hide</button></div>`:""}</div><div class="steps">${steps}</div>
+        <details ${S.showLog?"open":""} id="logd" style="margin-top:10px"><summary>Activity log</summary><pre class="log" id="log">Loading…</pre></details>`
+      : `<div class="summarybar"><span class="ok">✓</span><b>All ${s.stages.length} steps finished</b><span class="muted small">${ended?"· "+ago(ended):""}</span><button class="linkbtn" id="showSteps">Show steps</button></div>`}
+    </div>
+    <div class="card" id="results"><div class="empty">Loading results…</div></div>`;
+}
+async function bindSearch(){
+  const s = S.cur;
+  if ($("#rerun")) $("#rerun").onclick = async () => { const resume = $("#rerun").textContent === "Resume"; await api(`/api/searches/${s.slug}/run`, {method:"POST", body:"{}"}); toast(resume ? "Resuming" : "Running again"); loadSearches(); render(); };
+  document.querySelectorAll("[data-skip]").forEach(b => b.onclick = async () => {
+    const st = s.stages.find(x => x.key === b.dataset.skip);
+    if (st.status === "running" && !confirm(`Skip “${st.label}” now? It stops this step and continues with the next one. What it found so far is kept.`)) return;
+    b.disabled = true; await api(`/api/searches/${s.slug}/skip`, {method:"POST", body: JSON.stringify({stage: st.key})}); toast("Step skipped"); render(); });
+  document.querySelectorAll("[data-include]").forEach(b => b.onclick = async () => {
+    await api(`/api/searches/${s.slug}/skip`, {method:"POST", body: JSON.stringify({stage: b.dataset.include, skip: false})});
+    toast("Included: it runs on the next Run again / Resume"); render(); });
+  if ($("#stop")) $("#stop").onclick = async () => { if (!confirm("Stop this search? Everything found so far is kept, and Resume continues from the current step.")) return; $("#stop").disabled = true; await api(`/api/searches/${s.slug}/stop`, {method:"POST", body:"{}"}); toast("Stopping…"); };
+  $("#edit").onclick = () => editModal(s);
+  if ($("#showSteps")) $("#showSteps").onclick = () => { S.showSteps = true; render(); };
+  if ($("#hideSteps")) $("#hideSteps").onclick = () => { S.showSteps = false; render(); };
+  if ($("#logd")) { $("#logd").ontoggle = () => { S.showLog = $("#logd").open; if (S.showLog) refreshLog(); }; if (S.showLog) refreshLog(); }
+  await loadResults();
+}
+async function refreshLog(){
+  const s = S.cur; const jid = s.running_job || s.last_job?.id; if (!jid || !$("#log")) return;
+  const j = await api(`/api/jobs/${jid}`); const pre = $("#log"); if (!pre) return;
+  const atBottom = pre.scrollTop + pre.clientHeight >= pre.scrollHeight - 40;
+  pre.textContent = j.log || "(no output yet)"; if (atBottom) pre.scrollTop = pre.scrollHeight;
+}
+function editModal(s){
+  $("#modalBody").innerHTML = `<h2>Edit search</h2><p class="muted small">Changing the description or the people filters re-runs from the personas; changing only cities, excluded places or company size re-runs from the LinkedIn search. People already found are kept.</p>
+    <label class="f">Who do you want to talk to?</label><textarea id="m_persona">${esc(s.persona||"")}</textarea>
+    ${targetFields(s.target || {})}
+    <div class="row">
+      <div><label class="f">Find emails for the top</label><select id="m_emails">${[0,10,25,50].map(n => `<option value="${n}" ${(s.options.emails??25)===n?"selected":""}>${n?n+" people":"No emails"}</option>`).join("")}</select></div></div>
+    <label class="f">Research depth</label>${depthChoice(s.options.model==="opus"?"deep":"routine")}
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost" id="m_cancel">Cancel</button><button class="btn" id="m_go">Save &amp; run</button></div>`;
+  $("#modal").style.display = "grid"; bindDepth();
+  $("#m_cancel").onclick = () => $("#modal").style.display = "none";
+  $("#m_go").onclick = async () => {
+    await api(`/api/searches/${s.slug}/run`, {method:"POST", body: JSON.stringify({persona: $("#m_persona").value, target: readTarget(),
+      emails: +$("#m_emails").value, model: document.querySelector("#depth input:checked").value})});
+    $("#modal").style.display = "none"; toast("Running with your changes"); loadSearches(); render(); };
+}
+
+// ---------- results ----------
+const STATUSES = ["new","contacted","replied","interview booked","interviewed","not interested","wrong person"];
+const STATUS_CLS = {"new":"b-soft","contacted":"b-warn","replied":"b-warn","interview booked":"b-ok","interviewed":"b-ok","not interested":"b-bad","wrong person":"b-bad"};
+const KIND = {exhibitor:"Exhibited at", visitor_post:"Posted about visiting", thanked_by_exhibitor:"Tagged by an exhibitor at", order:"Ordered at",
+  delegation:"In a delegation to", speaker:"Spoke at", buyer_meet:"At a buyer-seller meet", report_named:"Named in the show report of", matchmaking:"Matchmaking at",
+  app_attendee:"Event-app attendee at", testimonial:"Quoted at", profile_inferred:"Fits the visitor profile of", linkedin_profile:"LinkedIn profile"};
+const CONF = {confirmed:["Seen at a show","b-ok"], likely:["Company at a show","b-warn"], inferred:["Profile match","b-soft"]};
+const initials = n => (n||"?").replace(/[^A-Za-z\s]/g,"").trim().split(/\s+/).slice(0,2).map(w => w[0]).join("").toUpperCase() || "?";
+const avColor = n => `hsl(${[...(n||"x")].reduce((a,c) => a + c.charCodeAt(0), 0) % 360} 45% 46%)`;
+const QF = {all: () => true, email: l => !!l.email, seen: l => l.confidence === "confirmed", todo: l => !l.tracker.status || l.tracker.status === "new"};
+
+async function loadResults(){ S.leads = await api(`/api/industries/${S.slug}/leads`); drawResults(); }
+function filtered(){
+  const q = S.q.toLowerCase();
+  const rows = S.leads.filter(l => !l.profile_flag && QF[S.qf](l) && (!S.icp || l.icp === S.icp) && (!S.company || l.company === S.company)
+    && (!q || `${l.name} ${l.title} ${l.company} ${l.location||""}`.toLowerCase().includes(q)));
+  const by = {best: (a,b) => b.score - a.score, name: (a,b) => a.name.localeCompare(b.name), company: (a,b) => (a.company||"").localeCompare(b.company||"") || b.score - a.score,
+    status: (a,b) => STATUSES.indexOf(b.tracker.status||"new") - STATUSES.indexOf(a.tracker.status||"new") || b.score - a.score};
+  return rows.sort(by[S.sort]);
+}
+function drawResults(){
+  const el = $("#results"); if (!el) return;
+  if (!S.leads.length) { el.innerHTML = `<div class="empty">${S.cur.running_job ? "People will appear here as the search finds them." : "No people yet. Try “Edit & re-run” with a broader description."}</div>`; return; }
+  const base = S.leads.filter(l => !l.profile_flag), flagged = S.leads.length - base.length;
+  const cnt = k => base.filter(QF[k]).length, icps = [...new Set(S.leads.map(l => l.icp))];
+  el.innerHTML = `<div class="row" style="align-items:center"><h3 style="flex:0;white-space:nowrap">Results</h3>
+      <div style="flex:0" class="tabs"><button data-tab="people" class="${S.tab==="people"?"on":""}">People</button><button data-tab="companies" class="${S.tab==="companies"?"on":""}">Companies</button></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost sm" id="copyEmails">Copy emails</button></div></div>
+    <div class="qf">${[["all","All"],["email","With email"],["seen","Seen at a show"],["todo","Not contacted yet"]].map(([k,l]) => `<button data-qf="${k}" class="${S.qf===k?"on":""}">${l}<b>${cnt(k)}</b></button>`).join("")}</div>
+    <div class="toolbar"><input id="q" placeholder="Search name, title, company, city…" value="${esc(S.q)}">
+      ${icps.length > 1 ? `<select id="fi"><option value="">All personas</option>${icps.map(x => `<option value="${esc(x)}" ${S.icp===x?"selected":""}>${esc((S.cur.icps.find(i => i.code===x)||{}).name || x)}</option>`).join("")}</select>` : ""}
+      <select id="sort">${[["best","Best match first"],["company","By company"],["name","By name"],["status","By status"]].map(([k,l]) => `<option value="${k}" ${S.sort===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    ${S.company ? `<div class="banner" style="margin:10px 0 0">Showing people at <b>${esc(S.company)}</b> <button class="btn ghost sm" id="clearCo">Show everyone</button></div>` : ""}
+    <div id="rbody"></div>
+    ${flagged ? `<div class="small muted" style="margin-top:8px">${flagged} people hidden because their profile check flagged them (outside the region or moved company). They're still in the Excel file.</div>` : ""}`;
+  document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { S.tab = b.dataset.tab; drawResults(); });
+  document.querySelectorAll("[data-qf]").forEach(b => b.onclick = () => { S.qf = b.dataset.qf; S.limit = 50; drawResults(); });
+  $("#q").oninput = e => { S.q = e.target.value; S.limit = 50; drawBody(); };
+  if ($("#fi")) $("#fi").onchange = e => { S.icp = e.target.value; drawBody(); };
+  $("#sort").onchange = e => { S.sort = e.target.value; drawBody(); };
+  if ($("#clearCo")) $("#clearCo").onclick = () => { S.company = null; drawResults(); };
+  $("#copyEmails").onclick = () => { const em = filtered().filter(l => l.email).map(l => l.email); em.length ? copy(em.join(", "), `${em.length} emails`) : toast("No emails in this view yet"); };
+  drawBody();
+}
+function drawBody(){
+  const b = $("#rbody"); if (!b) return;
+  if (S.tab === "companies") return drawCompanies(b);
+  const rows = filtered();
+  if (!rows.length) { b.innerHTML = `<div class="empty">Nobody matches these filters.</div>`; return; }
+  b.innerHTML = `<div class="plist">${rows.slice(0, S.limit).map(l => {
+      const [cl, cc] = CONF[l.confidence] || ["", "b-soft"], st = l.tracker.status || "new";
+      return `<div class="prow" data-pid="${l.id}">
+        <div class="av" style="background:${avColor(l.name)}">${esc(initials(l.name))}</div>
+        <div style="min-width:0"><div class="pname">${l.linkedin_url?`<a href="${esc(l.linkedin_url)}" target="_blank" rel="noopener" title="Open LinkedIn">${esc(l.name)} ↗</a>`:esc(l.name)}
+            <span class="badge ${cc}">${cl}</span></div>
+          <div class="sub" title="${esc(l.title)}">${esc(l.title||"")}</div></div>
+        <div class="c-company" style="min-width:0"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.company)}</div><div class="sub">${esc(l.location||l.country||"")}</div></div>
+        <div class="c-contact" style="min-width:0">${l.email?`<div class="email"><span title="${esc(l.email)}">${esc(l.email)}</span><button class="iconbtn" data-copy="${esc(l.email)}" title="Copy email">⧉</button></div>
+            <div class="sub ${l.email_status==="verified"?"ok":"warn"}">${l.email_status==="verified"?"✓ verified":esc(l.email_status||"")}</div>`:`<span class="sub">No email yet</span>`}</div>
+        <div><select class="status badge ${STATUS_CLS[st]}" data-status="${l.id}" aria-label="Status">${STATUSES.map(x => `<option ${st===x?"selected":""}>${x}</option>`).join("")}</select></div>
+      </div>`; }).join("")}</div>
+    ${rows.length > S.limit ? `<div class="more"><button class="btn ghost" id="more">Show ${Math.min(50, rows.length - S.limit)} more of ${rows.length - S.limit}</button></div>` : `<div class="small muted" style="margin-top:8px">${rows.length} people · click anyone for details and evidence</div>`}`;
+  if ($("#more")) $("#more").onclick = () => { S.limit += 50; drawBody(); };
+  b.querySelectorAll(".prow").forEach(r => r.onclick = e => { if (e.target.closest("a,button,select")) return; openPerson(+r.dataset.pid); });
+  b.querySelectorAll("[data-copy]").forEach(x => x.onclick = () => copy(x.dataset.copy, "Email"));
+  b.querySelectorAll("[data-status]").forEach(x => x.onchange = () => saveTracker(+x.dataset.status, {status: x.value}));
+}
+function drawCompanies(b){
+  const by = {};
+  filtered().forEach(l => { const c = by[l.company] ||= {name: l.company, people: 0, emails: 0, seen: 0, shows: l.shows, best: 0}; c.people++; if (l.email) c.emails++; if (l.confidence==="confirmed") c.seen++; c.best = Math.max(c.best, l.score); });
+  const rows = Object.values(by).sort((a,b) => b.best - a.best || b.people - a.people);
+  b.innerHTML = rows.length ? `<div style="overflow:auto;margin-top:10px"><table class="ctable"><thead><tr><th>Company</th><th>People</th><th>With email</th><th>Seen at a show</th><th>Trade shows</th></tr></thead><tbody>
+    ${rows.map(c => `<tr class="click" data-co="${esc(c.name)}"><td><b>${esc(c.name)}</b></td><td>${c.people}</td><td>${c.emails}</td><td>${c.seen}</td><td class="small muted">${esc(c.shows||"")}</td></tr>`).join("")}
+    </tbody></table></div><div class="small muted" style="margin-top:8px">Click a company to see its people.</div>` : `<div class="empty">Nobody matches these filters.</div>`;
+  b.querySelectorAll("[data-co]").forEach(r => r.onclick = () => { S.company = r.dataset.co; S.tab = "people"; drawResults(); });
+}
+async function saveTracker(pid, patch){
+  const l = S.leads.find(x => x.id === pid); if (l) Object.assign(l.tracker, patch);
+  await api(`/api/tracker/${pid}`, {method:"PATCH", body: JSON.stringify(patch)}); toast("Saved");
+  if ("status" in patch) drawResults();
+}
+
+// ---------- person drawer ----------
+function closeDrawer(){ $("#drawer").classList.remove("on"); $("#scrim").classList.remove("on"); S.openPid = null; }
+$("#scrim").onclick = closeDrawer;
+document.addEventListener("keydown", e => { if (e.key === "Escape") { closeDrawer(); $("#modal").style.display = "none"; } });
+async function openPerson(pid){
+  S.openPid = pid; const lead = S.leads.find(x => x.id === pid);
+  $("#drawer").innerHTML = `<div class="dhead"><div class="muted small">Loading…</div></div>`; $("#drawer").classList.add("on"); $("#scrim").classList.add("on");
+  const p = await api(`/api/people/${pid}`); const st = p.tracker.status || "new";
+  const [cl, cc] = CONF[lead?.confidence] || ["", "b-soft"];
+  const g = "https://www.google.com/search?q=" + encodeURIComponent(`"${p.name}" "${p.company?.name || ""}"`);
+  $("#drawer").innerHTML = `<div class="dhead"><div style="display:flex;gap:12px;align-items:center">
+      <div class="av" style="background:${avColor(p.name)};width:48px;height:48px">${esc(initials(p.name))}</div>
+      <div style="flex:1;min-width:0"><h2 style="font-size:18px">${esc(p.name)}</h2><div class="small">${esc(p.title||"")}</div>
+        <div class="small muted">${esc(p.company?.name||"")}${p.location?" · "+esc(p.location):""}</div></div>
+      <button class="iconbtn" id="dclose" title="Close (Esc)">✕</button></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+      ${p.linkedin_url?`<a class="btn sm" href="${esc(p.linkedin_url)}" target="_blank" rel="noopener">Open LinkedIn ↗</a>`:""}
+      ${p.email?`<button class="btn sm ghost" id="dcopy">Copy email</button><a class="btn sm ghost" href="mailto:${esc(p.email)}">Email</a>`:""}
+      <a class="btn sm ghost" href="${g}" target="_blank" rel="noopener">Google ↗</a></div></div>
+    <div class="dbody">
+      <div class="dsec"><h4>Status</h4><div class="row"><select id="dstatus">${STATUSES.map(x => `<option ${st===x?"selected":""}>${x}</option>`).join("")}</select>
+        <input type="date" id="dint" value="${esc(p.tracker.interview_date||"")}" title="Interview date"></div>
+        <textarea id="dnotes" placeholder="Notes: what they said, when to follow up…" style="margin-top:8px;min-height:80px">${esc(p.tracker.notes||"")}</textarea></div>
+      <div class="dsec"><h4>Why this person</h4><div><span class="badge ${cc}">${cl}</span> <span class="small">${esc(lead?.why||"")}</span></div>
+        ${p.profile_flag?`<div class="badge b-bad" style="margin-top:6px">${esc(p.profile_flag)}</div>`:""}</div>
+      <div class="dsec"><h4>Contact</h4><div class="kv">
+        <div>Email</div><div>${p.email?`${esc(p.email)} <span class="small ${p.email_status==="verified"?"ok":"warn"}">${esc(p.email_status||"")}</span> <span class="small muted">via ${esc(p.email_source||"")}</span>`:"Not found yet"}</div>
+        <div>LinkedIn</div><div>${p.linkedin_url?`<a href="${esc(p.linkedin_url)}" target="_blank" rel="noopener">profile ↗</a>`:"—"}</div>
+        <div>Location</div><div>${esc(p.location||p.country||"—")}</div></div></div>
+      <div class="dsec"><h4>Company</h4><div class="kv">
+        <div>Name</div><div>${esc(p.company?.name||"")}</div>
+        <div>Trade shows</div><div>${p.company?.exhibitor_at?.length ? esc(p.company.exhibitor_at.join(", ")) + (p.company.shows_12mo ? ` <span class="small muted">(${p.company.shows_12mo} in 12 months)</span>` : "") : "—"}</div>
+        <div>Website</div><div>${p.company?.domain?`<a href="https://${esc(p.company.domain)}" target="_blank" rel="noopener">${esc(p.company.domain)} ↗</a>`:"—"}</div>
+        <div>LinkedIn page</div><div>${p.company?.linkedin_url?`<a href="${esc(p.company.linkedin_url)}" target="_blank" rel="noopener">open ↗</a>`:"—"}</div></div></div>
+      <div class="dsec"><h4>Evidence (${p.evidence.length})</h4>${p.evidence.map(e => `<div class="ev"><div class="k">${esc(KIND[e.kind]||e.kind)} ${esc(e.show||"")}
+          <span class="badge ${e.confidence==="confirmed"?"b-ok":e.confidence==="likely"?"b-warn":"b-soft"}" style="float:right">${esc(e.confidence)}</span></div>
+          <div class="small muted">${e.entity==="company"?"About the company":"About this person"}</div>
+          ${e.snippet?`<div class="s">${esc(e.snippet.slice(0,300))}</div>`:""}
+          ${e.url?`<div class="s"><a href="${esc(e.url)}" target="_blank" rel="noopener">source ↗</a></div>`:""}</div>`).join("") || `<div class="muted small">No evidence recorded.</div>`}</div>
+    </div>`;
+  $("#dclose").onclick = closeDrawer;
+  if ($("#dcopy")) $("#dcopy").onclick = () => copy(p.email, "Email");
+  $("#dstatus").onchange = e => saveTracker(pid, {status: e.target.value});
+  $("#dint").onchange = e => saveTracker(pid, {interview_date: e.target.value});
+  $("#dnotes").onchange = e => saveTracker(pid, {notes: e.target.value});
+}
+
+// ---------- credits ----------
+async function viewCredits(refresh){
+  const d = await api("/api/credits" + (refresh ? "?refresh=1" : ""));
+  const rows = d.services.map(sv => {
+    const head = `<tr class="svc"><td><b>${esc(sv.label)}</b><div class="small muted">${esc(sv.use)}</div></td>
+      <td class="${sv.keys.length?"ok":"muted"}">${sv.keys.length ? sv.keys.length + (sv.keys.length>1?" keys":" key") : "not set up"}</td>
+      <td></td><td></td><td class="small muted">${esc(sv.free_allowance)}${sv.keys.length?"":`<br>add <code>${esc(sv.env)}=</code> to .env`}</td></tr>`;
+    const keys = sv.keys.map(k => {
+      const status = k.resting_until ? `<span class="warn">resting until ${esc(k.resting_until.replace("T"," ").slice(0,16))} UTC</span>` : `<span class="ok">active</span>`;
+      const rem = k.remaining != null ? `<b>${esc(k.remaining)}</b> <span class="small muted">${esc(k.unit||"")}</span><span class="src" title="${k.source==="live"?"read from the provider just now":"counted by this tool"}">${k.source==="live"?"live":"counted"}</span>` : `<span class="muted">–</span>`;
+      const note = [k.note, k.error].filter(Boolean).map(esc).join("<br>");
+      return `<tr class="keyrow"><td>key ${k.index} · <code>${esc(k.key)}</code></td><td>${status}</td><td>${rem}${note?`<div class="small muted">${note}</div>`:""}</td>
+        <td class="small muted">${k.used_today} today · ${k.used_month} this month</td><td></td></tr>`;
+    }).join("");
+    return head + keys;
+  }).join("");
+  return `<div class="card"><div class="row"><h2>Free credits</h2><div style="flex:0;display:flex;gap:8px;align-items:center"><span class="small muted" style="white-space:nowrap">checked ${esc(ago(d.checked_at))}</span><button class="btn ghost sm" id="credRefresh">Refresh</button></div></div>
+    <p class="muted small">Balances marked <span class="src">live</span> come from each provider's own account API. <span class="src">counted</span> means the provider has no balance API, so this tool counts its own use.
+    To add more keys for a service, list them in <code>.env</code> separated by commas (<code>SERPER_API_KEY=key1,key2</code>) or as <code>SERPER_API_KEY_2=…</code>. When a key runs out or is rate limited it rests, and the next key takes over automatically.</p>
+    <div style="overflow:auto"><table class="ctable"><thead><tr><th>Service / key</th><th>Status</th><th>Remaining</th><th>Used by this tool</th><th>Free allowance</th></tr></thead><tbody>${rows}
+    <tr class="svc"><td><b>OpenSERP</b><div class="small muted">self-hosted Google search</div></td><td class="${d.openserp?"ok":"muted"}">${d.openserp?"running":"not running"}</td><td></td><td></td><td class="small muted">free, no key (docker)</td></tr>
+    </tbody></table></div></div>`;
+}
+function bindCredits(){ const b = $("#credRefresh"); if (b) b.onclick = async () => { b.disabled = true; b.textContent = "Checking…"; $("#view").innerHTML = await viewCredits(true); bindCredits(); }; }
+
+async function render(){
+  const v = $("#view");
+  try {
+    if (S.view === "credits") { v.innerHTML = await viewCredits(); bindCredits(); return; }
+    if (S.view === "search" && S.slug && S.searches.find(s => s.slug === S.slug)) { v.innerHTML = await viewSearch(); await bindSearch(); return; }
+    v.innerHTML = viewNew(); bindNew();
+  } catch (e) { v.innerHTML = `<div class="card bad">${esc(e.message).slice(0,300)}</div>`; }
+}
+async function tick(){
+  if (S.view !== "search" || !S.slug || !S.cur) return;
+  const s = await api(`/api/searches/${S.slug}`).catch(() => null); if (!s) return;
+  const changed = JSON.stringify(s.stages) !== JSON.stringify(S.cur.stages) || (!!s.running_job) !== (!!S.cur.running_job);
+  const busy = $("#modal").style.display === "grid" || $("#drawer").classList.contains("on") || document.activeElement?.matches("input,textarea,select");
+  if (changed && !busy) { const keep = S.showLog; await loadSearches(); await render(); S.showLog = keep; }
+  else if (S.showLog) refreshLog();
+}
+(async () => { await loadSearches(); if (S.view === "search" && !S.searches.find(s => s.slug === S.slug)) S.view = "new"; await render(); setInterval(tick, 4000); })();
+</script>
+</body>
+</html>

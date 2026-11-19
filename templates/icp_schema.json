@@ -1,0 +1,43 @@
+{
+  "_comment": "SCHEMA ONLY - no persona content. The pipeline builds every search's personas from the user's own description in the web UI; this file only defines the JSON shape and the allowed values. Do not copy values from here.",
+  "industry": "<short industry / market name derived from the user's description>",
+  "geo": "<region from the search form>",
+  "sectors": [
+    "<buyer or customer sectors relevant to the description>"
+  ],
+  "hubs": [
+    "<cities / industrial hubs in the region relevant to the description>"
+  ],
+  "icps": [
+    {
+      "code": "P1  (use P1, P2, P3 ... one per distinct persona in the user's description)",
+      "name": "<short label for this persona>",
+      "description": "<one sentence, in the user's terms>",
+      "company_rule": "ONE OF: exhibitor_3plus (company exhibits at 3+ trade shows in 12 months) | exhibitor (exhibits at a show) | visitor (company visits/buys at shows) | visitor_or_exhibitor | any (no show requirement)",
+      "find_via": "ONE OF: company_list (find the companies via trade shows first, then the people) | industry_search (search people directly by title x sector x city)",
+      "titles": [
+        "<job titles the user means>"
+      ],
+      "title_keywords": [
+        "<lower-case substrings that identify the role in a LinkedIn headline>"
+      ],
+      "search_keywords": [
+        "<2-4 short phrases for search queries>"
+      ],
+      "exclude_keywords": [
+        "<lower-case substrings that disqualify, e.g. intern, trainee, student>"
+      ],
+      "buys_at_shows": [
+        "<only for buyer personas: what they source at shows>"
+      ],
+      "linkedin_filters": {
+        "functions": [
+          "ANY OF: purchasing, sales, business_development, operations, marketing"
+        ],
+        "seniority": [
+          "ANY OF: senior, strategic, manager, director, vp, cxo, owner"
+        ]
+      }
+    }
+  ]
+}
