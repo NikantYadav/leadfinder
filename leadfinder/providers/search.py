@@ -4,7 +4,6 @@ caches every response so no query is ever paid for twice.
 Provider order (each is skipped when not configured or cooling down):
   1. openserp   - self-hosted (docker), free, no key; Google captchas when queried fast -> paced.
   2. serper     - SERPER_API_KEY   (2,500 free queries one-time at serper.dev)
-  3. google_cse - GOOGLE_CSE_KEY + GOOGLE_CSE_CX (100 free queries/day)
 
 Every provider returns a list of {"title", "url", "snippet"}.
 """
@@ -95,35 +94,6 @@ class Serper:
         return out
 
 
-class GoogleCSE:
-    name = service = "google_cse"
-    monthly_free = 3000  # 100/day
-
-    def available(self):
-        return keys.configured(self.service)
-
-    def search(self, query, site=None, num=10, region=None, key=None):
-        key = key or keys.all_keys(self.service)[0]
-        out = []
-        q = f"site:{site} {query}" if site else query
-        for start in range(1, min(num, 30) + 1, 10):  # CSE pages are 10 results
-            params = {"key": key.value, "cx": key.secret, "q": q,
-                      "num": 10, "start": start}
-            if region:
-                params["gl"] = region.lower()
-            r = requests.get("https://www.googleapis.com/customsearch/v1", params=params, timeout=60)
-            if r.status_code in (403, 429):
-                raise ProviderBusy(f"HTTP {r.status_code}: {r.text[:120]}")
-            if not r.ok:
-                raise ProviderError(f"HTTP {r.status_code}: {r.text[:200]}")
-            items = r.json().get("items", [])
-            out += [{"title": x.get("title", ""), "url": x.get("link", ""), "snippet": x.get("snippet", "")}
-                    for x in items]
-            if len(items) < 10:
-                break
-        return out
-
-
 class TinySearch:
     """TinyFish TinySearch (docs read 2026-11-18): GET https://api.search.tinyfish.ai, header X-API-Key.
     Free up to 12,000 requests/day (resets 00:00 UTC), 30 requests/min; ~10 results per page, page 0..10.
@@ -134,6 +104,29 @@ class TinySearch:
 
     def available(self):
         return keys.configured(self.service)
+
+    _last_call = {}  # key -> monotonic time of its last request (limit is 30/min per key)
+
+    def _get(self, params, key):
+        """One paced request: keep under the per-key rate limit instead of bursting into a 429, and wait out a short
+        429 (Retry-After) once or twice before declaring the key busy for 30 minutes."""
+        for attempt in range(3):
+            wait = config.TINYSEARCH_MIN_GAP - (time.monotonic() - self._last_call.get(key.value, 0))
+            if wait > 0:
+                time.sleep(wait)
+            r = requests.get("https://api.search.tinyfish.ai", params=params, timeout=60,
+                             headers={"X-API-Key": key.value})
+            self._last_call[key.value] = time.monotonic()
+            if r.status_code != 429 or attempt == 2:
+                return r
+            try:
+                delay = float((getattr(r, "headers", None) or {}).get("Retry-After", ""))
+            except ValueError:
+                delay = 20
+            if delay > 90:  # a long wait means a quota, not a burst: let the key rest
+                return r
+            time.sleep(max(delay, 5))
+        return r
 
     def search(self, query, site=None, num=10, region=None, key=None):
         key = key or keys.all_keys(self.service)[0]
@@ -147,8 +140,7 @@ class TinySearch:
                 params["include_domains"] = site.split("/")[0]
             if region:
                 params["location"] = region.upper()
-            r = requests.get("https://api.search.tinyfish.ai", params=params, timeout=60,
-                             headers={"X-API-Key": key.value})
+            r = self._get(params, key)
             if r.status_code in (402, 429, 503):
                 if out:
                     break
@@ -166,8 +158,8 @@ class TinySearch:
         return out
 
 
-# Order: TinySearch (free 12k/day) -> OpenSERP (free, captcha-prone) -> Serper (2,500 one-time) -> Google CSE
-PROVIDERS = [TinySearch(), OpenSERP(), Serper(), GoogleCSE()]
+# Order: TinySearch (free 12k/day) -> OpenSERP (free, captcha-prone) -> Serper (2,500 one-time)
+PROVIDERS = [TinySearch(), OpenSERP(), Serper()]
 
 
 # ---------------- router ----------------

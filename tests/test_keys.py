@@ -167,7 +167,8 @@ def test_stop_marks_stage_and_resume_continues():
     try:
         pipeline.RUNNERS.update({"persona": lambda *a: {"icps": ["P1"]}, "research": research, "linkedin": linkedin,
                                  "web": lambda *a: {"done": 1}, "verify": lambda *a: {"checked": 0},
-                                 "emails": lambda *a: {"found": 0}, "export": lambda *a: {"leads": 1}})
+                                 "emails": lambda *a: {"found": 0}, "export": lambda *a: {"leads": 1},
+                                 "evidence": lambda *a: {}, "attendees": lambda *a: {}, "summary": lambda *a: {"text": "x"}})
         code = pipeline.run("stopme", {})
         assert code == 130
         st = {r["stage"]: r["status"] for r in con.execute("SELECT stage, status FROM pipeline_stages WHERE industry_id=?",
@@ -205,7 +206,8 @@ def test_skip_pending_and_running_steps():
     try:
         pipeline.RUNNERS.update({"persona": lambda *a: {"icps": ["P1"]}, "research": research,
                                  "linkedin": rec("linkedin"), "web": rec("web"), "verify": rec("verify"),
-                                 "emails": rec("emails"), "export": rec("export")})
+                                 "emails": rec("emails"), "export": rec("export"),
+                                 "evidence": lambda *a: {}, "attendees": lambda *a: {}, "summary": lambda *a: {"text": "x"}})
         assert pipeline.run("skipme", {}) == 0
         assert calls == ["research", "linkedin", "web", "emails", "export"]
         st = {r["stage"]: r["status"] for r in con.execute("SELECT stage, status FROM pipeline_stages WHERE industry_id=?",

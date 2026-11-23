@@ -3,14 +3,18 @@
 Stages (each recorded in pipeline_stages so the web UI can show a checklist; finished stages are skipped on re-run):
   persona   Claude turns the free-text persona into ICPs (titles, keywords, company rule)      [Claude]
   research  Claude finds shows, exhibitor lists and visitor/buyer signals                      [Claude]
+  evidence  when few companies meet the 'N+ shows' rule: retry thin exhibitor lists, then look up the top
+            companies' own "visit us at" / exhibitions pages for other shows they exhibit at       [Claude]
   linkedin  direct LinkedIn people search per ICP (Apify; free plan: 25 profiles/run, 10 runs)
   web       search-engine LinkedIn lookups per company x ICP (TinySearch first)
   verify    LinkedIn profile check of the top leads (country + current company)
   emails    company websites + email waterfall for the top leads
   export    Excel file
+  summary   plain-language report of what ran, what was skipped and the bottleneck (Sonnet words code-built facts)
 Run: ./lf pipeline --industry <slug> [--emails 25] [--model sonnet] [--from-stage research]
 """
 import json
+import re
 import signal
 import subprocess
 import sys
@@ -21,13 +25,26 @@ from . import config, db, targeting
 STAGES = [
     ("persona", "Understand the persona"),
     ("research", "Find trade shows, exhibitors and buyers"),
+    ("evidence", "Find more exhibitor evidence"),
+    ("attendees", "Find people who posted about recent shows"),
     ("linkedin", "Search LinkedIn"),
     ("web", "Search the web for more people"),
     ("verify", "Check LinkedIn profiles"),
     ("emails", "Find work emails"),
     ("export", "Prepare results"),
+    ("summary", "Summary"),
 ]
 CLAUDE_TOOLS = ["Bash(./lf:*)", "Read", "Glob", "Grep", "Write(data/work/**)", "Edit(data/work/**)", "WebSearch", "Skill"]
+
+
+class NeedsInput(Exception):
+    """A stage needs the user's answers before it can continue (the persona step's clarifying questions)."""
+    def __init__(self, detail):
+        super().__init__("waiting for your answers")
+        self.detail = detail
+
+
+MAX_QUESTION_ROUNDS = 2   # after this many rounds of answers, the persona step goes with its best reading
 
 
 class Stopped(BaseException):
@@ -65,8 +82,47 @@ def _claude(prompt, model=None, effort=None):
     return r.returncode
 
 
+def clarifications_block(opts):
+    qa = [c for c in (opts.get("clarifications") or []) if (c.get("a") or "").strip()]
+    if not qa:
+        return ""
+    lines = "\n".join(f"- Q: {c.get('q') or 'Extra note'}\n  A: {c['a'].strip()}" for c in qa)
+    return ("THE USER'S CLARIFICATIONS (answers to earlier questions about this description; they override any guess, "
+            "and win over the description where they conflict):\n" + lines + "\n")
+
+
+def _read_questions(path):
+    """Questions Claude wrote to questions.json: [{q, why?, options?}], at most 4, junk dropped."""
+    try:
+        raw = json.loads(path.read_text())
+    except (OSError, ValueError):
+        return []
+    items = raw.get("questions") if isinstance(raw, dict) else raw
+    out = []
+    for it in items if isinstance(items, list) else []:
+        if isinstance(it, str):
+            it = {"q": it}
+        if not isinstance(it, dict) or not str(it.get("q") or "").strip():
+            continue
+        opts = [str(o).strip()[:120] for o in (it.get("options") or []) if str(o).strip()][:5]
+        out.append({"q": str(it["q"]).strip()[:400], "why": str(it.get("why") or "").strip()[:300], "options": opts})
+    return out[:4]
+
+
 def stage_persona(con, ind, opts):
     slug = ind["slug"]
+    qfile = config.DATA / "work" / slug / "questions.json"
+    qfile.unlink(missing_ok=True)  # stale questions from an earlier round must not pause this one
+    may_ask = not opts.get("no_questions") and int(opts.get("persona_rounds") or 0) < MAX_QUESTION_ROUNDS
+    ask = f"""
+4. Questions: if something in the description is unclear AND the answer would change WHO you search for (e.g. which
+   roles, buyer vs seller side, which industry or company type, company size, what "show" or "event" means), still do
+   steps 2-3 with your best reading, then write data/work/{slug}/questions.json as
+   {{"questions": [{{"q": "short question", "why": "what changes depending on the answer", "options": ["a", "b"]}}]}}
+   with 1-4 questions (options are optional suggested answers). Do NOT ask about anything the description or the
+   user's clarifications already settle, nor about minor details you can decide sensibly yourself. If nothing
+   essential is unclear, do not write that file.""" if may_ask else """
+4. Do not ask questions: go with your best reading of the description and the clarifications."""
     prompt = f"""{HEADLESS}
 
 Task: build the personas for search slug '{slug}' (region: {ind['geo']}) ONLY from the user's description below.
@@ -77,6 +133,7 @@ USER'S DESCRIPTION:
 {ind['persona_text']}
 >>>
 
+{clarifications_block(opts)}
 {targeting.prompt_block(ind)}
 
 1. Read templates/icp_schema.json - it defines the JSON shape and allowed values only (it has no content to copy).
@@ -86,17 +143,23 @@ USER'S DESCRIPTION:
    any + industry_search). Always fill linkedin_filters (functions + seniority matching the roles and levels the user
    describes; default seniority manager, director, vp, cxo).
 3. Run `./lf set-icp --industry {slug} --file data/work/{slug}/icp.json` then `./lf approve-icp --industry {slug}`
-   (the user wrote this description themselves, so it is pre-approved)."""
+   (the user wrote this description themselves, so it is pre-approved).{ask}"""
     code = _claude(prompt, opts.get("model"), opts.get("effort"))
+    questions = _read_questions(qfile) if may_ask else []
     ind2 = db.get_industry(con, slug)
-    if code != 0 or not ind2["icp_json"]:
+    icps = []
+    if ind2["icp_json"]:
+        # enforce the form's targeting whatever Claude wrote
+        doc = targeting.apply(json.loads(ind2["icp_json"]), ind2)
+        con.execute("UPDATE industries SET icp_json=?, icp_approved=1 WHERE id=?", (json.dumps(doc), ind["id"]))
+        con.commit()
+        icps = [f'{i["code"]}: {i["name"]}' for i in doc["icps"] if i.get("enabled", True)]
+    if questions:
+        # pause: the user answers (persona runs again with the answers) or goes with the best guess in icp_json
+        raise NeedsInput({"questions": questions, "icps": icps, "round": int(opts.get("persona_rounds") or 0) + 1})
+    if code != 0 or not icps:
         raise RuntimeError("Claude did not produce personas")
-    # enforce the form's targeting whatever Claude wrote
-    doc = targeting.apply(json.loads(ind2["icp_json"]), ind2)
-    con.execute("UPDATE industries SET icp_json=?, icp_approved=1 WHERE id=?", (json.dumps(doc), ind["id"]))
-    con.commit()
-    icps = doc["icps"]
-    return {"icps": [f'{i["code"]}: {i["name"]}' for i in icps if i.get("enabled", True)]}
+    return {"icps": icps}
 
 
 def stage_research(con, ind, opts):
@@ -106,15 +169,21 @@ def stage_research(con, ind, opts):
     cities = targeting.get(ind).get("cities")
     region_note = (f" Region: {where}" + (f" (focus: {', '.join(cities)})" if cities else "") +
                    " - pick shows held in, or drawing buyers from, this region.")
+    from .people import requested_min_shows
+    n_shows = requested_min_shows(db.get_industry(con, slug))
+    overlap = (f"get exhibitor lists for AT LEAST {n_shows + 1} shows - the '{n_shows}+ shows a year' rule needs "
+               "overlap - and " if n_shows > 1 else "")
     needs_shows = any(i.get("find_via", "company_list") == "company_list" for i in icps if i.get("enabled", True))
     if not needs_shows:
         prompt = (f"/find-leads (continue industry slug '{slug}'; personas approved)\n\n{HEADLESS} This persona is found "
                   "by title x sector x city, not via shows: there is nothing to research. Reply 'no research needed'.")
     else:
         prompt = (f"/find-leads (continue industry slug '{slug}'; personas approved)\n\n{HEADLESS} Do ONLY: Step 2 (4-6 "
-                  "most relevant shows, exact dates)" + region_note + ", Step 3a (exhibitor lists; use `./lf parse-list` for fair-guide "
-                  "PDFs; get exhibitor lists for AT LEAST 4 shows - the '3+ shows a year' rule needs overlap - and "
-                  "name in your summary any show whose list you could not get), Step 3b (visitor/buyer signals: post-show reports, order news, delegations, buyer-seller "
+                  "most relevant shows, exact dates)" + region_note + " Shows outside the region are fine when the persona's "
+                  "companies exhibit or buy there. Record each show's exhibitor directory URL as exhibitor_list_url; "
+                  "when choosing between similar shows prefer ones whose directory is on Map Your Show, a2z, ExpoFP or "
+                  "Swapcard: a later step reads those automatically, so you need not copy them. Step 3a (exhibitor lists for the other shows; use "
+                  "`./lf parse-list` for fair-guide PDFs; " + overlap + "name in your summary any show whose list you could not get), Step 3b (visitor/buyer signals: post-show reports, order news, delegations, buyer-seller "
                   "meets; use `./lf plan-posts` + `./lf run-queue --purpose posts --max 10` and classify post "
                   "candidates). "
                   "Prefer `./lf search` and `./lf fetch` over your own WebSearch. Do NOT run people searches, "
@@ -130,12 +199,14 @@ def stage_research(con, ind, opts):
 
 
 def _decide_min_shows(con, ind):
-    """If no company meets the persona's '3+ shows' rule, relax to 2, then 1, and remember it for this search."""
-    from .people import companies_for_icp, load_icps
-    used = 3
+    """If too few companies meet the persona's 'N+ shows' rule (N as the user asked, default 3), relax to N-1, ... 1,
+    and remember the value used for this search (options_json.min_shows). The requested N is never overwritten."""
+    from .people import companies_for_icp, load_icps, requested_min_shows
+    wanted = requested_min_shows(ind)
+    used = wanted
     for icp in load_icps(ind):
         if icp.get("company_rule") == "exhibitor_3plus":
-            comps, m = companies_for_icp(con, ind, icp, 3)
+            comps, m = companies_for_icp(con, ind, icp, wanted)
             used = min(used, m) if comps else used
     opts = json.loads(ind["options_json"] or "{}")
     if opts.get("min_shows") != used:
@@ -145,10 +216,213 @@ def _decide_min_shows(con, ind):
     return used
 
 
+EVIDENCE_TARGET_COMPANIES = 25   # enough companies at N+ shows: no need to dig for more evidence
+THIN_LIST = 30                   # a show with fewer exhibitors than this probably had its list missed
+
+
+def show_coverage(con, ind):
+    """Per show: exhibitors recorded. Used by the evidence step and the summary."""
+    return [dict(r) for r in con.execute(
+        """SELECT s.id, s.name, s.series, s.year, s.start_date, s.exhibitor_list_url,
+                  (SELECT COUNT(DISTINCT e.entity_id) FROM evidence e WHERE e.show_id=s.id AND e.kind='exhibitor'
+                   AND e.entity='company') exhibitors
+           FROM shows s WHERE s.industry_id=? ORDER BY s.start_date""", (ind["id"],)).fetchall()]
+
+
+def shows_distribution(con, ind):
+    """{shows in the best 12-month window: number of companies}, e.g. {0: 32, 1: 635, 2: 3, 3: 3}."""
+    from .people import company_facts
+    dist = {}
+    for (cid,) in con.execute("SELECT company_id FROM company_industries WHERE industry_id=?", (ind["id"],)):
+        n = company_facts(con, cid)["exhibitor_window_count"]
+        dist[n] = dist.get(n, 0) + 1
+    return dict(sorted(dist.items()))
+
+
+def _at_least(dist, n):
+    return sum(v for k, v in dist.items() if k >= n)
+
+
+APIFY_CATALOG_USD = 2.0  # per search: exhibitor catalogs read through Apify (opts apify_catalog_usd); ~$3 per 1,000
+
+
+def _apify_catalogs(con, ind, opts):
+    """Read the thin shows' exhibitor catalogs with Apify actors before asking Claude: shows matched by fair name
+    (interpack, EuroBLECH, Hannover Messe, ...) or by a supported directory URL (Map Your Show, ExpoFP, a2z, Swapcard,
+    ...). Other shows (custom sites, PDFs) are left to Claude. Each started run is saved, so a resumed stage adopts it."""
+    from . import showdata
+    from .providers import events as ev
+    if not ev.available():
+        return {"skipped": "no Apify token"}
+    budget = float(opts.get("apify_catalog_usd", APIFY_CATALOG_USD))
+    prog = dict(_progress(con, ind["id"], "evidence").get("catalogs") or {})
+    paid = ev.paid_plan()
+    shows = {r["id"]: dict(r) for r in con.execute("SELECT * FROM shows WHERE industry_id=?", (ind["id"],))}
+    todo = [s for s in show_coverage(con, ind) if s["exhibitors"] < THIN_LIST
+            and not (prog.get(str(s["id"])) or {}).get("finished")
+            and ev.route(shows[s["id"]], allow_capped=paid)]
+    spent = sum((v or {}).get("cost", 0) for v in prog.values())
+    out = {}
+    for i, s in enumerate(todo):
+        left = budget - spent
+        if left < 0.1:
+            out[s["name"]] = "not read: Apify catalog budget used up"
+            continue
+        key = str(s["id"])
+        saved = prog.get(key) or {}
+
+        def started(ref, key=key):
+            prog[key] = {"ref": ref}
+            _save_progress(con, ind["id"], "evidence", {"catalogs": prog})
+        res = showdata.harvest_exhibitors(con, ind, shows[s["id"]], left / (len(todo) - i), deadline=time.time() + 20 * 60,
+                                          log=log, ref=saved.get("ref"), on_start=started, allow_capped=False)
+        spent += res.get("cost", 0)
+        prog[key] = {"finished": True, "cost": res.get("cost", 0), "added": res.get("added", 0)}
+        _save_progress(con, ind["id"], "evidence", {"catalogs": prog})
+        out[s["name"]] = f'{res["added"]} exhibitors via {res["actor"].split("~")[0]}' if res.get("added") \
+            else f'not read: {res.get("error")}'
+    return {"catalogs": out, "apify_usd": round(spent, 2)} if out else {}
+
+
+def stage_evidence(con, ind, opts):
+    from .people import company_facts, load_icps, requested_min_shows
+    ind = db.get_industry(con, ind["slug"])
+    if not any(i.get("company_rule") == "exhibitor_3plus" for i in load_icps(ind)):
+        return {"skipped": "this persona has no 'exhibits at N+ shows' rule"}
+    n = requested_min_shows(ind)
+    if n < 2:
+        return {"skipped": "this persona asks for no minimum number of shows"}
+    target = int(opts.get("evidence_target", EVIDENCE_TARGET_COMPANIES))
+    before = shows_distribution(con, ind)
+    if _at_least(before, n) >= target:
+        return {"skipped": f"{_at_least(before, n)} companies already exhibit at {n}+ shows", "min_shows_wanted": n,
+                "companies_at_n_before": _at_least(before, n)}
+    apify = _apify_catalogs(con, ind, opts)
+    mid = shows_distribution(con, ind)
+    if _at_least(mid, n) >= target:
+        return {**apify, "min_shows_wanted": n, "companies_at_n_before": _at_least(before, n),
+                "companies_at_n_after": _at_least(mid, n), "distribution_after": {str(k): v for k, v in mid.items()}}
+    shows = show_coverage(con, ind)
+    thin = [s for s in shows if s["exhibitors"] < THIN_LIST]
+    comps = con.execute("""SELECT c.id, c.name, c.domain FROM companies c JOIN company_industries ci
+                           ON ci.company_id=c.id WHERE ci.industry_id=?""", (ind["id"],)).fetchall()
+    facts = {c["id"]: company_facts(con, c["id"]) for c in comps}
+    # closest to the bar first: 2-show companies, then 1-show companies that also have buyer evidence
+    top = sorted([c for c in comps if facts[c["id"]]["exhibitor_shows"]],
+                 key=lambda c: (-facts[c["id"]]["exhibitor_window_count"], -facts[c["id"]]["visitor_evidence"], c["id"]))
+    top = top[:int(opts.get("evidence_companies", 30))]
+    slug = ind["slug"]
+    show_lines = "\n".join(f'  show_id={s["id"]} | {s["name"]} | series={s["series"]} | {s["start_date"]} | '
+                            f'{s["exhibitors"]} exhibitors recorded | list url: {s["exhibitor_list_url"] or "-"}'
+                            for s in shows)
+    comp_lines = "\n".join(f'  {c["name"]}' + (f' ({c["domain"]})' if c["domain"] else "") + " | exhibits at: "
+                            + ", ".join(x["name"] for x in facts[c["id"]]["exhibitor_shows"]) for c in top)
+    prompt = f"""/find-leads (continue industry slug '{slug}'; personas approved)
+
+{HEADLESS}
+
+Goal: more companies must be PROVEN to exhibit at {n}+ trade shows within one 12-month window (the persona's rule).
+Right now only {_at_least(mid, n)} do. Companies per number of shows (best 12 months): {mid}.
+Most companies show up at just one show because exhibitor lists for the other shows are missing. Work in this order:
+
+PART 1 - missing exhibitor lists (highest yield: one list adds hundreds of company/show links).
+Shows on record (exhibitors recorded so far):
+{show_lines}
+For every show with fewer than {THIN_LIST} exhibitors, get its exhibitor list (Step 3a of the skill: `./lf fetch`
+the list URL or find one; fair-guide / show-daily / catalogue PDFs via `./lf search '"<show>" exhibitor list OR
+"fair guide" OR catalogue pdf'`; `./lf parse-list` for Hall/Stall layouts). Import with
+`./lf add-companies --industry {slug} --show <show_id> --kind exhibitor --confidence confirmed --file ...`.
+Shows to retry: {", ".join(s["name"] for s in thin) or "none"}.
+If you find a show's online exhibitor directory on Map Your Show, a2z, ExpoFP or Swapcard, read it with
+`./lf exhibitors-apify --industry {slug} --show <show_id> --list-url <directory URL> --budget 0.5` instead of
+fetching page by page (paid Apify credit: at most 2 such calls in this step).
+
+PART 2 - other shows the best companies exhibit at (only with search budget left after part 1).
+These companies are closest to the bar:
+{comp_lines}
+For each, look for proof of exhibiting at OTHER shows: the company's own "events / exhibitions / meet us at" page,
+"visit us at <show> Hall X Stall Y" news or posts, exhibitor directories. Rules:
+- Reuse a show from the list above when it is the same event (same series and year) - use its show_id. Never add a
+  second row for an event that is already there under another spelling.
+- A new show needs exact start_date/end_date (the rule counts shows within 12 months of each other); add it with
+  `./lf add-shows --industry {slug} --file data/work/{slug}/more_shows.json` (fields: name, series, year, start_date,
+  end_date, city, country, url, source_url), then `./lf list-shows --industry {slug}` to get its id.
+- Write company rows with the company name EXACTLY as listed above, so they attach to the existing company, and the
+  proof page as url. Only shows held within 12 months of the company's other shows help.
+
+Budget: about {int(opts.get("evidence_searches", 40))} searches in total. Do NOT run people searches, LinkedIn, email or
+export commands. In your summary give: lists retried (got / not got and why), companies checked, new show links added."""
+    code = _claude(prompt, opts.get("model"), opts.get("effort"))
+    after = shows_distribution(con, db.get_industry(con, slug))
+    out = {**apify, "min_shows_wanted": n, "companies_at_n_before": _at_least(before, n),
+           "companies_at_n_after": _at_least(after, n), "distribution_after": {str(k): v for k, v in after.items()},
+           "thin_shows_before": [s["name"] for s in thin],
+           "thin_shows_after": [s["name"] for s in show_coverage(con, ind) if s["exhibitors"] < THIN_LIST]}
+    if code != 0:
+        raise RuntimeError("Claude evidence step failed")
+    return out
+
+
+ATTENDEE_SHOW_USD = 1.5   # per show (opts attendee_usd); below this the actor's sub-run minimums eat the budget
+ATTENDEE_MAX_SHOWS = 2    # opts attendee_shows
+ATTENDEE_DAYS_BEFORE, ATTENDEE_DAYS_AFTER = 75, 45  # LinkedIn posts are read newest first: only recent shows yield
+
+
+def recent_shows(con, ind, today=None):
+    """Shows close enough to today that their LinkedIn posts are still among the newest: ended within ~75 days or
+    starting within ~45 days. Closest first."""
+    from datetime import date, timedelta
+    t = today or date.today()
+    lo, hi = (t - timedelta(days=ATTENDEE_DAYS_BEFORE)).isoformat(), (t + timedelta(days=ATTENDEE_DAYS_AFTER)).isoformat()
+    rows = [dict(r) for r in con.execute(
+        """SELECT * FROM shows WHERE industry_id=? AND start_date IS NOT NULL
+           AND COALESCE(end_date, start_date) >= ? AND start_date <= ?""", (ind["id"], lo, hi))]
+    return sorted(rows, key=lambda s: abs((date.fromisoformat(s["start_date"][:10]) - t).days))
+
+
+def stage_attendees(con, ind, opts):
+    """People who posted or commented about a recent show on LinkedIn (Apify sherwood actor, no login): visitors go
+    in as visitor_post evidence (persona C / buyers), exhibitor staff as exhibitor evidence. Paid Apify credit."""
+    from . import showdata
+    from .providers import events as ev
+    shows = recent_shows(con, ind)[:int(opts.get("attendee_shows", ATTENDEE_MAX_SHOWS))]
+    if not shows:
+        return {"skipped": f"no show within {ATTENDEE_DAYS_BEFORE} days before or {ATTENDEE_DAYS_AFTER} days after "
+                           "today (older shows' posts are out of reach)"}
+    if not ev.available():
+        return {"skipped": "no Apify token"}
+    per_show = float(opts.get("attendee_usd", ATTENDEE_SHOW_USD))
+    doc = json.loads(db.get_industry(con, ind["slug"])["icp_json"] or "{}")
+    target = ", ".join((doc.get("sectors") or [])[:3]) or ind["name"]
+    prog = dict(_progress(con, ind["id"], "attendees"))
+    out = {}
+    for s in shows:
+        key = str(s["id"])
+        if (prog.get(key) or {}).get("finished"):
+            out[s["name"]] = prog[key].get("summary")
+            continue
+
+        def started(ref, key=key):
+            prog[key] = {"ref": ref}
+            _save_progress(con, ind["id"], "attendees", prog)
+        try:
+            res = showdata.show_people(con, ind, s, per_show, target, time.time() + 40 * 60, log=log,
+                                       ref=(prog.get(key) or {}).get("ref"), on_start=started)
+        except Exception as e:  # noqa: BLE001 - one show failing must not stop the others
+            res = {"error": str(e)[:200]}
+        summary = (f'{res.get("people", 0)} people ({res.get("visitors", 0)} visitors)' if "people" in res
+                   else f'not read: {res.get("error")}')
+        prog[key] = {"finished": True, "summary": summary}
+        _save_progress(con, ind["id"], "attendees", prog)
+        out[s["name"]] = summary
+    return {"shows": out}
+
+
 def stage_linkedin(con, ind, opts):
     from . import enrich
     from .people import load_icps, plan_title_searches, run_queue
     from . import keys
+    from .providers import deepline as dlp
     from .providers import linkedin as lip
     ind = db.get_industry(con, ind["slug"])
     m = _decide_min_shows(con, ind)
@@ -157,8 +431,9 @@ def stage_linkedin(con, ind, opts):
     prev = _progress(con, ind["id"], "linkedin")
     prev_done = {k: v for k, v in prev.items()
                  if isinstance(v, dict) and not v.get("error") and not v.get("skipped") and not v.get("in_flight")}
-    if m < 3:
-        out["note"] = (f"No company exhibited at 3+ of the shows found, so companies at {m}+ show"
+    wanted = __import__("leadfinder.people", fromlist=["x"]).requested_min_shows(ind)
+    if m < wanted:
+        out["note"] = (f"Too few companies exhibited at {wanted}+ of the shows found, so companies at {m}+ show"
                        f"{'s' if m > 1 else ''} were used (best first).")
     for icp in load_icps(ind):
         if icp["code"] in prev_done:  # finished before a Stop: don't spend another Apify run on it
@@ -171,40 +446,88 @@ def stage_linkedin(con, ind, opts):
             r = plan_title_searches(con, ind, icp["code"], sectors, hubs, limit=24)
             out[icp["code"]] = {"title_searches_planned": r["planned"]}
             continue
-        runs_left = sum(lip.apify_runs_left(k) for k in keys.usable("apify")) if lip.apify_available() else 0
+        has_credit = lip.apify_available() and any(lip.apify_has_credit(k) for k in keys.usable("apify"))
         # an Apify run started before a Stop keeps running on Apify's side: reuse its results instead of paying again
         flight = (prev.get(icp["code"]) or {}).get("in_flight") if isinstance(prev.get(icp["code"]), dict) else None
         ds = lip.finished_run_dataset(flight) if flight and lip.apify_available() else None
-        if ds:
+        dl, only = None, None
+        if not ds and dlp.search_available():  # free: always first
+            log(f"LinkedIn search for ICP {icp['code']} (Deepline, free)")
+            # free, so room for ~3 people at each of the 40 companies (a smaller cap would leave the
+            # later companies unsearched and send them to the paid sources)
+            dl = enrich.linkedin_people(con, ind, icp["code"], max_items=120, log=log, via="deepline",
+                                        companies_limit=40)
+            if dl.get("people_added_or_matched"):
+                only = dl.get("companies_without_results") or []
+                if only:
+                    log(f"  Deepline had nobody at {len(only)} companies; trying the paid sources for those")
+        paid = None
+        if only == []:
+            pass  # Deepline covered every company
+        elif ds:
             log(f"LinkedIn search for ICP {icp['code']}: reusing the Apify run that finished after the Stop")
-            out[icp["code"]] = enrich.linkedin_people(con, ind, icp["code"], max_items=25, log=log, via="apify",
-                                                     companies_limit=40, dataset_id=ds)
-        elif runs_left:
-            log(f"LinkedIn search for ICP {icp['code']} ({runs_left} free Apify run(s) left across your keys)")
+            paid = enrich.linkedin_people(con, ind, icp["code"], max_items=25, log=log, via="apify",
+                                          companies_limit=40, dataset_id=ds)
+        elif has_credit:
+            log(f"LinkedIn search for ICP {icp['code']} (Apify)")
             _save_progress(con, ind["id"], "linkedin", {**out, icp["code"]: {"in_flight": db.now()}})
-            out[icp["code"]] = enrich.linkedin_people(con, ind, icp["code"], max_items=25, log=log, via="apify",
-                                                     companies_limit=40)
-        elif lip.brightdata_available():
-            out[icp["code"]] = enrich.linkedin_people(con, ind, icp["code"], max_items=100, log=log, via="brightdata")
+            paid = enrich.linkedin_people(con, ind, icp["code"], max_items=25, log=log, via="apify",
+                                          companies_limit=40, only_companies=only)
+            missed = (paid or {}).get("unresolved_companies") or []
+            if missed and lip.aiark_search_available():
+                log(f"  {len(missed)} companies have no LinkedIn page Apify can use; trying AI Ark by name")
+                paid["aiark_for_unresolved"] = enrich.linkedin_people(
+                    con, ind, icp["code"], max_items=25, log=log, via="aiark", only_companies=missed)
+        elif lip.aiark_search_available():
+            log(f"LinkedIn search for ICP {icp['code']} (AI Ark)")
+            paid = enrich.linkedin_people(con, ind, icp["code"], max_items=50, log=log, via="aiark",
+                                          companies_limit=60, only_companies=only)
+        elif lip.brightdata_search_available():
+            paid = enrich.linkedin_people(con, ind, icp["code"], max_items=100, log=log, via="brightdata",
+                                          only_companies=only)
+        elif not (dl and dl.get("people_added_or_matched")):
+            why = "Deepline found nobody; no Apify or AI Ark credit on any key"
+            if lip.brightdata_available():
+                why += f"; Bright Data people search not enabled ({lip.BD_SEARCH_HOWTO})"
+            paid = {"skipped": f"no LinkedIn search credits left ({why})"}
+        if dl and dl.get("people_added_or_matched"):
+            out[icp["code"]] = dl
+            if paid:
+                dl["paid_for_rest"] = paid
         else:
-            out[icp["code"]] = {"skipped": "no LinkedIn search credits left (Apify free runs used up on every key)"}
+            out[icp["code"]] = paid or dl or {"skipped": "no LinkedIn search source available"}
+            if dl and isinstance(out[icp["code"]], dict) and out[icp["code"]] is not dl:
+                out[icp["code"]]["deepline"] = dl  # tried first, found nobody
         _save_progress(con, ind["id"], "linkedin", out)
     return out
 
 
 def stage_web(con, ind, opts):
+    """Company x ICP LinkedIn lookups, best companies first. Drains the whole queue (not a fixed ~60) within a time
+    budget; unfinished work stays queued and a Resume continues it."""
     from .people import plan_people_searches, run_queue
     ind = db.get_industry(con, ind["slug"])
-    planned = plan_people_searches(con, ind, limit=60)
+    cap = int(opts.get("web_companies", 300))
+    planned = plan_people_searches(con, ind, max_companies=cap or None)
     log(f"web people searches planned: {planned}")
-    total = {"done": 0, "people_added": 0}
-    for _ in range(4):  # up to ~80 searches; stops early when the queue is empty or providers are busy
-        r = run_queue(con, max_items=20, log=lambda m: print(m, flush=True))
+    deadline = time.time() + 60 * float(opts.get("web_minutes", 45))
+    total = {"done": 0, "people_added": 0, **planned}
+    while True:
+        r = run_queue(con, max_items=20, log=lambda m: print(m, flush=True), industry_id=ind["id"], deadline=deadline)
         total["done"] += r["done"]
         total["people_added"] += r["people_added"]
+        total["pending"] = r["pending"]
         if r["stopped"] or not r["pending"]:
             total["stopped"] = r.get("stopped")
             break
+    # coverage, so "N of M companies" is visible (most skips come from the persona's company rule, e.g. 2+ shows)
+    from .people import effective_min_shows
+    total["companies_total"] = con.execute("SELECT COUNT(*) FROM company_industries WHERE industry_id=?",
+                                           (ind["id"],)).fetchone()[0]
+    total["companies_searched"] = con.execute(
+        """SELECT COUNT(DISTINCT json_extract(context, '$.company_id')) FROM search_queue WHERE purpose='people'
+           AND status IN ('done','empty') AND json_extract(context, '$.industry_id')=?""", (ind["id"],)).fetchone()[0]
+    total["min_shows"] = effective_min_shows(ind)
     return total
 
 
@@ -237,6 +560,183 @@ def stage_export(con, ind, opts):
     return {"leads": r["leads"], "by_icp": r["by_icp"]}
 
 
+RULE_WORDS = {
+    None: "no company requirement", "": "no company requirement", "any": "no company requirement",
+    "exhibitor": "company must have exhibited at a trade show",
+    "visitor": "company must have visited / bought at a trade show",
+    "visitor_or_exhibitor": "company must have exhibited at or visited a trade show",
+}
+FOUND_WORDS = {"company_list": "searched company by company (companies taken from trade-show lists)",
+               "industry_search": "searched by job title x sector x location (not through show lists)"}
+
+
+def run_facts(con, ind):
+    """Everything the summary may say, computed here (Sonnet only puts it into words, it never invents numbers).
+    Facts that don't apply to this persona are left out, so the summary can't present them as a limit."""
+    from . import keys
+    from .people import company_facts, company_rule_ok, effective_min_shows, load_icps, requested_min_shows
+    ind = db.get_industry(con, ind["slug"])
+    q = lambda sql, *a: con.execute(sql, (ind["id"], *a)).fetchone()[0]  # noqa: E731
+    icps = load_icps(ind)
+    opts = json.loads(ind["options_json"] or "{}")
+    asked = requested_min_shows(ind)
+    has_count_rule = asked > 0 and any(i.get("company_rule") == "exhibitor_3plus" for i in icps)
+    uses_shows = any(i.get("company_rule") not in (None, "", "any") for i in icps)
+    by_company = any(i.get("find_via", "company_list") == "company_list" for i in icps)
+    m = effective_min_shows(ind)
+    comp_ids = [r[0] for r in con.execute("SELECT company_id FROM company_industries WHERE industry_id=?", (ind["id"],))]
+    facts = {c: company_facts(con, c) for c in comp_ids} if uses_shows else {}
+
+    steps = []
+    for key, label in STAGES:
+        if key == "summary":
+            continue
+        r = con.execute("SELECT status, detail FROM pipeline_stages WHERE industry_id=? AND stage=?",
+                        (ind["id"], key)).fetchone()
+        d = json.loads(r["detail"]) if r and r["detail"] else {}
+        status = r["status"] if r else "not run"
+        for k in ("partial", "seconds", "in_flight"):
+            d.pop(k, None)
+        if status == "skipped" or (key == "emails" and int(opts.get("emails", 25)) <= 0):
+            d = {"skipped": "turned off by you"}
+        elif key == "research" and not by_company:
+            d = {"note": "not needed: this persona is " + FOUND_WORDS["industry_search"]}
+        elif key == "web":
+            d["people_found_before_persona_check"] = d.pop("people_added", None)
+            for k in ("planned", "skipped_company_rule", "companies_considered", "stopped"):
+                d.pop(k, None)
+            if not has_count_rule:
+                d.pop("min_shows", None)
+            if not by_company:
+                d.pop("companies_searched", None)
+                d.pop("companies_total", None)
+        elif key == "linkedin" and not by_company:
+            d = {"note": "planned the job-title searches that the web step then ran"}
+        elif key == "verify" and d.get("requested") and not d.get("checked"):
+            d["warning"] = (f"asked the LinkedIn provider for {d['requested']} profiles but got none back, so no "
+                            "profile was actually checked (employer / location not confirmed)")
+        steps.append({"step": label, "status": status, "detail": d})
+
+    groups = []
+    for i in icps:
+        rule = i.get("company_rule")
+        g = {"code": i["code"], "name": i.get("name"), "how_found": FOUND_WORDS.get(i.get("find_via", "company_list")),
+             "company_requirement": (f"company must exhibit at {m}+ shows within 12 months" if rule == "exhibitor_3plus"
+                                     else RULE_WORDS.get(rule, rule)),
+             "leads": q("""SELECT COUNT(*) FROM people p JOIN company_industries ci ON ci.company_id=p.company_id
+                           WHERE ci.industry_id=? AND p.icp=?""", i["code"])}
+        if rule not in (None, "", "any"):
+            g["companies_meeting_requirement"] = sum(company_rule_ok(rule, f, m) for f in facts.values())
+            g["companies_total"] = len(comp_ids)
+        groups.append(g)
+
+    out = {"search": ind["name"], "persona": ind["persona_text"], "target_groups": groups, "steps": steps}
+    if has_count_rule:
+        dist = shows_distribution(con, ind)
+        out["shows_rule"] = {"asked_min_shows": asked, "used_min_shows": m,
+                             "companies_meeting_asked": _at_least(dist, asked),
+                             "companies_by_shows_in_12_months": {str(k): v for k, v in dist.items()}}
+    if by_company or uses_shows:
+        out["shows"] = [{"name": s["name"], "date": s["start_date"], "exhibitors_recorded": s["exhibitors"]}
+                        for s in show_coverage(con, ind)]
+    if by_company:
+        out["companies_total"] = len(comp_ids)
+        out["companies_searched_for_people"] = q("""SELECT COUNT(DISTINCT json_extract(context, '$.company_id'))
+            FROM search_queue WHERE purpose='people' AND status IN ('done','empty')
+            AND json_extract(context, '$.industry_id')=?""")
+    out["people_searches_still_queued"] = q("""SELECT COUNT(*) FROM search_queue WHERE status='pending'
+        AND json_extract(context, '$.industry_id')=?""")
+    out["people_matching_persona"] = q("""SELECT COUNT(*) FROM people p JOIN company_industries ci
+        ON ci.company_id=p.company_id WHERE ci.industry_id=? AND p.icp IS NOT NULL""")
+    out["email_search"] = "off - the user's choice" if int(opts.get("emails", 25)) <= 0 else "on"
+    out["people_with_email"] = q("""SELECT COUNT(*) FROM people p JOIN company_industries ci
+        ON ci.company_id=p.company_id WHERE ci.industry_id=? AND p.icp IS NOT NULL AND p.email IS NOT NULL""")
+    resting = {}
+    for svc in keys.SPECS:
+        ks = keys.all_keys(svc)
+        if ks:
+            n_rest = len(ks) - len(keys.usable(svc, con))
+            if n_rest:
+                resting[svc] = f"{n_rest} of {len(ks)} keys resting"
+    out["api_keys_resting"] = resting or "none"
+    return out
+
+
+def unsupported_numbers(text, f):
+    """Numbers in the summary that appear nowhere in the facts (small counts like 'two groups' are fine)."""
+    known = {int(n) for n in re.findall(r"\d+", json.dumps(f, default=str))} | set(range(11))
+    said = {int(n.replace(",", "")) for n in re.findall(r"(?<![\w.])\d[\d,]*(?![\w.]*\d)", text or "")}
+    return sorted(said - known)
+
+
+def fallback_summary(f):
+    """Plain summary from the facts, used when the Sonnet call fails or its text doesn't match the facts."""
+    lines = [f"People found: {f['people_matching_persona']} matching the persona"
+             + (f", {f['people_with_email']} with a work email." if f["email_search"] == "on"
+                else " (email search was off).")]
+    for g in f["target_groups"]:
+        extra = (f"; {g['companies_meeting_requirement']} of {g['companies_total']} companies meet it"
+                 if "companies_meeting_requirement" in g else "")
+        lines.append(f"- {g['code']} {g['name']}: {g['leads']} leads ({g['company_requirement']}{extra}).")
+    for st in f["steps"]:
+        d = st["detail"]
+        why = d.get("warning") or d.get("skipped") or d.get("error") or d.get("note") or ""
+        lines.append(f"- {st['step']}: {st['status']}" + (f" - {why}" if why else ""))
+    r = f.get("shows_rule")
+    if r:
+        lines.append(f"- Shows rule: asked {r['asked_min_shows']}+ shows, used {r['used_min_shows']}+; "
+                     f"{r['companies_meeting_asked']} companies meet {r['asked_min_shows']}+.")
+    thin = [s["name"] for s in f.get("shows", []) if s["exhibitors_recorded"] < THIN_LIST]
+    if thin:
+        lines.append(f"- Shows with few or no exhibitors recorded: {', '.join(thin)}.")
+    if "companies_searched_for_people" in f:
+        lines.append(f"- People search covered {f['companies_searched_for_people']} of {f['companies_total']} "
+                     "companies.")
+    if f["people_searches_still_queued"]:
+        lines.append(f"- {f['people_searches_still_queued']} searches still queued; Run again continues them.")
+    return "\n".join(lines)
+
+
+def _claude_text(prompt, model=None, effort=None, timeout=240):
+    """One tool-less Claude call whose answer we keep (the stage runner's _claude only streams to the log)."""
+    cmd = ["claude", "-p", prompt, "--output-format", "text", "--tools", "", "--no-session-persistence",
+           "--model", model or DEFAULT_MODEL, "--effort", effort or DEFAULT_EFFORT]
+    try:
+        r = subprocess.run(cmd, cwd=config.ROOT, capture_output=True, text=True, timeout=timeout)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return r.stdout.strip() if r.returncode == 0 and r.stdout.strip() else None
+
+
+def stage_summary(con, ind, opts):
+    f = run_facts(con, ind)
+    prompt = f"""You write the end-of-run report for a lead-finder tool. The reader is a non-technical user who wants to
+know what happened and what is holding the results back. Use ONLY the facts in the JSON below; never invent numbers,
+never do arithmetic on them, and never mention a rule, setting or number that is not in the facts.
+
+Write plain text, no markdown headings, at most ~14 short lines:
+1. One line: the outcome (people matching the persona, per target group). Mention emails only if email_search is "on".
+2. "Done:" what each step achieved, one short bullet ("- ") per step that ran; group skipped / not-needed steps
+   into one bullet with the reason as given. Report a step's "warning" plainly (e.g. requested vs actually checked).
+3. "Bottleneck:" the single biggest reason there aren't more results, with the numbers that show it (e.g. a target
+   group whose company requirement few companies meet; searches still queued; keys resting; shows missing exhibitor
+   lists). Something the user turned off on purpose is their choice, NEVER a bottleneck - don't list it there or
+   suggest turning it back on. If nothing else limited the results, write "Bottleneck: none found".
+4. "Next:" 1-3 concrete actions the user can take (reword the persona, upload an exhibitor list, add an API key...).
+   How the buttons work: "Run again" only continues steps whose status is warn/failed/stopped/not run, plus people
+   searches still queued; it never redoes a step whose status is "done". "Edit & re-run" redoes the steps affected
+   by the edit. Only suggest a button that will actually do what you say.
+
+FACTS:
+{json.dumps(f, default=str)[:12000]}"""
+    text = _claude_text(prompt, opts.get("summary_model", "sonnet"), "low")
+    bad = unsupported_numbers(text, f) if text else []
+    if bad:
+        log(f"summary mentioned numbers not in the facts {bad}; using the plain summary instead")
+        text = None
+    return {"text": text or fallback_summary(f), "by": "sonnet" if text else "fallback"}
+
+
 def _empty_warning(key, d):
     if key == "research" and not d.get("companies"):
         return "No companies found at the shows. Try wording the description more broadly."
@@ -247,13 +747,25 @@ def _empty_warning(key, d):
             return "LinkedIn search found nobody" + (f": {errs[0]}" if errs else ".")
     if key == "web" and not d.get("done"):
         return "No web searches ran (nothing planned, or all search providers are busy)."
+    if key == "web" and d.get("pending"):
+        return (f"Searched {d['done']} so far; {d['pending']} searches still queued"
+                + (f" ({d['stopped']})" if d.get("stopped") else "") + ". Resume continues them.")
+    if key == "verify" and d.get("requested") and not d.get("checked"):
+        return f"Asked for {d['requested']} LinkedIn profiles but none came back, so nothing was checked."
     if key == "export" and not d.get("leads"):
         return "No people matched this persona yet. Use 'Edit & re-run' to broaden the description."
     return None
 
 
-RUNNERS = {"persona": stage_persona, "research": stage_research, "linkedin": stage_linkedin, "web": stage_web,
-           "verify": stage_verify, "emails": stage_emails, "export": stage_export}
+RUNNERS = {"persona": stage_persona, "research": stage_research, "evidence": stage_evidence,
+           "attendees": stage_attendees,
+           "linkedin": stage_linkedin, "web": stage_web, "verify": stage_verify, "emails": stage_emails,
+           "export": stage_export, "summary": stage_summary}
+
+
+# Cheap, idempotent steps (verify skips checked profiles, emails skips people already tried) that must run again when
+# an earlier finding step ran again, e.g. a web search resumed after a stop, or its new people get no emails/export.
+REFRESH_AFTER_FINDING = ("verify", "emails", "export")
 
 
 def _progress(con, ind_id, stage):
@@ -293,22 +805,37 @@ def run(slug, opts, from_stage=None):
             con.execute("DELETE FROM pipeline_stages WHERE industry_id=? AND stage=? AND status!='skipped'",
                         (ind["id"], k))
         con.commit()
+    ran_finder = False  # did a people-finding step run in this invocation?
     for key, label in STAGES:
         status = _status(con, ind["id"], key)  # read fresh: the user may skip a later step while this runs
+        if key == "summary" and status != "skipped":
+            status = None  # always re-written: it describes this run, including steps that failed or warned
+        if status == "done" and ran_finder and key in REFRESH_AFTER_FINDING:
+            log(f"{label}: running again for the people found just now")
+            status = None
         if status == "done":
             log(f"{label}: already done, skipping")
             continue
         if status == "skipped":
             log(f"{label}: skipped by you")
             continue
+        if status == "questions":
+            log(f"{label}: waiting for your answers to its questions (answer them in the web UI)")
+            return 0
         if key == "persona" and not ind["persona_text"] and ind["icp_json"]:
             _stage_set(con, ind["id"], key, "done", {"note": "personas defined earlier"})
             continue
         log(f"{label}…")
+        ran_finder = ran_finder or key in ("research", "evidence", "attendees", "linkedin", "web")
         _stage_set(con, ind["id"], key, "running")
         t = time.time()
         try:
             detail = RUNNERS[key](con, ind, opts)
+        except NeedsInput as e:
+            _stage_set(con, ind["id"], key, "questions", {**e.detail, "seconds": round(time.time() - t)})
+            log(f"{label}: has {len(e.detail['questions'])} question(s) for you. Answer them in the web UI, "
+                "or let it continue with its best guess.")
+            return 0
         except Stopped:
             if _status(con, ind["id"], key) == "skipping":  # Skip pressed on this running step: move on
                 _stage_set(con, ind["id"], key, "skipped", {"note": "Skipped by you while it was running."})

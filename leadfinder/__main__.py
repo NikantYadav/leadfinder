@@ -267,6 +267,53 @@ def cmd_company_posts(a, con):
     out(enrich.company_posts(con, show, None, a.companies, a.per_company, log=lambda m: print(m, file=sys.stderr)))
 
 
+def _show(con, ind, show_id):
+    show = con.execute("SELECT * FROM shows WHERE id=? AND industry_id=?", (show_id, ind["id"])).fetchone()
+    if not show:
+        raise SystemExit("unknown show id for this industry (see lf list-shows)")
+    return show
+
+
+def cmd_exhibitors_apify(a, con):
+    """Read a show's exhibitor catalog with Apify (35+ fair platforms; budget in USD)."""
+    import time
+    from . import showdata
+    ind = db.get_industry(con, a.industry)
+    show = _show(con, ind, a.show)
+    show = dict(show)
+    if a.list_url:
+        show["exhibitor_list_url"] = a.list_url
+    res = showdata.harvest_exhibitors(con, ind, show, a.budget, a.max, time.time() + a.minutes * 60,
+                                      log=lambda m: print(m, file=sys.stderr))
+    if a.list_url and res.get("added"):  # keep a working URL only; never overwrite a good one with a failed guess
+        con.execute("UPDATE shows SET exhibitor_list_url=? WHERE id=?", (a.list_url, show["id"]))
+        con.commit()
+    out(res)
+
+
+def cmd_discover_shows(a, con):
+    """Trade shows by topic/country/date from 10times via Apify (candidates only; add the relevant ones with add-shows)."""
+    from . import showdata
+    ind = db.get_industry(con, a.industry)
+    res = showdata.discover_shows(con, ind, a.query, a.countries.split(",") if a.countries else None,
+                                  a.start, a.end, a.max, log=lambda m: print(m, file=sys.stderr))
+    if a.out:
+        with open(a.out, "w") as f:
+            json.dump(res["events"], f, indent=1)
+    out(res)
+
+
+def cmd_show_people(a, con):
+    """People who posted/commented about a show on LinkedIn, via Apify (no login). Visitors -> visitor_post evidence."""
+    import time
+    from . import showdata
+    ind = db.get_industry(con, a.industry)
+    show = _show(con, ind, a.show)
+    ref = showdata.ev.adopt(showdata.ev.PEOPLE, a.run) if a.run else None
+    out(showdata.show_people(con, ind, dict(show), a.budget, a.target, time.time() + a.minutes * 60,
+                             log=lambda m: print(m, file=sys.stderr), ref=ref, role_based=a.role_based))
+
+
 def cmd_set_company(a, con):
     """Manually correct a company's LinkedIn page / website (overrides automatic resolution)."""
     row = con.execute("SELECT * FROM companies WHERE id=? OR name=?", (a.id, a.name)).fetchone()
@@ -332,6 +379,11 @@ def cmd_stats(a, con):
                        WHERE ci.industry_id=?"""),
         "people_with_icp": q("""SELECT COUNT(*) FROM people p JOIN company_industries ci ON ci.company_id=p.company_id
                                 WHERE ci.industry_id=? AND p.icp IS NOT NULL"""),
+        "companies_searched": q("""SELECT COUNT(DISTINCT json_extract(context, '$.company_id')) FROM search_queue
+                                   WHERE purpose='people' AND status IN ('done','empty')
+                                   AND json_extract(context, '$.industry_id')=?"""),
+        "companies_with_people": q("""SELECT COUNT(DISTINCT p.company_id) FROM people p
+                                      JOIN company_industries ci ON ci.company_id=p.company_id WHERE ci.industry_id=?"""),
         "queue": [dict(r) for r in con.execute(
             "SELECT purpose, status, COUNT(*) n FROM search_queue GROUP BY purpose, status").fetchall()],
     })
@@ -369,7 +421,7 @@ def main(argv=None):
     add("frequent", cmd_frequent, IND, (["--min"], {"type": int, "default": 3}),
         (["--window-days"], {"type": int, "default": 365}), (["--limit"], {"type": int, "default": 200}))
     add("plan-people", cmd_plan_people, IND, (["--icp"], {}), (["--limit"], {"type": int}),
-        (["--min-shows"], {"type": int, "default": 3}))
+        (["--min-shows"], {"type": int, "default": None}))
     add("plan-titles", cmd_plan_titles, IND, (["--icp"], {"required": True}), (["--sectors"], {"required": True}),
         (["--locations"], {"required": True}), (["--limit"], {"type": int}))
     add("plan-posts", cmd_plan_posts, (["--show"], {"type": int, "required": True}), (["--hashtag"], {"nargs": "*"}))
@@ -401,18 +453,32 @@ def main(argv=None):
     add("linkedin-people", cmd_linkedin_people, IND, (["--icp"], {"required": True}),
         (["--max"], {"type": int, "default": 150, "help": "max profiles (25 per $0.10 search page)"}),
         (["--companies"], {"type": int, "default": 40}),
-        (["--via"], {"default": "auto", "choices": ["auto", "apify", "brightdata"]}),
+        (["--via"], {"default": "auto", "choices": ["auto", "deepline", "apify", "aiark", "brightdata"]}),
         (["--dataset"], {"help": "re-ingest a finished Apify run's dataset id (free) instead of a new run"}),
         (["--seniority"], {"help": "comma list: senior,strategic,manager,director,vp,cxo,owner"}))
     add("company-posts", cmd_company_posts, (["--show"], {"type": int, "required": True}),
         (["--companies"], {"type": int, "default": 15}), (["--per-company"], {"type": int, "default": 40}))
+    add("exhibitors-apify", cmd_exhibitors_apify, IND, (["--show"], {"type": int, "required": True}),
+        (["--list-url"], {"help": "exhibitor directory URL (saved on the show)"}),
+        (["--budget"], {"type": float, "default": 1.0, "help": "USD cap for this show (~$3 per 1,000 exhibitors)"}),
+        (["--max"], {"type": int, "help": "max exhibitors (default: what the budget allows)"}),
+        (["--minutes"], {"type": int, "default": 30}))
+    add("discover-shows", cmd_discover_shows, IND, (["--query"], {"required": True}),
+        (["--countries"], {"help": "comma list of ISO codes, e.g. IN,DE,US"}), (["--start"], {}), (["--end"], {}),
+        (["--max"], {"type": int, "default": 40}), (["--out"], {"help": "write the candidates to this JSON file"}))
+    add("show-people", cmd_show_people, IND, (["--show"], {"type": int, "required": True}),
+        (["--budget"], {"type": float, "default": 2.0, "help": "USD in total incl. the actors it calls (min 1.5)"}),
+        (["--target"], {"help": "what kind of exhibitors matter, e.g. 'packaging machinery makers'"}),
+        (["--role-based"], {"action": "store_true", "help": "also list booth staff found by job title (no evidence)"}),
+        (["--run"], {"help": "adopt a finished/running Apify run id instead of starting one"}),
+        (["--minutes"], {"type": int, "default": 40}))
     add("set-company", cmd_set_company, (["--id"], {"type": int}), (["--name"], {}), (["--linkedin-url"], {}),
         (["--domain"], {}))
     add("credits", cmd_credits)
     add("pipeline", cmd_pipeline, IND, (["--emails"], {"type": int}), (["--model"], {}),
-        (["--from-stage"], {"choices": ["persona", "research", "linkedin", "web", "verify", "emails", "export"]}))
+        (["--from-stage"], {"choices": ["persona", "research", "evidence", "attendees", "linkedin", "web", "verify", "emails", "export", "summary"]}))
     add("ui", cmd_ui, (["--port"], {"type": int, "default": 8787}))
-    add("export", cmd_export, IND, (["--min-shows"], {"type": int, "default": 3}))
+    add("export", cmd_export, IND, (["--min-shows"], {"type": int, "default": None}))
     add("sync-tracker", cmd_sync_tracker, IND)
     add("stats", cmd_stats, IND)
     add("providers", cmd_providers)

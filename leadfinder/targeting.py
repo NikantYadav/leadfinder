@@ -224,6 +224,22 @@ def map_terms(terms, table):
     return out
 
 
+_NUM_WORDS = {"two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
+
+
+def shows_wanted(text):
+    """'exhibits at 5+ shows', 'at least four trade fairs a year', '3 or more exhibitions' -> 5 / 4 / 3; else None."""
+    low = (text or "").lower()
+    num = r"(\d{1,2}|" + "|".join(_NUM_WORDS) + r")"
+    m = re.search(num + r"\s*(?:\+|or more|and above|plus)?\s*(?:\w+\s+){0,2}?(?:shows?|fairs?|exhibitions?|expos?|events?)",
+                  low) or re.search(r"(?:at least|minimum of|min\.?)\s*" + num, low)
+    if not m:
+        return None
+    v = m.group(1)
+    n = int(v) if v.isdigit() else _NUM_WORDS[v]
+    return n if 1 <= n <= 20 else None
+
+
 def rule_from_text(text):
     """Map the user's trade-show wording onto a company rule when it's unambiguous, else None (Claude decides)."""
     low = (text or "").lower()
@@ -236,7 +252,9 @@ def rule_from_text(text):
     if exhibit and visit:
         return "visitor_or_exhibitor"
     if exhibit:
-        return "exhibitor_3plus" if re.search(r"\b(3|three|multiple|several|many)\b|3\+", low) else "exhibitor"
+        n = shows_wanted(low)
+        return "exhibitor_3plus" if (n and n >= 2) or re.search(r"\b(multiple|several|many|repeat|regular)\b", low) \
+            else "exhibitor"
     if visit:
         return "visitor"
     return None

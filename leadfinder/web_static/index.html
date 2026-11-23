@@ -45,6 +45,7 @@ textarea{min-height:100px;resize:vertical}label.f{display:block;font-weight:600;
 .ico.done{background:var(--ok);border-color:var(--ok);color:#fff}.ico.failed{background:var(--bad);border-color:var(--bad);color:#fff}.ico.warn{background:var(--warn);border-color:var(--warn);color:#fff}
 .ico.running{border-color:var(--accent);border-top-color:transparent;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 .summarybar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.runsummary .sumtext{white-space:pre-wrap;line-height:1.55;font-size:14px}
 pre.log{background:var(--code);color:var(--codeink);padding:12px;border-radius:10px;max-height:45vh;overflow:auto;white-space:pre-wrap;font-size:12px}
 details summary{cursor:pointer;font-weight:600;padding:4px 0;font-size:13px}.empty{text-align:center;padding:40px;color:var(--muted)}
 .banner{border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--soft)}
@@ -79,12 +80,39 @@ select.status{border-radius:999px;padding:5px 10px;font-size:12px;font-weight:60
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;display:none;z-index:50}
 .ico.skipped,.ico.skipping{background:var(--panel2);border-style:dashed}
 .ico.stopped{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.ico.questions{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.qcard{border:2px solid var(--accent)}.qitem{margin:14px 0}.qitem .q{font-weight:600}.qitem .why{font-size:12px;color:var(--muted);margin:2px 0 6px}
+.qopts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}.qopts button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:3px 10px;cursor:pointer;font-size:12.5px}
+.qopts button:hover{border-color:var(--accent)}.qitem textarea,.qcard textarea{min-height:44px}
+.clar{font-size:12px;color:var(--muted);margin-top:4px}.clar b{color:var(--ink);font-weight:600}
 .tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 14px}
 .checks{display:flex;flex-wrap:wrap;gap:6px}.checks label{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer;font-size:12.5px}
 .checks input{width:auto;margin:0}.checks label:has(input:checked){background:var(--soft);border-color:var(--accent)}
 details.more{text-align:left;margin-top:14px;border:1px solid var(--line);border-radius:12px;padding:6px 14px 14px}details.more summary{padding:8px 0}
 .hint{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
-.keyrow td:first-child{padding-left:22px;color:var(--muted)}.svc td{border-bottom:0;padding-top:16px}
+.chead{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:16px}.chead h1{font-size:22px}.chead p{margin:2px 0 0;max-width:640px}
+.chead .right{margin-left:auto;display:flex;gap:10px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--accent);border-top-color:transparent;animation:spin 1s linear infinite;display:inline-block}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:26px;line-height:1.15}.stat span{font-size:12px;color:var(--muted)}.stat.warn b{color:var(--warn)}
+.csec{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:22px 2px 10px;font-weight:600}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}@media (max-width:420px){.cgrid{grid-template-columns:minmax(0,1fr)}}
+.ccard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;min-width:0}
+.ccard.off{background:var(--panel2);box-shadow:none}
+.ccard .top{display:flex;gap:10px;align-items:flex-start}.ccard .top>div:first-child{min-width:0;flex:1}.ccard h3{font-size:15px}
+.ckey{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--panel2);display:flex;flex-direction:column;gap:6px}
+.ckey .l1{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ckey .l1 .sp{margin-left:auto}
+.ckey .big{font-size:20px;font-weight:700;line-height:1.2}.ckey .big small{font-size:12px;font-weight:400;color:var(--muted);margin-left:4px}
+.ckey code,.ccard code{background:var(--soft);padding:1px 6px;border-radius:6px;font-size:12px}
+.ckey .meta{font-size:12px;color:var(--muted)}.ckey .err{font-size:12px;color:var(--warn)}
+.tag{font-size:10.5px;padding:1px 7px;border-radius:6px;background:var(--soft);color:var(--muted);cursor:help}
+.tag.live{background:var(--ok-soft);color:var(--ok)}
+.addrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.skel{height:92px;border-radius:14px;background:linear-gradient(90deg,var(--panel2),var(--soft),var(--panel2));background-size:200% 100%;animation:shim 1.4s linear infinite;border:1px solid var(--line)}
+@keyframes shim{to{background-position:-200% 0}}
+.attn{border-left:4px solid var(--warn);background:var(--warn-soft);border-radius:12px;padding:12px 14px;margin-bottom:6px}.attn b{display:block;margin-bottom:4px}.attn ul{margin:0;padding-left:18px}
 .src{font-size:10.5px;padding:1px 6px;border-radius:6px;background:var(--soft);color:var(--muted);margin-left:6px}
 .modal .card{max-height:92vh;overflow:auto}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;place-items:center;z-index:40;padding:16px}.modal .card{max-width:640px;width:100%}
@@ -134,8 +162,8 @@ $("#themeBtn").onclick = () => { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]
 async function loadSearches(){
   S.searches = await api("/api/searches");
   $("#slist").innerHTML = S.searches.map(s => {
-    const running = s.running_job, attn = s.stages.some(x => ["failed","warn"].includes(x.status)), done = s.stages.every(x => ["done","skipped"].includes(x.status));
-    const st = running ? `<span class="warn">● running</span>` : attn ? `<span class="warn">needs a look</span>` : done ? `<span class="ok">✓ ready</span>` : `<span class="muted">not run</span>`;
+    const running = s.running_job, asks = s.stages.some(x => x.status === "questions"), attn = s.stages.some(x => ["failed","warn"].includes(x.status)), done = s.stages.every(x => ["done","skipped"].includes(x.status));
+    const st = running ? `<span class="warn">● running</span>` : asks ? `<span class="warn">? needs your answers</span>` : attn ? `<span class="warn">needs a look</span>` : done ? `<span class="ok">✓ ready</span>` : `<span class="muted">not run</span>`;
     return `<div class="sitem ${S.view==="search"&&S.slug===s.slug?"on":""}" data-s="${s.slug}"><b>${esc(s.name)}</b><small>${st} · ${s.people} people · ${s.emails} emails</small></div>`;
   }).join("") || `<div class="muted small" style="padding:6px">No searches yet.</div>`;
   document.querySelectorAll(".sitem").forEach(el => el.onclick = () => go("search", el.dataset.s));
@@ -219,24 +247,36 @@ function bindNew(){
 }
 
 // ---------- search: header + progress ----------
-const ICON = {done:"✓", failed:"!", warn:"!", skipped:"↷", skipping:"↷", stopped:"❚❚"};
+const ICON = {done:"✓", failed:"!", warn:"!", skipped:"↷", skipping:"↷", stopped:"❚❚", questions:"?"};
 function stageText(st){
   const d = st.detail || {};
   if (st.status === "skipped" || st.status === "skipping") return `<span class="muted">${st.status === "skipping" ? "Skipping…" : esc(d.note || "Skipped by you.")}</span>`;
   if (st.status === "stopped") return `<span class="warn">${esc(d.note || "Stopped. Resume continues from here.")}</span>`;
   if (st.status === "failed") return `<span class="bad">${esc(d.error || "failed")}</span>`;
+  if (st.status === "questions") return `<span class="warn">Has ${(d.questions||[]).length} question(s) for you (see above)</span>`;
   if (st.status !== "done" && st.status !== "warn") return "";
   if (d.warning) return `<span class="warn">${esc(d.warning)}</span>` + (d.note ? `<br>${esc(d.note)}` : "");
   if (d.skipped) return esc(d.skipped);
   const k = st.key;
   if (k === "persona") return esc((d.icps||[]).join(" · ") || d.note || "");
   if (k === "research") return `${d.shows ?? 0} shows · ${d.companies ?? 0} companies`;
-  if (k === "linkedin") return (d.note ? esc(d.note) + " · " : "") + Object.entries(d).filter(([,v]) => typeof v === "object").map(([c,v]) => `${v.people_added_or_matched ?? v.title_searches_planned ?? 0} people`).join(" · ");
-  if (k === "web") return `${d.done ?? 0} searches · ${d.people_added ?? 0} people`;
+  if (k === "evidence") return `companies at ${d.min_shows_wanted ?? 3}+ shows: ${d.companies_at_n_before ?? 0} → ${d.companies_at_n_after ?? 0}` + ((d.thin_shows_after||[]).length ? ` · lists still missing: ${esc(d.thin_shows_after.join(", "))}` : "");
+  if (k === "attendees") return d.skipped ? esc(d.skipped) : Object.entries(d.shows||{}).map(([n,v]) => `${esc(n)}: ${esc(v)}`).join(" · ");
+  if (k === "summary") return d.by === "fallback" ? "Written without Sonnet (it could not be reached)" : "See the summary above";
+  if (k === "linkedin") return (d.note ? esc(d.note) + " · " : "") + Object.entries(d).filter(([,v]) => typeof v === "object").map(([c,v]) => `${(v.people_added_or_matched ?? v.title_searches_planned ?? 0) + (v.aiark_for_unresolved?.people_added_or_matched || 0) + (v.deepline?.people_added_or_matched || 0) + (v.paid_for_rest?.people_added_or_matched || 0) + (v.paid_for_rest?.aiark_for_unresolved?.people_added_or_matched || 0)} people`).join(" · ");
+  if (k === "web") return `${d.done ?? 0} searches · ${d.people_added ?? 0} people` + (d.companies_total != null
+    ? ` · ${d.companies_searched ?? 0} of ${d.companies_total} companies searched (the rest don't pass the persona's company rule${d.min_shows ? `, e.g. exhibits at ${d.min_shows}+ shows` : ""}, or are still queued)` : "");
   if (k === "verify") return d.checked != null ? `${d.checked} checked · ${d.flagged ?? 0} flagged` : esc(d.note || "");
   if (k === "emails") return `${d.found ?? 0} emails found of ${d.tried ?? 0} tried`;
   if (k === "export") return `${d.leads ?? 0} people ready`;
   return "";
+}
+function summaryText(s){
+  const st = s.stages.find(x => x.key === "summary");
+  const t = st && ["done","warn"].includes(st.status) && st.detail?.text;
+  if (!t) return "";
+  // plain text from Sonnet: keep line breaks, bold the section labels
+  return esc(t).replace(/^(Done|Bottleneck|Next):/gm, "<b>$1:</b>");
 }
 async function viewSearch(){
   const s = await api(`/api/searches/${S.slug}`); S.cur = s;
@@ -246,18 +286,23 @@ async function viewSearch(){
   const steps = s.stages.map(st => `<div class="step"><div class="ico ${st.status}">${ICON[st.status]||""}</div>
       <div><b style="font-weight:${st.status==="running"?700:500}">${esc(st.label)}</b><div class="small muted">${stageText(st)}</div></div>
       <div class="small muted" style="display:flex;gap:8px;align-items:center;justify-content:flex-end">${["done","warn"].includes(st.status)?dur(st.detail?.seconds):st.status==="running"?"working…":""}
+        ${st.key==="persona" && ["done","warn"].includes(st.status) && !running ? `<button class="iconbtn" id="clarifyBtn" title="Add or correct details about who you mean; the search re-runs from this step">Clarify</button>` : ""}
         ${st.status==="skipped" ? `<button class="iconbtn" data-include="${st.key}" title="Run this step again">Include</button>`
           : ["pending","running","failed","warn","stopped"].includes(st.status) && !(st.key==="persona" && !s.icps.length) ? `<button class="iconbtn" data-skip="${st.key}" title="${st.status==="running"?"Interrupt this step and continue with the next":"Don't run this step"}">Skip</button>` : ""}</div></div>`).join("");
-  const progressOpen = running || stopped || !allDone || attn || S.showSteps;
+  const asking = !running && s.stages.find(x => x.key === "persona" && x.status === "questions");
+  const progressOpen = running || stopped || !allDone || attn || asking || S.showSteps;
   return `<div class="card"><div class="hdr"><div style="flex:1 1 380px;min-width:0"><h2 style="font-size:20px">${esc(s.name)}</h2>
-      ${s.persona?`<div class="persona">${esc(s.persona)}</div>`:`<div class="muted small">Created from the command line.</div>`}
+      ${s.persona?`<div class="persona">${esc(s.persona)}${(s.clarifications||[]).length ? s.clarifications.map(c => `<div class="clar"><b>${esc(c.q === "Extra note from the user" ? "Your note" : c.q)}</b> ${esc(c.a)}</div>`).join("") : ""}</div>`:`<div class="muted small">Created from the command line.</div>`}
       <div class="small muted">${targetSummary(s.target||{}) || "Region: " + esc(s.region)} · ${s.icps.map(i => `<span class="chip" title="${esc(i.titles.join(", "))}">${esc(i.name)}</span>`).join(" ")}</div></div>
       <div class="acts"><button class="btn ghost" id="edit" ${running?"disabled":""}>Edit &amp; re-run</button>
         ${running ? `<button class="btn ghost" id="stop" ${s.stopping?"disabled":""}>Stop</button>`
-                  : `<button class="btn ${stopped?"":"ghost"}" id="rerun">${stopped?"Resume":"Run again"}</button>`}
+                  : s.stages.some(x => x.status === "questions") ? "" : `<button class="btn ${stopped?"":"ghost"}" id="rerun">${stopped?"Resume":"Run again"}</button>`}
+        <button class="btn ghost" id="refreshView" title="Reload the people, companies and progress for this search without reloading the page">↻ Refresh</button>
         <a class="btn ghost" href="/download/${s.slug}.xlsx">Excel</a></div></div></div>
     ${running?`<div class="banner"><div class="ico running" style="flex:0 0 24px"></div><div><b>Working on it</b> <span class="muted">· started ${ago(started)} · people appear below as they're found · you can close this tab, or Stop and resume later</span></div></div>`:""}
+    ${asking ? questionCard(s, asking.detail || {}) : ""}
     ${stopped?`<div class="banner warn"><b class="warn">❚❚</b><div><b>Stopped.</b> <span class="muted">Finished steps and everyone found so far are kept. “Resume” continues from “${esc(s.stages.find(x => x.status==="stopped").label)}”.</span></div></div>`:""}
+    ${!running && summaryText(s)?`<div class="card runsummary"><div class="row" style="margin-bottom:6px"><h3>What happened</h3></div><div class="sumtext">${summaryText(s)}</div></div>`:""}
     ${!running && attn?`<div class="banner warn"><b class="warn">!</b><div><b>${esc(attn.label)}:</b> ${esc(attn.detail?.warning || attn.detail?.error || "did not finish")} <span class="muted">· “Run again” retries steps that didn't produce results.</span></div></div>`:""}
     <div class="card" style="padding:${progressOpen?"20px":"12px 20px"}">
       ${progressOpen ? `<div class="row" style="margin-bottom:6px"><h3>Progress</h3>${allDone && !attn?`<div style="flex:0"><button class="linkbtn" id="hideSteps">Hide</button></div>`:""}</div><div class="steps">${steps}</div>
@@ -266,8 +311,50 @@ async function viewSearch(){
     </div>
     <div class="card" id="results"><div class="empty">Loading results…</div></div>`;
 }
+function questionCard(s, d){
+  const qs = d.questions || [];
+  return `<div class="card qcard" id="qcard"><h3>A few questions about who you mean</h3>
+    <p class="muted small">The description could be read more than one way. Your answers decide which people it searches for. ${d.icps?.length ? `Its best guess so far: ${d.icps.map(i => `<span class="chip">${esc(i)}</span>`).join(" ")}` : ""}</p>
+    ${qs.map((q, i) => `<div class="qitem"><div class="q">${i+1}. ${esc(q.q)}</div>${q.why ? `<div class="why">${esc(q.why)}</div>` : ""}
+      ${(q.options||[]).length ? `<div class="qopts">${q.options.map(o => `<button type="button" data-qi="${i}" data-opt="${esc(o)}">${esc(o)}</button>`).join("")}</div>` : ""}
+      <textarea id="qa_${i}" placeholder="Your answer (leave empty if it doesn't matter)"></textarea></div>`).join("")}
+    <label class="f">Anything else it should know? <span class="hint">optional</span></label><textarea id="qa_note"></textarea>
+    <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+      <button class="btn ghost" id="qa_guess" ${d.icps?.length ? "" : "disabled title='No draft persona yet: answer the questions'"}>Skip questions, use its best guess</button>
+      <button class="btn" id="qa_send">Send answers &amp; continue</button></div></div>`;
+}
+function clarifyModal(s){
+  $("#modalBody").innerHTML = `<h2>Clarify the persona</h2><p class="muted small">Add or correct details about the people you mean, e.g. “only the buying side, not sellers” or “companies with 50–500 staff”. The personas are rebuilt with this, and the search re-runs from that step. People already found are kept.</p>
+    <textarea id="c_note" style="min-height:90px"></textarea>
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost" id="c_cancel">Cancel</button><button class="btn" id="c_go">Save &amp; re-run</button></div>`;
+  $("#modal").style.display = "grid"; $("#c_note").focus();
+  $("#c_cancel").onclick = () => $("#modal").style.display = "none";
+  $("#c_go").onclick = async () => {
+    const note = $("#c_note").value.trim(); if (!note) return toast("Write what to add or correct first");
+    await api(`/api/searches/${s.slug}/clarify`, {method:"POST", body: JSON.stringify({note})});
+    $("#modal").style.display = "none"; toast("Re-running with your clarification"); loadSearches(); render(); };
+}
+function bindQuestions(s){
+  if (!$("#qcard")) return;
+  const d = s.stages.find(x => x.key === "persona").detail || {};
+  document.querySelectorAll("#qcard [data-opt]").forEach(b => b.onclick = () => { const t = $("#qa_" + b.dataset.qi); t.value = t.value.trim() ? t.value.trim() + "; " + b.dataset.opt : b.dataset.opt; t.focus(); });
+  $("#qa_send").onclick = async () => {
+    const answers = (d.questions||[]).map((q, i) => ({q: q.q, a: $("#qa_" + i).value})), note = $("#qa_note").value;
+    if (!answers.some(a => a.a.trim()) && !note.trim()) return toast("Answer at least one question, or use its best guess");
+    $("#qa_send").disabled = true;
+    try { await api(`/api/searches/${s.slug}/clarify`, {method:"POST", body: JSON.stringify({answers, note})}); }
+    catch { $("#qa_send").disabled = false; return; }
+    toast("Thanks, rebuilding the personas with your answers"); loadSearches(); render(); };
+  $("#qa_guess").onclick = async () => {
+    $("#qa_guess").disabled = true;
+    try { await api(`/api/searches/${s.slug}/clarify`, {method:"POST", body: JSON.stringify({use_guess: true})}); }
+    catch { $("#qa_guess").disabled = false; return; }
+    toast("Continuing with its best guess"); loadSearches(); render(); };
+}
 async function bindSearch(){
   const s = S.cur;
+  bindQuestions(s);
+  if ($("#clarifyBtn")) $("#clarifyBtn").onclick = () => clarifyModal(s);
   if ($("#rerun")) $("#rerun").onclick = async () => { const resume = $("#rerun").textContent === "Resume"; await api(`/api/searches/${s.slug}/run`, {method:"POST", body:"{}"}); toast(resume ? "Resuming" : "Running again"); loadSearches(); render(); };
   document.querySelectorAll("[data-skip]").forEach(b => b.onclick = async () => {
     const st = s.stages.find(x => x.key === b.dataset.skip);
@@ -278,6 +365,11 @@ async function bindSearch(){
     toast("Included: it runs on the next Run again / Resume"); render(); });
   if ($("#stop")) $("#stop").onclick = async () => { if (!confirm("Stop this search? Everything found so far is kept, and Resume continues from the current step.")) return; $("#stop").disabled = true; await api(`/api/searches/${s.slug}/stop`, {method:"POST", body:"{}"}); toast("Stopping…"); };
   $("#edit").onclick = () => editModal(s);
+  $("#refreshView").onclick = async () => {  // re-read everything for this search; filters, tab and scroll position stay
+    const b = $("#refreshView"); b.disabled = true; b.textContent = "Refreshing…"; const y = window.scrollY;
+    try { await loadSearches(); await render(); window.scrollTo(0, y); toast("Up to date"); }
+    catch { const nb = $("#refreshView"); if (nb) { nb.disabled = false; nb.textContent = "↻ Refresh"; } }
+  };
   if ($("#showSteps")) $("#showSteps").onclick = () => { S.showSteps = true; render(); };
   if ($("#hideSteps")) $("#hideSteps").onclick = () => { S.showSteps = false; render(); };
   if ($("#logd")) { $("#logd").ontoggle = () => { S.showLog = $("#logd").open; if (S.showLog) refreshLog(); }; if (S.showLog) refreshLog(); }
@@ -290,7 +382,7 @@ async function refreshLog(){
   pre.textContent = j.log || "(no output yet)"; if (atBottom) pre.scrollTop = pre.scrollHeight;
 }
 function editModal(s){
-  $("#modalBody").innerHTML = `<h2>Edit search</h2><p class="muted small">Changing the description or the people filters re-runs from the personas; changing only cities, excluded places or company size re-runs from the LinkedIn search. People already found are kept.</p>
+  $("#modalBody").innerHTML = `<h2>Edit search</h2><p class="muted small">Changing the description or the people filters re-runs from the personas (changing the description clears earlier clarifications, so put anything still true into the text); changing only cities, excluded places or company size re-runs from the LinkedIn search. People already found are kept.</p>
     <label class="f">Who do you want to talk to?</label><textarea id="m_persona">${esc(s.persona||"")}</textarea>
     ${targetFields(s.target || {})}
     <div class="row">
@@ -330,8 +422,9 @@ function drawResults(){
   if (!S.leads.length) { el.innerHTML = `<div class="empty">${S.cur.running_job ? "People will appear here as the search finds them." : "No people yet. Try “Edit & re-run” with a broader description."}</div>`; return; }
   const base = S.leads.filter(l => !l.profile_flag), flagged = S.leads.length - base.length;
   const cnt = k => base.filter(QF[k]).length, icps = [...new Set(S.leads.map(l => l.icp))];
+  const shown = filtered(), nPeople = shown.length, nCos = new Set(shown.map(l => l.company)).size;
   el.innerHTML = `<div class="row" style="align-items:center"><h3 style="flex:0;white-space:nowrap">Results</h3>
-      <div style="flex:0" class="tabs"><button data-tab="people" class="${S.tab==="people"?"on":""}">People</button><button data-tab="companies" class="${S.tab==="companies"?"on":""}">Companies</button></div>
+      <div style="flex:0" class="tabs"><button data-tab="people" class="${S.tab==="people"?"on":""}">People <span class="muted">${nPeople}</span></button><button data-tab="companies" class="${S.tab==="companies"?"on":""}">Companies <span class="muted">${nCos}</span></button></div>
       <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost sm" id="copyEmails">Copy emails</button></div></div>
     <div class="qf">${[["all","All"],["email","With email"],["seen","Seen at a show"],["todo","Not contacted yet"]].map(([k,l]) => `<button data-qf="${k}" class="${S.qf===k?"on":""}">${l}<b>${cnt(k)}</b></button>`).join("")}</div>
     <div class="toolbar"><input id="q" placeholder="Search name, title, company, city…" value="${esc(S.q)}">
@@ -376,7 +469,7 @@ function drawCompanies(b){
   const by = {};
   filtered().forEach(l => { const c = by[l.company] ||= {name: l.company, people: 0, emails: 0, seen: 0, shows: l.shows, best: 0}; c.people++; if (l.email) c.emails++; if (l.confidence==="confirmed") c.seen++; c.best = Math.max(c.best, l.score); });
   const rows = Object.values(by).sort((a,b) => b.best - a.best || b.people - a.people);
-  b.innerHTML = rows.length ? `<div style="overflow:auto;margin-top:10px"><table class="ctable"><thead><tr><th>Company</th><th>People</th><th>With email</th><th>Seen at a show</th><th>Trade shows</th></tr></thead><tbody>
+  b.innerHTML = rows.length ? `<div class="small muted" style="margin-top:10px">${rows.length} ${rows.length === 1 ? "company" : "companies"}</div><div style="overflow:auto;margin-top:6px"><table class="ctable"><thead><tr><th>Company</th><th>People</th><th>With email</th><th>Seen at a show</th><th>Trade shows</th></tr></thead><tbody>
     ${rows.map(c => `<tr class="click" data-co="${esc(c.name)}"><td><b>${esc(c.name)}</b></td><td>${c.people}</td><td>${c.emails}</td><td>${c.seen}</td><td class="small muted">${esc(c.shows||"")}</td></tr>`).join("")}
     </tbody></table></div><div class="small muted" style="margin-top:8px">Click a company to see its people.</div>` : `<div class="empty">Nobody matches these filters.</div>`;
   b.querySelectorAll("[data-co]").forEach(r => r.onclick = () => { S.company = r.dataset.co; S.tab = "people"; drawResults(); });
@@ -435,34 +528,72 @@ async function openPerson(pid){
 }
 
 // ---------- credits ----------
-async function viewCredits(refresh){
-  const d = await api("/api/credits" + (refresh ? "?refresh=1" : ""));
-  const rows = d.services.map(sv => {
-    const head = `<tr class="svc"><td><b>${esc(sv.label)}</b><div class="small muted">${esc(sv.use)}</div></td>
-      <td class="${sv.keys.length?"ok":"muted"}">${sv.keys.length ? sv.keys.length + (sv.keys.length>1?" keys":" key") : "not set up"}</td>
-      <td></td><td></td><td class="small muted">${esc(sv.free_allowance)}${sv.keys.length?"":`<br>add <code>${esc(sv.env)}=</code> to .env`}</td></tr>`;
-    const keys = sv.keys.map(k => {
-      const status = k.resting_until ? `<span class="warn">resting until ${esc(k.resting_until.replace("T"," ").slice(0,16))} UTC</span>` : `<span class="ok">active</span>`;
-      const rem = k.remaining != null ? `<b>${esc(k.remaining)}</b> <span class="small muted">${esc(k.unit||"")}</span><span class="src" title="${k.source==="live"?"read from the provider just now":"counted by this tool"}">${k.source==="live"?"live":"counted"}</span>` : `<span class="muted">–</span>`;
-      const note = [k.note, k.error].filter(Boolean).map(esc).join("<br>");
-      return `<tr class="keyrow"><td>key ${k.index} · <code>${esc(k.key)}</code></td><td>${status}</td><td>${rem}${note?`<div class="small muted">${note}</div>`:""}</td>
-        <td class="small muted">${k.used_today} today · ${k.used_month} this month</td><td></td></tr>`;
-    }).join("");
-    return head + keys;
-  }).join("");
-  return `<div class="card"><div class="row"><h2>Free credits</h2><div style="flex:0;display:flex;gap:8px;align-items:center"><span class="small muted" style="white-space:nowrap">checked ${esc(ago(d.checked_at))}</span><button class="btn ghost sm" id="credRefresh">Refresh</button></div></div>
-    <p class="muted small">Balances marked <span class="src">live</span> come from each provider's own account API. <span class="src">counted</span> means the provider has no balance API, so this tool counts its own use.
-    To add more keys for a service, list them in <code>.env</code> separated by commas (<code>SERPER_API_KEY=key1,key2</code>) or as <code>SERPER_API_KEY_2=…</code>. When a key runs out or is rate limited it rests, and the next key takes over automatically.</p>
-    <div style="overflow:auto"><table class="ctable"><thead><tr><th>Service / key</th><th>Status</th><th>Remaining</th><th>Used by this tool</th><th>Free allowance</th></tr></thead><tbody>${rows}
-    <tr class="svc"><td><b>OpenSERP</b><div class="small muted">self-hosted Google search</div></td><td class="${d.openserp?"ok":"muted"}">${d.openserp?"running":"not running"}</td><td></td><td></td><td class="small muted">free, no key (docker)</td></tr>
-    </tbody></table></div></div>`;
+// The server answers from its last balance sweep at once (and says `refreshing` while it re-reads in the background).
+const credNum = v => typeof v === "number" ? v : (typeof v === "string" && /^\$?[\d,.]+$/.test(v.trim())) ? parseFloat(v.replace(/[$,]/g, "")) : null;
+let credTimer = null;
+function credKey(k){
+  const empty = credNum(k.remaining) === 0;
+  const state = k.resting_until ? `<span class="badge b-warn" title="Rate limited or out of credits; the next key takes over automatically">Resting until ${esc(k.resting_until.replace("T"," ").slice(0,16))} UTC</span>`
+    : empty ? `<span class="badge b-bad">Empty</span>` : `<span class="badge b-ok">Active</span>`;
+  const src = k.source === "live" ? `<span class="tag live" title="Read from the provider's own account just now">live</span>`
+    : k.source === "local" ? `<span class="tag" title="This provider has no balance API, so the tool counts its own use">counted</span>` : "";
+  const rem = k.remaining != null ? `<div class="big">${esc(k.remaining)}<small>${esc(k.unit || "")}</small></div>` : `<div class="muted">Balance not available</div>`;
+  const notes = [k.note].filter(Boolean).map(esc).join(" · ");
+  return `<div class="ckey"><div class="l1"><span class="small muted">Key ${k.index} · <code>${esc(k.key)}</code></span>${state}<span class="sp">${src}</span></div>${rem}
+    ${notes ? `<div class="meta">${notes}</div>` : ""}${k.error ? `<div class="err">⚠ ${esc(k.error)}</div>` : ""}
+    <div class="meta">Used by this tool: ${k.used_today} today · ${k.used_month} this month</div></div>`;
 }
-function bindCredits(){ const b = $("#credRefresh"); if (b) b.onclick = async () => { b.disabled = true; b.textContent = "Checking…"; $("#view").innerHTML = await viewCredits(true); bindCredits(); }; }
+function credCard(sv){
+  const n = sv.keys.length;
+  if (!n) return `<div class="ccard off"><div class="top"><div><h3>${esc(sv.label)}</h3><div class="small muted">${esc(sv.use)}</div></div><span class="badge b-soft">Not set up</span></div>
+    <div class="small"><b>Free allowance:</b> ${esc(sv.free_allowance)}</div>
+    <div class="addrow">Add <code>${esc(sv.env)}=your_key</code> to <code>.env</code> <button class="iconbtn" data-copy="${esc(sv.env)}=">Copy name</button></div></div>`;
+  return `<div class="ccard"><div class="top"><div><h3>${esc(sv.label)}</h3><div class="small muted">${esc(sv.use)}</div></div><span class="badge b-ok">${n} ${n > 1 ? "keys" : "key"}</span></div>
+    ${sv.keys.map(credKey).join("")}<div class="small muted">Free allowance: ${esc(sv.free_allowance)}</div></div>`;
+}
+function credPaint(d, busy){
+  const on = d.services.filter(x => x.keys.length);
+  const keys = on.flatMap(x => x.keys.map(k => ({svc: x.label, k})));
+  const resting = keys.filter(x => x.k.resting_until), empty = keys.filter(x => !x.k.resting_until && credNum(x.k.remaining) === 0);
+  const errs = keys.filter(x => x.k.error && x.k.source !== "live");
+  const issues = [...resting.map(x => `${esc(x.svc)} key ${x.k.index} is resting until ${esc(x.k.resting_until.replace("T"," ").slice(0,16))} UTC. The next key takes over automatically.`),
+    ...empty.map(x => `${esc(x.svc)} key ${x.k.index} has no credits left.`),
+    ...errs.map(x => `${esc(x.svc)} key ${x.k.index}: ${esc(x.k.error)}`)];
+  const status = busy ? `<span class="pill"><span class="spin"></span>Checking every provider…</span>`
+    : d.refreshing ? `<span class="pill"><span class="spin"></span>Updating…</span>` : `<span class="pill">Updated ${esc(ago(d.checked_at))}</span>`;
+  const sp = d.openserp ? `<span class="badge b-ok">OpenSERP running</span>` : `<span class="badge b-soft" title="Self-hosted Google search, free, no key (docker)">OpenSERP not running</span>`;
+  $("#view").innerHTML = `<div class="chead"><div><h1>Free credits</h1>
+      <p class="muted">What is left on each free plan, so you know what a search can still afford. When a key runs out or is rate limited it rests and the next key takes over by itself.</p></div>
+      <div class="right">${status}<button class="btn ghost sm" id="credRefresh" ${busy ? "disabled" : ""}>Refresh</button></div></div>
+    <div class="stats"><div class="stat"><b>${on.length}<span style="font-weight:400"> / ${d.services.length}</span></b><span>services set up</span></div>
+      <div class="stat"><b>${keys.length - resting.length - empty.length}</b><span>keys ready to use</span></div>
+      <div class="stat ${resting.length + empty.length ? "warn" : ""}"><b>${resting.length + empty.length}</b><span>resting or empty</span></div>
+      <div class="stat"><b>${sp}</b><span style="margin-top:6px;display:block">self-hosted search</span></div></div>
+    ${issues.length ? `<div class="attn"><b>Needs a look</b><ul>${issues.map(i => `<li>${i}</li>`).join("")}</ul></div>` : ""}
+    <div class="csec">In use (${on.length})</div><div class="cgrid">${on.map(credCard).join("") || `<div class="muted">No API keys found yet. Add some to <code>.env</code> below.</div>`}</div>
+    <details class="more"><summary>How to add more keys</summary><p class="muted small">Put a key in the <code>.env</code> file next to the tool. For several keys on one service, separate them with commas
+      (<code>SERPER_API_KEY=key1,key2</code>) or number them (<code>SERPER_API_KEY_2=…</code>). Restart the tool after editing <code>.env</code>.
+      <span class="tag live">live</span> numbers come from the provider; <span class="tag">counted</span> means this tool counts its own use.</p></details>`;
+  document.querySelectorAll("[data-copy]").forEach(b => b.onclick = () => copy(b.dataset.copy, "Name"));
+  const rb = $("#credRefresh"); if (rb) rb.onclick = () => showCredits(true);
+}
+async function showCredits(refresh){
+  clearTimeout(credTimer);
+  if (S.credData) credPaint(S.credData, refresh);
+  else $("#view").innerHTML = `<div class="chead"><div><h1>Free credits</h1><p class="muted"><span class="spin"></span> Checking balances with each provider…</p></div></div><div class="cgrid">${'<div class="skel"></div>'.repeat(6)}</div>`;
+  try {
+    const d = await api("/api/credits" + (refresh ? "?refresh=1" : ""));
+    S.credData = d;
+    if (S.view !== "credits") return;
+    credPaint(d);
+    if (d.refreshing) credTimer = setTimeout(() => { if (S.view === "credits") showCredits(); }, 2500);
+  } catch (e) { if (S.view === "credits") { if (S.credData) credPaint(S.credData); else $("#view").innerHTML = `<div class="card bad">${esc(e.message).slice(0,300)}</div>`; } }
+}
 
 async function render(){
   const v = $("#view");
   try {
-    if (S.view === "credits") { v.innerHTML = await viewCredits(); bindCredits(); return; }
+    if (S.view === "credits") { await showCredits(); return; }
     if (S.view === "search" && S.slug && S.searches.find(s => s.slug === S.slug)) { v.innerHTML = await viewSearch(); await bindSearch(); return; }
     v.innerHTML = viewNew(); bindNew();
   } catch (e) { v.innerHTML = `<div class="card bad">${esc(e.message).slice(0,300)}</div>`; }

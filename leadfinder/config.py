@@ -35,6 +35,7 @@ OPENSERP_URL = get("OPENSERP_URL", "http://127.0.0.1:7000")
 # Minimum seconds between OpenSERP Google queries; Google shows captchas when this is too fast.
 OPENSERP_MIN_GAP = float(get("OPENSERP_MIN_GAP", "45"))
 # Minutes to rest a provider after a captcha / rate limit.
+TINYSEARCH_MIN_GAP = float(get("TINYSEARCH_MIN_GAP", "2.2"))  # 30 req/min limit per key
 COOLDOWN_MINUTES = float(get("COOLDOWN_MINUTES", "30"))
 
 for d in (DATA, RAW, OUTPUT):

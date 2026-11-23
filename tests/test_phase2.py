@@ -9,9 +9,14 @@ os.environ.update({"PROSPEO_API_KEY": "k", "HUNTER_API_KEY": "k", "APOLLO_API_KE
                    "TOMBA_API_SECRET": "s", "BETTERCONTACT_API_KEY": "k", "APIFY_TOKEN": "t",
                    "TARGET_COUNTRIES": "India,IN"})
 
+from leadfinder.providers import deepline as DL  # noqa: E402
 from leadfinder.providers import email as E  # noqa: E402
 from leadfinder.providers import linkedin as L  # noqa: E402
 from leadfinder.providers.search import ProviderBusy  # noqa: E402
+
+# No network: the real Deepline CLI and an AI_ARK_API_KEY in .env would otherwise be picked by via="auto".
+DL.available = lambda: False
+L.aiark_search_available = lambda: False
 
 
 class R:
@@ -344,7 +349,9 @@ def test_brightdata_business_search_people():
     p = con.execute("SELECT * FROM people").fetchone()
     assert p["linkedin_url"] == "https://www.linkedin.com/in/vijay-nelson" and p["icp"] == "C"
     LI.requests.post = lambda *a, **k: R(403, {"error": "not allowlisted"})
-    assert "allowlist" in enrich.linkedin_people(con, ind, "C", log=lambda m: None, via="brightdata")["error"]
+    assert "not enabled" in enrich.linkedin_people(con, ind, "C", log=lambda m: None, via="brightdata")["error"]
+    k = __import__("leadfinder.keys", fromlist=["x"]).all_keys("brightdata")[0]
+    assert LI.bd_search_denied(k) and not LI.brightdata_search_available() and LI.brightdata_available()
     os.environ["APIFY_TOKEN"] = "t"
 
 

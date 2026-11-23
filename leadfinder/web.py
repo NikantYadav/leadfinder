@@ -68,7 +68,7 @@ def build_command(action, p, slug):
         return _lf("run-queue", "--max", num("max", 40)), "Run search queue"
     if action == "linkedin_people":
         return _lf("linkedin-people", *i, "--icp", p["icp"], "--max", num("max", 150),
-                   *(["--via", p["via"]] if p.get("via") in ("apify", "brightdata") else [])), \
+                   *(["--via", p["via"]] if p.get("via") in ("deepline", "apify", "aiark", "brightdata") else [])), \
             f"LinkedIn people search (ICP {p['icp']})"
     if action == "company_posts":
         return _lf("company-posts", "--show", num("show", 0), "--companies", num("companies", 15)), \
@@ -330,10 +330,12 @@ def companies(slug):
     rows = con.execute("""SELECT c.* FROM companies c JOIN company_industries ci ON ci.company_id=c.id
                           WHERE ci.industry_id=?""", (ind["id"],)).fetchall()
     out = []
+    from .people import effective_min_shows
+    m = effective_min_shows(ind)
     for c in rows:
         f = company_facts(con, c["id"])
         fit = [i["code"] for i in icps if i.get("find_via", "company_list") == "company_list"
-               and company_rule_ok(i.get("company_rule"), f)]
+               and company_rule_ok(i.get("company_rule"), f, m)]
         n = con.execute("SELECT COUNT(*) FROM people WHERE company_id=? AND icp IS NOT NULL", (c["id"],)).fetchone()[0]
         out.append({"id": c["id"], "name": c["name"], "fit": fit, "domain": c["domain"], "domain_source": c["domain_source"],
                     "linkedin_url": c["linkedin_url"], "shows_12mo": f["exhibitor_window_count"],
@@ -399,7 +401,8 @@ def _search_summary(con, ind):
     from . import targeting
     return {"slug": ind["slug"], "name": ind["name"], "persona": ind["persona_text"], "region": ind["geo"],
             "target": targeting.get(ind),
-            "options": json.loads(ind["options_json"] or "{}"), "icps": icps, "stages": stages,
+            "options": json.loads(ind["options_json"] or "{}"), "icps": icps,
+            "clarifications": json.loads(ind["options_json"] or "{}").get("clarifications") or [], "stages": stages,
             "running_job": job["id"] if job else None, "stopping": bool(job and job["status"] == "stopping"), "last_job": dict(last) if last else None,
             "people": q("""SELECT COUNT(*) FROM people p JOIN company_industries ci ON ci.company_id=p.company_id
                            WHERE ci.industry_id=? AND p.icp IS NOT NULL"""),
@@ -467,6 +470,13 @@ def rerun_search(slug):
     from . import targeting
     old = json.loads(ind["options_json"] or "{}")
     new = _opts_from(p, old)
+    if (p.get("persona") or "").strip() and p["persona"].strip() != (ind["persona_text"] or ""):
+        # answers were about the old wording and would override the new one: start fresh (fold them into the text)
+        new["persona_rounds"], new["clarifications"] = 0, []
+    pst = con.execute("SELECT status FROM pipeline_stages WHERE industry_id=? AND stage='persona'",
+                      (ind["id"],)).fetchone()
+    if pst and pst["status"] == "questions" and from_stage != "persona":
+        abort(409, "Answer the persona's questions first, or use its best guess.")
     if "target" in p:  # a targeting change must re-run the steps it affects, not be skipped as "already done"
         # compare with what the form showed (older searches derive countries from Region), not the raw stored value
         changed = targeting.rerun_from(targeting.get(ind), new.get("target") or {})
@@ -483,6 +493,47 @@ def rerun_search(slug):
     con.execute("UPDATE industries SET options_json=? WHERE id=?", (json.dumps(new), ind["id"]))
     con.commit()
     return jsonify({"job": start_job("pipeline", {"from_stage": from_stage} if from_stage else {}, slug)})
+
+
+@app.post("/api/searches/<slug>/clarify")
+def clarify_persona(slug):
+    """Answer the persona step's questions (or add a note of your own) and re-run from the persona step.
+    use_guess=true instead accepts the personas Claude drafted with its best reading and carries on."""
+    p = request.get_json(force=True)
+    con = _con()
+    ind = db.get_industry(con, slug)
+    if _running_pipeline(con, slug):
+        abort(409, "This search is already running.")
+    opts = json.loads(ind["options_json"] or "{}")
+    row = con.execute("SELECT status, detail FROM pipeline_stages WHERE industry_id=? AND stage='persona'",
+                      (ind["id"],)).fetchone()
+    detail = json.loads(row["detail"]) if row and row["detail"] else {}
+    if p.get("use_guess"):
+        if not ind["icp_json"]:
+            abort(400, "There's no draft persona to continue with yet. Answer the questions instead.")
+        con.execute("UPDATE pipeline_stages SET status='done', detail=?, ended_at=? WHERE industry_id=? AND "
+                    "stage='persona'", (json.dumps({"icps": detail.get("icps") or [],
+                                                    "note": "Went ahead with its best reading (questions skipped)."}),
+                                        db.now(), ind["id"]))
+        con.commit()
+        return jsonify({"job": start_job("pipeline", {}, slug)})
+    new = []
+    for a in p.get("answers") or []:
+        q, ans = str(a.get("q") or "").strip()[:400], str(a.get("a") or "").strip()[:1000]
+        if ans:
+            new.append({"q": q, "a": ans})
+    note = str(p.get("note") or "").strip()[:2000]
+    if note:
+        new.append({"q": "Extra note from the user", "a": note})
+    if not new:
+        abort(400, "Write at least one answer or note (or continue with the best guess).")
+    asked = {c["q"] for c in new}
+    opts["clarifications"] = [c for c in opts.get("clarifications") or [] if c.get("q") not in asked
+                              or c.get("q") == "Extra note from the user"] + new
+    opts["persona_rounds"] = int(opts.get("persona_rounds") or 0) + (1 if row and row["status"] == "questions" else 0)
+    con.execute("UPDATE industries SET options_json=?, icp_approved=0 WHERE id=?", (json.dumps(opts), ind["id"]))
+    con.commit()
+    return jsonify({"job": start_job("pipeline", {"from_stage": "persona"}, slug)})
 
 
 @app.get("/api/credits")
@@ -619,5 +670,7 @@ def serve(port=8787):
         else:
             threading.Thread(target=_watch_orphan, args=(r["id"], r["pid"]), daemon=True).start()
     c.commit()
+    from . import credits as _credits
+    _credits.warm()  # read every balance now, so the Free credits page opens instantly
     print(f"Lead Finder UI: http://127.0.0.1:{port}  (Ctrl+C to stop)")
     app.run(host="127.0.0.1", port=port, debug=False, threaded=True)

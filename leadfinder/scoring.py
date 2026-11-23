@@ -41,7 +41,7 @@ def seniority_points(title):
     return 8
 
 
-def score_person(person, person_ev, company_ev, company_window_count, min_shows=3):
+def score_person(person, person_ev, company_ev, company_window_count, min_shows=0):
     """Returns (score 0-100, confidence, why)."""
     why = []
     s = seniority_points(person["title"])
@@ -61,7 +61,7 @@ def score_person(person, person_ev, company_ev, company_window_count, min_shows=
     else:
         conf = "inferred"
     s += {"confirmed": 30, "likely": 18, "inferred": 5}[conf]
-    if company_window_count >= min_shows:
+    if company_window_count >= max(min_shows or 0, 1):
         s += 15
         why.append(f"company exhibits at {company_window_count} shows/yr")
     person_shows = {e["show_id"] for e in p_att if e["show_id"]}

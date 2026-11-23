@@ -21,7 +21,7 @@ extracting rows. Write extracted rows to JSON files under `data/work/<industry-s
 - Page reads: always `./lf fetch <url>` (direct -> TinyFetch 1,000/day -> OpenSERP -> Firecrawl) rather than WebFetch.
 - `./lf run-queue` is slow on purpose (OpenSERP is paced ~45s/query to avoid Google captchas). Run it with
   `run_in_background` and a sensible `--max`; when it pauses (all providers busy) tell the user and offer
-  `./lf queue-links` (clickable fallbacks) or adding a Serper / Google CSE key to `.env`.
+  `./lf queue-links` (clickable fallbacks) or adding a Serper key to `.env`.
 - Never contact anyone: the tool only finds and verifies people.
 
 ## Step 0 - setup check

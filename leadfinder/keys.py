@@ -3,8 +3,8 @@
 In .env, put several keys in one variable separated by commas, or use numbered variables:
     SERPER_API_KEY=key_one,key_two
     SERPER_API_KEY_2=key_three
-Services with a second value pair by position: TOMBA_API_KEY + TOMBA_API_SECRET, GOOGLE_CSE_KEY + GOOGLE_CSE_CX
-(the n-th key goes with the n-th secret / cx).
+Tomba has a second value paired by position: TOMBA_API_KEY + TOMBA_API_SECRET
+(the n-th key goes with the n-th secret).
 
 Each key gets its own state, stored under "key:<service>:<hash>" in provider_state / credit_usage. The UI shows
 only the last 4 characters. Full keys never leave this process: not in the UI, not in logs.
@@ -25,10 +25,10 @@ SPECS = {
     "bettercontact": ("BETTERCONTACT_API_KEY", None),
     "serper": ("SERPER_API_KEY", None),
     "tinyfish": ("TINYFISH_API_KEY", None),
-    "google_cse": ("GOOGLE_CSE_KEY", "GOOGLE_CSE_CX"),
     "firecrawl": ("FIRECRAWL_API_KEY", None),
     "apify": ("APIFY_TOKEN", None),
     "brightdata": ("BRIGHTDATA_API_KEY", None),
+    "ai_ark": ("AI_ARK_API_KEY", None),
 }
 QUOTA_HOURS = 24          # cooldown when a key is out of credits
 RATE_LIMIT_HINTS = ("429", "rate", "RATE_LIMITED", "per minute", "too many")
@@ -138,7 +138,7 @@ def used(key, bucket, con=None):
 def run(service, fn, con=None, log=None, only=None):
     """Call fn(key) with each usable key in turn. A key that raises ProviderBusy (out of credits / rate limited)
     is rested and the same request is retried with the next key. Raises ProviderBusy when every key is busy.
-    only: optional predicate to restrict which keys may be used (e.g. Apify tokens with free runs left)."""
+    only: optional predicate to restrict which keys may be used (e.g. Apify tokens with credit left)."""
     from .providers.search import ProviderBusy
     if not service or service not in SPECS:  # a provider without API keys (OpenSERP, test fakes)
         return fn(None)

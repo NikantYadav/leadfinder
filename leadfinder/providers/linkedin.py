@@ -10,7 +10,7 @@ Posts (people posting about a show):
 """
 import requests
 
-from .. import config, keys
+from .. import config, db, keys
 from .search import ProviderBusy, ProviderError
 
 APIFY = "https://api.apify.com/v2/actors/{actor}/run-sync-get-dataset-items"
@@ -30,11 +30,35 @@ def brightdata_available():
     return keys.available("brightdata")
 
 
+# Business Search (/search/people) is early access: without it every call is a 403. Remember that per key for a day
+# (so runs don't keep asking), and show it on the credits page. Profile scraping and post discovery are unaffected.
+BD_SEARCH_DENIED_HOURS = 24
+BD_SEARCH_HOWTO = "email sales@brightdata.com to enable Business Search"
+
+
+def _bd_denied_setting(key):
+    return f"bd_search_denied:{key.state_id}"
+
+
+def bd_search_denied(key):
+    from datetime import datetime, timedelta, timezone
+    at = db.get_setting(keys._con(), _bd_denied_setting(key))
+    cutoff = (datetime.now(timezone.utc) - timedelta(hours=BD_SEARCH_DENIED_HOURS)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return bool(at) and at > cutoff
+
+
+def brightdata_search_available():
+    return any(not bd_search_denied(k) for k in keys.usable("brightdata"))
+
+
 LAST_APIFY_KEY = {}  # actor -> Key that ran it last (so the caller can count the run against that account)
 
 
 PEOPLE_SEARCH_ACTOR = "harvestapi~linkedin-profile-search"
-APIFY_FREE_RUNS = 10  # free Apify plans get 10 runs of the people-search actor per account, in total
+# There is NO run cap on this actor for free plans (tested 2026-11-23: an 11th run on a FREE account succeeded).
+# It is pay-per-event: one search page (up to 25 profiles, "Short" mode) costs ~$0.10 of platform credit.
+APIFY_SEARCH_PAGE_USD = 0.10
+APIFY_MIN_CREDIT_USD = 0.25
 
 
 def apify_actor_runs(key, actor=PEOPLE_SEARCH_ACTOR):
@@ -47,10 +71,27 @@ def apify_actor_runs(key, actor=PEOPLE_SEARCH_ACTOR):
         return None
 
 
-def apify_runs_left(key):
-    # Apify's count can drop old runs after its data retention, so never trust less than our own count
-    used = max(apify_actor_runs(key) or 0, keys.used(key, "runs:" + PEOPLE_SEARCH_ACTOR))
-    return max(0, APIFY_FREE_RUNS - used)
+def apify_credit_left(key):
+    """USD of platform credit left this month on the token's account (free call). None if unreadable."""
+    try:
+        r = requests.get("https://api.apify.com/v2/users/me/limits", timeout=20,
+                         headers={"Authorization": f"Bearer {key.value}"})
+        d = (r.json().get("data") or {}) if r.ok else {}
+        cap = d["limits"]["maxMonthlyUsageUsd"]
+        # on the FREE plan the usage limit ($10) is above the free credit ($5): spend only the credit
+        me = requests.get("https://api.apify.com/v2/users/me", timeout=20, headers={"Authorization": f"Bearer {key.value}"})
+        plan = ((me.json().get("data") or {}).get("plan") or {}) if me.ok else {}
+        if plan.get("id") == "FREE" and plan.get("monthlyUsageCreditsUsd") is not None:
+            cap = min(cap, plan["monthlyUsageCreditsUsd"])
+        return cap - d["current"]["monthlyUsageUsd"]
+    except (requests.RequestException, ValueError, KeyError, TypeError):
+        return None
+
+
+def apify_has_credit(key):
+    # unreadable -> try anyway; a 402 from Apify rotates to the next token
+    left = apify_credit_left(key)
+    return left is None or left >= APIFY_MIN_CREDIT_USD
 
 
 def finished_run_dataset(since_iso, actor=PEOPLE_SEARCH_ACTOR):
@@ -185,7 +226,7 @@ def dataset_items(dataset_id):
 
 def people_search(company_urls, function_ids=None, seniority_ids=None, locations=None, job_titles=None,
                   max_items=100, dataset_id=None, exclude_locations=None, exclude_titles=None, headcount=None):
-    """NOTE: free Apify plans return at most 25 profiles per run (and 10 runs total for this actor)."""
+    """NOTE: free Apify plans return at most 25 profiles per run; each search page costs ~$0.10 of credit."""
     if not apify_available():
         raise ProviderBusy("APIFY_TOKEN not set")
     body = {"profileScraperMode": "Short", "currentCompanies": company_urls, "maxItems": max_items,
@@ -204,9 +245,8 @@ def people_search(company_urls, function_ids=None, seniority_ids=None, locations
         body["excludeCurrentJobTitles"] = exclude_titles
     if headcount:
         body["companyHeadcount"] = headcount
-    # only tokens whose account still has free runs of this actor
-    items = dataset_items(dataset_id) if dataset_id else _apify(PEOPLE_SEARCH_ACTOR, body,
-                                                                only=lambda k: apify_runs_left(k) > 0)
+    # only tokens whose account still has platform credit
+    items = dataset_items(dataset_id) if dataset_id else _apify(PEOPLE_SEARCH_ACTOR, body, only=apify_has_credit)
     out = []
     for it in items or []:
         loc = it.get("location")
@@ -236,8 +276,10 @@ def bd_people_search(company_names, title_terms, country_code="IN", limit=100, m
     """POST /search/people, mode=ludicrous (structured): current company IN names AND title matches any term AND country."""
     if not brightdata_available():
         raise ProviderBusy("BRIGHTDATA_API_KEY not set")
+    if not brightdata_search_available():
+        raise ProviderBusy(f"Bright Data people search: not enabled ({BD_SEARCH_HOWTO})")
     return keys.run("brightdata", lambda k: _bd_people_search(k, company_names, title_terms, country_code, limit,
-                                                              max_pages))
+                                                              max_pages), only=lambda k: not bd_search_denied(k))
 
 
 def _bd_people_search(key, company_names, title_terms, country_code, limit, max_pages):
@@ -253,11 +295,15 @@ def _bd_people_search(key, company_names, title_terms, country_code, limit, max_
                 "limit": limit, "view": "summary"}
         r = requests.post(f"{BD}/search/people", headers=_bd_headers(key), json=body, timeout=90)
         if r.status_code == 403:
-            raise ProviderBusy("brightdata Business Search: account not on the beta allowlist (HTTP 403)")
+            # not "busy": resting the key would also stop profile checks and post discovery, which do work
+            db.set_setting(keys._con(), _bd_denied_setting(key), db.now())
+            raise ProviderError(f"Bright Data people search: not enabled ({BD_SEARCH_HOWTO})")
         if r.status_code in (402, 429):
             raise ProviderBusy(f"brightdata HTTP {r.status_code}")
         if not r.ok:
             raise ProviderError(f"brightdata search HTTP {r.status_code}: {r.text[:200]}")
+        if page == 0 and bd_search_denied(key):
+            db.set_setting(keys._con(), _bd_denied_setting(key), "")  # access was granted since
         docs = r.json().get("documents") or []
         for d in docs:
             pid = d.get("linkedin_person_id") or d.get("linkedin_id") or d.get("id")
@@ -325,3 +371,101 @@ def _bd_company_posts(key, company_urls, start_date, end_date, limit_per_input, 
                       "posted_at": p.get("date_posted"), "tagged_people": p.get("tagged_people") or [],
                       "tagged_companies": p.get("tagged_companies") or []})
     return posts
+
+
+# ---------------- AI Ark: people search by company NAME (no LinkedIn company page needed) ----------------
+# Docs read 2026-11-23 (docs.ai-ark.com). POST /v1/people, header X-TOKEN. 0.5 credits per returned person;
+# balance read is free. Free trial: 100 credits; the API key reported 4 requests/minute (x-ratelimit-limit-minute).
+AIARK = "https://api.ai-ark.com/api/developer-portal/v1"
+AIARK_CREDITS_PER_RESULT = 0.5
+AIARK_PAGE_GAP_SECONDS = 16  # 4 requests a minute
+
+
+def _aiark_headers(key):
+    return {"X-TOKEN": key.value, "Content-Type": "application/json"}
+
+
+_AIARK_BALANCE = {}  # key state_id -> (read at, credits): the 4/minute limit counts balance reads too
+
+
+def aiark_credits(key, max_age=300):
+    """Credits left on the key's account (free call, cached). None if unreadable."""
+    import time
+    hit = _AIARK_BALANCE.get(key.state_id)
+    if hit and time.time() - hit[0] < max_age:
+        return hit[1]
+    try:
+        r = requests.get(f"{AIARK}/payments/credits", headers=_aiark_headers(key), timeout=20)
+        val = float(r.json()["total"]) if r.ok else None
+    except (requests.RequestException, ValueError, KeyError, TypeError):
+        val = None
+    if val is not None:
+        _AIARK_BALANCE[key.state_id] = (time.time(), val)
+    return val
+
+
+def _aiark_spent(key, n):
+    import time
+    hit = _AIARK_BALANCE.get(key.state_id)
+    if hit:
+        _AIARK_BALANCE[key.state_id] = (time.time(), max(0.0, hit[1] - n * AIARK_CREDITS_PER_RESULT))
+
+
+def aiark_has_credit(key):
+    left = aiark_credits(key)
+    return left is None or left >= AIARK_CREDITS_PER_RESULT * 5
+
+
+def aiark_search_available():
+    return any(aiark_has_credit(k) for k in keys.usable("ai_ark"))
+
+
+def aiark_people_search(company_names, title_terms, locations, max_items=50):
+    """Current company name (SMART match) AND current title matches any term AND location. Returns the same profile
+    dicts as people_search(). Spends 0.5 credits per person returned, never more than the key has."""
+    if not aiark_search_available():
+        raise ProviderBusy("AI Ark: no key with credits left")
+    return keys.run("ai_ark", lambda k: _aiark_people_search(k, company_names, title_terms, locations, max_items),
+                    only=aiark_has_credit)
+
+
+def _aiark_people_search(key, company_names, title_terms, locations, max_items):
+    import time
+    contact = {}
+    if title_terms:
+        contact["experience"] = {"current": {"title": {"any": {"include": {"mode": "SMART",
+                                                                           "content": list(title_terms)[:300]}}}}}
+    if locations:
+        contact["location"] = {"any": {"include": list(locations)[:300]}}
+    body = {"account": {"name": {"any": {"include": {"mode": "SMART", "content": list(company_names)[:300]}}}},
+            "contact": contact}
+    left = aiark_credits(key)
+    if left is not None:
+        max_items = min(max_items, int(left / AIARK_CREDITS_PER_RESULT))
+    out, page = [], 0
+    while len(out) < max_items:
+        size = min(100, max_items - len(out))
+        if page:
+            time.sleep(AIARK_PAGE_GAP_SECONDS)
+        r = requests.post(f"{AIARK}/people", headers=_aiark_headers(key), json={**body, "page": page, "size": size},
+                          timeout=90)
+        if r.status_code == 404:  # "data not found"
+            break
+        if r.status_code in (401, 402, 403, 429):
+            raise ProviderBusy(f"ai_ark HTTP {r.status_code}: {r.text[:150]}")
+        if not r.ok:
+            raise ProviderError(f"ai_ark HTTP {r.status_code}: {r.text[:200]}")
+        d = r.json()
+        for it in d.get("content") or []:
+            prof, loc = it.get("profile") or {}, it.get("location") or {}
+            out.append({"name": prof.get("full_name") or " ".join(x for x in (prof.get("first_name"),
+                                                                                 prof.get("last_name")) if x),
+                        "headline": prof.get("headline"), "url": (it.get("link") or {}).get("linkedin"),
+                        "company": ((it.get("company") or {}).get("summary") or {}).get("name"),
+                        "title": prof.get("title"), "location": loc.get("default"), "country": loc.get("country")})
+        keys.count(key, n=len(d.get("content") or []))
+        _aiark_spent(key, len(d.get("content") or []))
+        if d.get("last", True) or not d.get("content"):
+            break
+        page += 1
+    return out

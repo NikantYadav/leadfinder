@@ -1,0 +1,485 @@
+[
+ {
+  "exhibitorId": "01243238",
+  "companyName": "3A BIOTECH SL",
+  "profileUrl": "https://ift27.mapyourshow.com/8_0/exhibitor/exhibitor-details.cfm?exhid=01243238",
+  "description": "3A Biotech, a Spanish company founded in 2000, specializes in manufacturing synergistic preservatives and antioxidants. With over 20 years of experience, they focus on human and animal food, cosmetics and nutraceuticals, agriculture, paints, inks, and biodiesel. They emphasize green INNOVATION, adaptive SOLUTIONS, and specialized ADVISORY, dedicating their efforts to research and develop solutions that enhance food quality, safety, and shelf life.",
+  "booths": [
+   "1561"
+  ],
+  "boothCodes": [
+   "1561"
+  ],
+  "hallIds": [
+   "A"
+  ],
+  "halls": [
+   {
+    "id": "A",
+    "name": "South Building"
+   }
+  ],
+  "hallNames": [
+   "South Building"
+  ],
+  "isFeatured": false,
+  "badges": [],
+  "logoUrl": null,
+  "alphaGroup": "3",
+  "companyNameSort": "3a biotech sl",
+  "showCode": "ift27",
+  "showId": "IFT27",
+  "showName": "IFT FIRST 2027",
+  "showDates": "July 11 - 14",
+  "showStartDate": "2027-07-11",
+  "showEndDate": "2027-07-14",
+  "showLocation": "Chicago",
+  "showHost": "ift27.mapyourshow.com",
+  "directoryUrl": "https://ift27.mapyourshow.com/8_0/explore/exhibitor-gallery.cfm?featured=false",
+  "position": 1,
+  "searchTotal": 562,
+  "scrapedAt": "2026-11-23T19:03:17.398Z",
+  "website": "https://tres-a.com",
+  "phone": "+34 968 83 90 04",
+  "fax": null,
+  "address1": "Pol. Ind. Media Legua Nave A1, 30565 Las Torres De Cotillas",
+  "address2": null,
+  "address3": null,
+  "city": "Murcia",
+  "state": null,
+  "postalCode": "30565",
+  "country": "Spain",
+  "fullAddress": "Pol. Ind. Media Legua Nave A1, 30565 Las Torres De Cotillas, Murcia, 30565, Spain",
+  "linkedin": null,
+  "facebook": null,
+  "twitter": null,
+  "instagram": null,
+  "productCategories": [
+   {
+    "category": "Ingredients",
+    "subcategory": "Bakery Ingredients",
+    "path": "Ingredients > Bakery Ingredients"
+   },
+   {
+    "category": "Ingredients",
+    "subcategory": "Flavors, Extracts, Seasonings",
+    "path": "Ingredients > Flavors, Extracts, Seasonings"
+   },
+   {
+    "category": "Ingredients",
+    "subcategory": "Fruits, Berries, Vegetables",
+    "path": "Ingredients > Fruits, Berries, Vegetables"
+   },
+   {
+    "category": "Ingredients",
+    "subcategory": "Functional Ingredients (Supplements)",
+    "path": "Ingredients > Functional Ingredients (Supplements)"
+   },
+   {
+    "category": "Ingredients",
+    "subcategory": "Organic",
+    "path": "Ingredients > Organic"
+   },
+   {
+    "category": "Ingredients",
+    "subcategory": "Shelf Life, Preservatives",
+    "path": "Ingredients > Shelf Life, Preservatives"
+   },
+   {
+    "category": "Nutrients",
+    "subcategory": "Botanicals",
+    "path": "Nutrients > Botanicals"
+   },
+   {
+    "category": "Nutrients",
+    "subcategory": "Vitamins",
+    "path": "Nutrients > Vitamins"
+   },
+   {
+    "category": "Preservatives",
+    "subcategory": "Antimicrobials",
+    "path": "Preservatives > Antimicrobials"
+   },
+   {
+    "category": "Preservatives",
+    "subcategory": "Antioxidants",
+    "path": "Preservatives > Antioxidants"
+   }
+  ],
+  "brands": [],
+  "contactPersons": [],
+  "contactPersonsStatus": "not requested",
+  "boothLocations": [
+   {
+    "hall": "South Building",
+    "booth": "1561",
+    "label": "South Building \u2014 1561 \u2014 Organic Pavilion"
+   }
+  ],
+  "detailsFetched": true,
+  "detailsStatus": "read"
+ },
+ {
+  "exhibitorId": "01163687",
+  "companyName": "3i Solutions",
+  "profileUrl": "https://ift27.mapyourshow.com/8_0/exhibitor/exhibitor-details.cfm?exhid=01163687",
+  "description": "We are an innovative ingredient solutions company, transforming non water soluble ingredients into a state which is fully dispersible in water, in either an aqueous or powder form. Our process increases shelf life and bioavailability for the food and beverage, nutritional supplements, personal care, cosmetics and animal nutrition industries. We make the impossible POSSIBLE through our science based technologies and processes.",
+  "booths": [
+   "4205"
+  ],
+  "boothCodes": [
+   "4205"
+  ],
+  "hallIds": [
+   "A"
+  ],
+  "halls": [
+   {
+    "id": "A",
+    "name": "South Building"
+   }
+  ],
+  "hallNames": [
+   "South Building"
+  ],
+  "isFeatured": false,
+  "badges": [],
+  "logoUrl": null,
+  "alphaGroup": "3",
+  "companyNameSort": "3i solutions",
+  "showCode": "ift27",
+  "showId": "IFT27",
+  "showName": "IFT FIRST 2027",
+  "showDates": "July 11 - 14",
+  "showStartDate": "2027-07-11",
+  "showEndDate": "2027-07-14",
+  "showLocation": "Chicago",
+  "showHost": "ift27.mapyourshow.com",
+  "directoryUrl": "https://ift27.mapyourshow.com/8_0/explore/exhibitor-gallery.cfm?featured=false",
+  "position": 2,
+  "searchTotal": 562,
+  "scrapedAt": "2026-11-23T19:03:17.398Z",
+  "website": "https://www.3isolutions.com",
+  "phone": "330 262 4440",
+  "fax": null,
+  "address1": "146 S Bever St",
+  "address2": null,
+  "address3": null,
+  "city": "Wooster",
+  "state": "OH",
+  "postalCode": "44691",
+  "country": "United States of America",
+  "fullAddress": "146 S Bever St, Wooster, OH 44691, United States of America",
+  "linkedin": null,
+  "facebook": null,
+  "twitter": null,
+  "instagram": null,
+  "productCategories": [
+   {
+    "category": "Contract Services & Solutions",
+    "subcategory": "Ingredient Sourcing and Procurement",
+    "path": "Contract Services & Solutions > Ingredient Sourcing and Procurement"
+   },
+   {
+    "category": "Contract Services & Solutions",
+    "subcategory": "Product Development and Innovation",
+    "path": "Contract Services & Solutions > Product Development and Innovation"
+   },
+   {
+    "category": "Contract Services & Solutions",
+    "subcategory": "Research and Development (R&D) Services",
+    "path": "Contract Services & Solutions > Research and Development (R&D) Services"
+   },
+   {
+    "category": "Emerging OR Specialty",
+    "subcategory": "Functional and Nutraceutical Ingredients",
+    "path": "Emerging OR Specialty > Functional and Nutraceutical Ingredients"
+   },
+   {
+    "category": "Ingredients",
+    "subcategory": "Functional Ingredients (Supplements)",
+    "path": "Ingredients > Functional Ingredients (Supplements)"
+   },
+   {
+    "category": "Nutrients",
+    "subcategory": "Aminos",
+    "path": "Nutrients > Aminos"
+   },
+   {
+    "category": "Nutrients",
+    "subcategory": "Botanicals",
+    "path": "Nutrients > Botanicals"
+   },
+   {
+    "category": "Nutrients",
+    "subcategory": "Vitamins",
+    "path": "Nutrients > Vitamins"
+   }
+  ],
+  "brands": [],
+  "contactPersons": [],
+  "contactPersonsStatus": "not requested",
+  "boothLocations": [
+   {
+    "hall": "South Building",
+    "booth": "4205",
+    "label": "South Building \u2014 4205"
+   }
+  ],
+  "detailsFetched": true,
+  "detailsStatus": "read"
+ },
+ {
+  "exhibitorId": "01209488",
+  "companyName": "5 Star Foods Intl",
+  "profileUrl": "https://ift27.mapyourshow.com/8_0/exhibitor/exhibitor-details.cfm?exhid=01209488",
+  "description": null,
+  "booths": [
+   "1264"
+  ],
+  "boothCodes": [
+   "1264"
+  ],
+  "hallIds": [
+   "A"
+  ],
+  "halls": [
+   {
+    "id": "A",
+    "name": "South Building"
+   }
+  ],
+  "hallNames": [
+   "South Building"
+  ],
+  "isFeatured": false,
+  "badges": [],
+  "logoUrl": null,
+  "alphaGroup": "5",
+  "companyNameSort": "5 star foods intl",
+  "showCode": "ift27",
+  "showId": "IFT27",
+  "showName": "IFT FIRST 2027",
+  "showDates": "July 11 - 14",
+  "showStartDate": "2027-07-11",
+  "showEndDate": "2027-07-14",
+  "showLocation": "Chicago",
+  "showHost": "ift27.mapyourshow.com",
+  "directoryUrl": "https://ift27.mapyourshow.com/8_0/explore/exhibitor-gallery.cfm?featured=false",
+  "position": 3,
+  "searchTotal": 562,
+  "scrapedAt": "2026-11-23T19:03:17.398Z",
+  "website": "http://www.5star-foods.com",
+  "phone": "+1-844-645-7827",
+  "fax": null,
+  "address1": "2111-B McDuffie St",
+  "address2": null,
+  "address3": null,
+  "city": "Houston",
+  "state": "TX",
+  "postalCode": "77019",
+  "country": "United States of America",
+  "fullAddress": "2111-B McDuffie St, Houston, TX 77019, United States of America",
+  "linkedin": null,
+  "facebook": null,
+  "twitter": null,
+  "instagram": null,
+  "productCategories": [],
+  "brands": [],
+  "contactPersons": [],
+  "contactPersonsStatus": "not requested",
+  "boothLocations": [
+   {
+    "hall": "South Building",
+    "booth": "1264",
+    "label": "South Building \u2014 1264 \u2014 Organic Pavilion"
+   }
+  ],
+  "detailsFetched": true,
+  "detailsStatus": "read"
+ },
+ {
+  "exhibitorId": "00017573",
+  "companyName": "A&B Ingredients",
+  "profileUrl": "https://ift27.mapyourshow.com/8_0/exhibitor/exhibitor-details.cfm?exhid=00017573",
+  "description": "A&B Ingredients is a leading provider of clean-label ingredient solutions from nature. We deliver functional solutions for food safety and quality, natural shelf life extension, health and wellness, and plant-based product development. Our commitment to ingredient innovation is supported by our R&D and analytical teams and in-house applications, microbiology, and antioxidant laboratories. Creating value for our customers and addressing the needs of today's food and beverage industry.",
+  "booths": [
+   "308"
+  ],
+  "boothCodes": [
+   "308"
+  ],
+  "hallIds": [
+   "A"
+  ],
+  "halls": [
+   {
+    "id": "A",
+    "name": "South Building"
+   }
+  ],
+  "hallNames": [
+   "South Building"
+  ],
+  "isFeatured": false,
+  "badges": [],
+  "logoUrl": null,
+  "alphaGroup": "A",
+  "companyNameSort": "a&b ingredients",
+  "showCode": "ift27",
+  "showId": "IFT27",
+  "showName": "IFT FIRST 2027",
+  "showDates": "July 11 - 14",
+  "showStartDate": "2027-07-11",
+  "showEndDate": "2027-07-14",
+  "showLocation": "Chicago",
+  "showHost": "ift27.mapyourshow.com",
+  "directoryUrl": "https://ift27.mapyourshow.com/8_0/explore/exhibitor-gallery.cfm?featured=false",
+  "position": 4,
+  "searchTotal": 562,
+  "scrapedAt": "2026-11-23T19:03:17.398Z",
+  "website": "https://abingredients.com/",
+  "phone": "(973) 227-1390\u00a0EXT 240",
+  "fax": null,
+  "address1": "24 Spielman Rd",
+  "address2": null,
+  "address3": null,
+  "city": "Fairfield",
+  "state": "NJ",
+  "postalCode": "07004",
+  "country": "United States",
+  "fullAddress": "24 Spielman Rd, Fairfield, NJ 07004, United States",
+  "linkedin": null,
+  "facebook": null,
+  "twitter": null,
+  "instagram": null,
+  "productCategories": [
+   {
+    "category": "Ingredients",
+    "subcategory": "Salt and Sodium Reduction",
+    "path": "Ingredients > Salt and Sodium Reduction"
+   },
+   {
+    "category": "Ingredients",
+    "subcategory": "Shelf Life, Preservatives",
+    "path": "Ingredients > Shelf Life, Preservatives"
+   },
+   {
+    "category": "Ingredients",
+    "subcategory": "Sweeteners, Sugars",
+    "path": "Ingredients > Sweeteners, Sugars"
+   },
+   {
+    "category": "Miscellaneous",
+    "subcategory": "Enzymes and Processing Aids",
+    "path": "Miscellaneous > Enzymes and Processing Aids"
+   },
+   {
+    "category": "Preservatives",
+    "subcategory": "Antimicrobials",
+    "path": "Preservatives > Antimicrobials"
+   },
+   {
+    "category": "Preservatives",
+    "subcategory": "Antioxidants",
+    "path": "Preservatives > Antioxidants"
+   },
+   {
+    "category": "Proteins",
+    "subcategory": "Alternative Proteins",
+    "path": "Proteins > Alternative Proteins"
+   },
+   {
+    "category": "Proteins",
+    "subcategory": "Plant-Based",
+    "path": "Proteins > Plant-Based"
+   },
+   {
+    "category": "Stabilizers",
+    "subcategory": "Thickeners",
+    "path": "Stabilizers > Thickeners"
+   }
+  ],
+  "brands": [],
+  "contactPersons": [],
+  "contactPersonsStatus": "not requested",
+  "boothLocations": [
+   {
+    "hall": "South Building",
+    "booth": "308",
+    "label": "South Building \u2014 308"
+   }
+  ],
+  "detailsFetched": true,
+  "detailsStatus": "read"
+ },
+ {
+  "exhibitorId": "12139548",
+  "companyName": "AAF International",
+  "profileUrl": "https://ift27.mapyourshow.com/8_0/exhibitor/exhibitor-details.cfm?exhid=12139548",
+  "description": null,
+  "booths": [
+   "2959"
+  ],
+  "boothCodes": [
+   "2959"
+  ],
+  "hallIds": [
+   "A"
+  ],
+  "halls": [
+   {
+    "id": "A",
+    "name": "South Building"
+   }
+  ],
+  "hallNames": [
+   "South Building"
+  ],
+  "isFeatured": false,
+  "badges": [],
+  "logoUrl": null,
+  "alphaGroup": "A",
+  "companyNameSort": "aaf international",
+  "showCode": "ift27",
+  "showId": "IFT27",
+  "showName": "IFT FIRST 2027",
+  "showDates": "July 11 - 14",
+  "showStartDate": "2027-07-11",
+  "showEndDate": "2027-07-14",
+  "showLocation": "Chicago",
+  "showHost": "ift27.mapyourshow.com",
+  "directoryUrl": "https://ift27.mapyourshow.com/8_0/explore/exhibitor-gallery.cfm?featured=false",
+  "position": 5,
+  "searchTotal": 562,
+  "scrapedAt": "2026-11-23T19:03:17.398Z",
+  "website": "http://aafintl.com",
+  "phone": null,
+  "fax": null,
+  "address1": "9920 Corporate Campus Dr Ste 2200",
+  "address2": null,
+  "address3": null,
+  "city": "Louisville",
+  "state": "KY",
+  "postalCode": "40223",
+  "country": "United States of America",
+  "fullAddress": "9920 Corporate Campus Dr Ste 2200, Louisville, KY 40223, United States of America",
+  "linkedin": null,
+  "facebook": null,
+  "twitter": null,
+  "instagram": null,
+  "productCategories": [],
+  "brands": [],
+  "contactPersons": [],
+  "contactPersonsStatus": "not requested",
+  "boothLocations": [
+   {
+    "hall": "South Building",
+    "booth": "2959",
+    "label": "South Building \u2014 2959"
+   }
+  ],
+  "detailsFetched": true,
+  "detailsStatus": "read"
+ }
+]

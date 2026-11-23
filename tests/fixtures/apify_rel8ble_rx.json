@@ -1,0 +1,284 @@
+[
+ {
+  "show": "EuroBLECH",
+  "showKey": "euroblech",
+  "edition": "EuroBLECH",
+  "eventEditionId": "eve-61ade742-93a7-4e7a-8022-cd407f60238d",
+  "companyName": "247TailorSteel Deutschland GmbH",
+  "displayName": "247TailorSteel Deutschland GmbH",
+  "website": "https://www.247tailorsteel.com/de",
+  "phone": "+49 322 210 929 60",
+  "email": "info@247tailorsteel.com",
+  "country": "Germany",
+  "countryCode": "DE",
+  "stand": "17-E22",
+  "coExhibitor": false,
+  "mainStandHolder": null,
+  "description": "247TailorSteel is Europe\u2019s innovative market leader in custom sheet metal, tubes and bent parts. On the Sophia\u00ae platform, customers order around the clock, receive a quote within one minute and benefit from delivery from 48 hours. Founded in 2007, the company has its headquarters in Varsseveld and production sites in Oyten, Hilden, Langenau, Oud Gastel and Hooglede. Its own production runs 60 laser cutting machines, 48 press brakes and 22 tube laser cutting machines across 185,000 m\u00b2 of production space.",
+  "showObjective": "Configure sheet metal, tubes, profiles and bent parts online at 247TailorSteel. A quote within one minute, fast delivery and high precision.",
+  "brands": [],
+  "products": [
+   "Edge finishing",
+   "Tube laser cutting",
+   "Laser cutting",
+   "Bending",
+   "Our Sophia\u00ae platform"
+  ],
+  "productCategories": [
+   "Yes. New Service",
+   "Tube / Section Working",
+   "Processing of Sheet Metal / Plastic Hybrid Structures",
+   "Sheet Metals & Semi Finished Products",
+   "Sheet, Plate and Strip Metal",
+   "Section / Tubes",
+   "Pre-Processed Semi Finished Products",
+   "Blanks & 2D Cut Parts",
+   "Formed Sheet Metal Parts"
+  ],
+  "categories": {
+   "Product Launch": [
+    "Yes. New Service"
+   ],
+   "Recruiting": [
+    "We are hiring"
+   ],
+   "Technology Sectors": [
+    "Tube / Section Working",
+    "Processing of Sheet Metal / Plastic Hybrid Structures",
+    "Sheet Metals & Semi Finished Products"
+   ],
+   "Products and services": [
+    "Sheet, Plate and Strip Metal",
+    "Section / Tubes",
+    "Pre-Processed Semi Finished Products",
+    "Blanks & 2D Cut Parts",
+    "Formed Sheet Metal Parts"
+   ]
+  },
+  "documents": [
+   {
+    "title": "247TS_CORPORATE_BORCHURE_2026_DE_online.pdf",
+    "url": "https://pub-mediabox-storage.rxweb-prd.com/exhibitor/document/exh-3157e0b6-93da-4e17-84bd-1061853e966f/222db54b-5cfb-492e-b454-8b459b2ad94d.pdf"
+   },
+   {
+    "title": "247TS_CORPORATE_BORCHURE_2026_EN_online.pdf",
+    "url": "https://pub-mediabox-storage.rxweb-prd.com/exhibitor/document/exh-3157e0b6-93da-4e17-84bd-1061853e966f/a396fa3d-ce95-43f2-9d02-eceb266dce52.pdf"
+   }
+  ],
+  "logoUrl": "https://pub-mediabox-storage.rxweb-prd.com/exhibitor/logo/exh-3157e0b6-93da-4e17-84bd-1061853e966f/5473545e-4519-48e1-afe8-682f4f033cb4.png",
+  "isNew": false,
+  "exhibitorId": "exh-3157e0b6-93da-4e17-84bd-1061853e966f",
+  "organisationId": "org-5656ae2d-bf79-492e-9ca2-d68e04d6b7ec",
+  "profileUrl": "https://www.euroblech.com/en-gb/exhibitor-directory/exhibitor-details.247tailorsteel%20deutschland%20gmbh.org-5656ae2d-bf79-492e-9ca2-d68e04d6b7ec.html",
+  "position": 1,
+  "scrapedAt": "2026-11-23T19:02:57.233Z"
+ },
+ {
+  "show": "EuroBLECH",
+  "showKey": "euroblech",
+  "edition": "EuroBLECH",
+  "eventEditionId": "eve-61ade742-93a7-4e7a-8022-cd407f60238d",
+  "companyName": "3D Concepts GmbH",
+  "displayName": "3D Concepts GmbH",
+  "website": null,
+  "phone": null,
+  "email": null,
+  "country": "Germany",
+  "countryCode": "DE",
+  "stand": "11-J01",
+  "coExhibitor": false,
+  "mainStandHolder": null,
+  "description": null,
+  "showObjective": null,
+  "brands": [],
+  "products": [],
+  "productCategories": [],
+  "categories": {},
+  "documents": [],
+  "logoUrl": "https://pub-mediabox-storage.rxweb-prd.com/exhibitor/logo/exh-15defd76-416c-4697-8a45-28b50bf411bc/59749f20-3c34-4e83-8b1c-94bd1ed5ce59.png",
+  "isNew": true,
+  "exhibitorId": "exh-15defd76-416c-4697-8a45-28b50bf411bc",
+  "organisationId": "org-c1595914-11f4-41c9-9988-4fb769ca4b10",
+  "profileUrl": "https://www.euroblech.com/en-gb/exhibitor-directory/exhibitor-details.3d%20concepts%20gmbh.org-c1595914-11f4-41c9-9988-4fb769ca4b10.html",
+  "position": 2,
+  "scrapedAt": "2026-11-23T19:02:57.343Z"
+ },
+ {
+  "show": "EuroBLECH",
+  "showKey": "euroblech",
+  "edition": "EuroBLECH",
+  "eventEditionId": "eve-61ade742-93a7-4e7a-8022-cd407f60238d",
+  "companyName": "A. Piovan Srl",
+  "displayName": "A. Piovan Srl",
+  "website": "http://www.apiovan.it",
+  "phone": "+390499335733",
+  "email": "info@apiovan.it",
+  "country": "Italy",
+  "countryCode": "IT",
+  "stand": "16-G24",
+  "coExhibitor": false,
+  "mainStandHolder": null,
+  "description": "A.Piovan produces and export worlwide rubber and polyurethane products for the metal industry. The company manufacturers different solution of coil mandrel sleeves for all needs of Rewinding and Unwinding and, with over 45 years experience of production of roller covering, it has taylor made solutions for every needs. The full customer service provide also the metal shaft in order to have a unique supplier.",
+  "showObjective": "A global partner for rubber and polyurethane solutions, rollers and sleeves taylor made on customer production.",
+  "brands": [
+   "A.PIOVAN"
+  ],
+  "products": [
+   "Polyurethane Roller Covering",
+   "Rubber Roller Covering",
+   "Roller",
+   "Polyurethane Mandrel Sleeve",
+   "Rubber mandrel sleeve for unwinding and rewinding"
+  ],
+  "productCategories": [
+   "Machine Elements and Components",
+   "Parts & Finished Products / Contract Manufacturing  & Job Shops",
+   "Coating & Protection"
+  ],
+  "categories": {
+   "Recruiting": [
+    "We are hiring"
+   ],
+   "Technology Sectors": [
+    "Machine Elements and Components",
+    "Parts & Finished Products / Contract Manufacturing  & Job Shops"
+   ],
+   "Products and services": [
+    "Coating & Protection",
+    "Machine Elements and Components"
+   ]
+  },
+  "documents": [
+   {
+    "title": "A.PIOVAN mandrel sleeve brochure.pdf",
+    "url": "https://pub-mediabox-storage.rxweb-prd.com/exhibitor/document/exh-8697b8da-789e-4d47-b363-2a311e0e86c7/fac2205b-3238-42f8-8e3c-a2d25e964fe4.pdf"
+   },
+   {
+    "title": "APiovan_General catalogue_.pdf",
+    "url": "https://pub-mediabox-storage.rxweb-prd.com/exhibitor/document/exh-8697b8da-789e-4d47-b363-2a311e0e86c7/8b6c4b6b-05ab-478f-83ce-095a7fffb0f9.pdf"
+   }
+  ],
+  "logoUrl": "https://pub-mediabox-storage.rxweb-prd.com/exhibitor/logo/exh-8697b8da-789e-4d47-b363-2a311e0e86c7/1910e0e7-187d-4633-b31f-94c7fd446e5c.jpg",
+  "isNew": false,
+  "exhibitorId": "exh-8697b8da-789e-4d47-b363-2a311e0e86c7",
+  "organisationId": "org-80b42559-f61c-4cdf-9183-1714a3be44eb",
+  "profileUrl": "https://www.euroblech.com/en-gb/exhibitor-directory/exhibitor-details.a.%20piovan%20srl.org-80b42559-f61c-4cdf-9183-1714a3be44eb.html",
+  "position": 3,
+  "scrapedAt": "2026-11-23T19:02:57.407Z"
+ },
+ {
+  "show": "EuroBLECH",
+  "showKey": "euroblech",
+  "edition": "EuroBLECH",
+  "eventEditionId": "eve-61ade742-93a7-4e7a-8022-cd407f60238d",
+  "companyName": "A.B. ESSE SPA CON SOCIO UNICO",
+  "displayName": "A.B. ESSE SPA CON SOCIO UNICO",
+  "website": "https://www.abesse.com",
+  "phone": "+39051515508",
+  "email": "info@abesse.com",
+  "country": "Italy",
+  "countryCode": "IT",
+  "stand": "12-B35",
+  "coExhibitor": false,
+  "mainStandHolder": null,
+  "description": "With over 30 years experience in laser spare parts, A.B. Esse is known as a solid key player in the production and distribution of laser spare parts. Among these, the nozzles are particularly noteworthy, the result of A.B.Esse's long experience in the sector. They are built with very technologically advanced numerical control machines; High quality, pre-sales support and after-sales assistance are some of the strengths that have been distinguished A.B. Esse. Normally we have all the items offered ready for delivery.",
+  "showObjective": "A.B. Esse will provide visitors with all the information about the laser spare parts and consumables for cutting industrial machines as nozzles, ceramics, lens, protective windows and more.",
+  "brands": [
+   "Laser Store; R&W Tech;"
+  ],
+  "products": [],
+  "productCategories": [
+   "Joining and Fastening Technology",
+   "Welding Technologies",
+   "Cutting & Forming Tools",
+   "Machine Elements and Components"
+  ],
+  "categories": {
+   "Technology Sectors": [
+    "Joining and Fastening Technology"
+   ],
+   "Products and services": [
+    "Welding Technologies",
+    "Cutting & Forming Tools",
+    "Machine Elements and Components"
+   ]
+  },
+  "documents": [
+   {
+    "title": "Catalogo-Ricambi-2022-w.pdf",
+    "url": "https://pub-mediabox-storage.rxweb-prd.com/exhibitor/document/exh-3df52ea2-83fa-49bc-9f49-1568a6bc69dc/bf2b83a7-c781-44ef-b3b6-7e015512ec74.pdf"
+   }
+  ],
+  "logoUrl": "https://pub-mediabox-storage.rxweb-prd.com/exhibitor/logo/exh-3df52ea2-83fa-49bc-9f49-1568a6bc69dc/5c2e7f8d-537e-43f0-b022-789fe56f731b.jpg",
+  "isNew": false,
+  "exhibitorId": "exh-3df52ea2-83fa-49bc-9f49-1568a6bc69dc",
+  "organisationId": "org-46b84a82-5e52-4afb-aee2-fccd8c8c127d",
+  "profileUrl": "https://www.euroblech.com/en-gb/exhibitor-directory/exhibitor-details.a.b.%20esse%20spa%20con%20socio%20unico.org-46b84a82-5e52-4afb-aee2-fccd8c8c127d.html",
+  "position": 4,
+  "scrapedAt": "2026-11-23T19:02:57.466Z"
+ },
+ {
+  "show": "EuroBLECH",
+  "showKey": "euroblech",
+  "edition": "EuroBLECH",
+  "eventEditionId": "eve-61ade742-93a7-4e7a-8022-cd407f60238d",
+  "companyName": "aalbers farina",
+  "displayName": "aalbers farina",
+  "website": "http://aalbersfarina.nl",
+  "phone": "+31 (0) 318 57 85 28",
+  "email": "info@aalbersfarina.nl",
+  "country": "Netherlands",
+  "countryCode": "NL",
+  "stand": "11-G06",
+  "coExhibitor": false,
+  "mainStandHolder": null,
+  "description": "At aalbers|farina , we develop smart storage solutions for the metal industry. Our automatic sheet metal and long goods storage systems create more storage capacity, reduce forklift movements and improve material flow efficiency. Companies work faster, safer and more efficiently with direct access to materials and maximum use of available space. From compact systems to fully automated solutions, we deliver tailor-made systems that provide immediate results and long-term reliability.",
+  "showObjective": "Visit aalbers|farina and discover how to achieve more storage capacity, less forklift traffic and greater efficiency in your production process.",
+  "brands": [
+   "aalbers|farina"
+  ],
+  "products": [
+   "Sheet Metal Storage systems",
+   "Sheet Metal Storage systems"
+  ],
+  "productCategories": [
+   "Yes. Product Launch",
+   "Handling, Automation & Robotics",
+   "Sheet Metals & Semi Finished Products",
+   "Sheet, Plate and Strip Metal",
+   "Metal Foil and Thin Sheet",
+   "Section / Tubes",
+   "Tailored and Surface Treated Semi Finished Products",
+   "Pre-Processed Semi Finished Products"
+  ],
+  "categories": {
+   "Product Launch": [
+    "Yes. Product Launch"
+   ],
+   "Technology Sectors": [
+    "Handling, Automation & Robotics",
+    "Sheet Metals & Semi Finished Products"
+   ],
+   "Products and services": [
+    "Sheet, Plate and Strip Metal",
+    "Metal Foil and Thin Sheet",
+    "Section / Tubes",
+    "Tailored and Surface Treated Semi Finished Products",
+    "Pre-Processed Semi Finished Products"
+   ]
+  },
+  "documents": [
+   {
+    "title": "250753-Drieluik-210x297-LanggoedmagazijnenPlatenmagazijnenHandling-EN.pdf",
+    "url": "https://pub-mediabox-storage.rxweb-prd.com/exhibitor/document/exh-5da72b92-9024-4380-8293-70f4b685fa26/7d21b688-91fa-4790-a801-8d4b03773ada.pdf"
+   }
+  ],
+  "logoUrl": "https://pub-mediabox-storage.rxweb-prd.com/exhibitor/logo/exh-5da72b92-9024-4380-8293-70f4b685fa26/9e56090c-7a92-43ab-a2c7-3d0a06980a61.jpg",
+  "isNew": true,
+  "exhibitorId": "exh-5da72b92-9024-4380-8293-70f4b685fa26",
+  "organisationId": "org-db991bee-baf4-4506-b4d4-4e5637eea4e9",
+  "profileUrl": "https://www.euroblech.com/en-gb/exhibitor-directory/exhibitor-details.aalbers%20farina.org-db991bee-baf4-4506-b4d4-4e5637eea4e9.html",
+  "position": 5,
+  "scrapedAt": "2026-11-23T19:02:57.531Z"
+ }
+]

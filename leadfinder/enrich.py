@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, timezone
 
 from . import config, db, keys, targeting
 from .normalize import _flat, norm_company, norm_domain, same_company, search_name, strict_company_match
+from .providers import deepline as dlp
 from .providers import email as emailp
 from .providers import linkedin as lip
 from .providers import search as router
@@ -376,28 +377,44 @@ def resolve_company_linkedin(con, company_row):
     return clean
 
 
+def _title_terms(icp, n):
+    """Real job titles first, then short title words. search_keywords are web-search phrases
+    ("sales head packaging machinery") that title filters never match."""
+    terms = list(icp.get("titles") or []) + list(icp.get("title_keywords") or [])
+    if not terms:
+        terms = list(icp.get("search_keywords") or [])
+    return list(dict.fromkeys(t.strip() for t in terms if t and len(t.strip()) >= 2))[:n]
+
+
 def linkedin_people(con, industry, icp_code, max_items=150, companies_limit=40, log=print, via="auto",
-                    dataset_id=None, seniority=None):
+                    dataset_id=None, seniority=None, only_companies=None):
     """Search LinkedIn people directly (no login) at the companies that pass this ICP's company rule.
     via=apify: harvestapi profile search (LinkedIn function + seniority filters, needs company page URLs).
-    via=brightdata: Business Search index (current company name + title words + country), beta access."""
+    via=brightdata: Business Search index (current company name + title words + country), beta access.
+    via=aiark: AI Ark people search by company name + title words + location (no company page needed).
+    via=deepline: Deepline Native search (free allowance), one request per company by domain or name.
+    only_companies: restrict to these company names (e.g. the ones Apify couldn't resolve to a LinkedIn page)."""
     from .people import company_facts, company_rule_ok, load_icps
     icp = next((i for i in load_icps(industry) if i["code"] == icp_code), None)
     if not icp:
         return {"error": f"unknown or disabled ICP {icp_code}"}
     if via == "auto":
-        via = "apify" if lip.apify_available() else "brightdata" if lip.brightdata_available() else None
+        via = "deepline" if dlp.search_available() else "apify" if lip.apify_available() else \
+            "aiark" if lip.aiark_search_available() else \
+            "brightdata" if lip.brightdata_search_available() else None
     if not via:
         return {"error": "set APIFY_TOKEN (or BRIGHTDATA_API_KEY with Business Search access) in .env"}
     from .people import companies_for_icp, effective_min_shows
     targets, _m = companies_for_icp(con, industry, icp, effective_min_shows(industry))
+    if only_companies:
+        targets = [c for c in targets if c["name"] in set(only_companies)]
     targets = targets[:companies_limit]
     if not targets:
         return {"error": f"no companies satisfy ICP {icp_code}'s company rule yet"}
     unresolved = []
     try:
         if via == "brightdata":
-            terms = (icp.get("search_keywords") or icp.get("title_keywords") or [])[:8]
+            terms = _title_terms(icp, 8)
             cc = targeting.region_code(industry) if targeting.get(industry).get("countries") else \
                 config.get("LINKEDIN_COUNTRY_CODE", "IN")
             log(f"  Bright Data Business Search: {len(targets)} companies, titles {terms}, country {cc}")
@@ -405,6 +422,25 @@ def linkedin_people(con, industry, icp_code, max_items=150, companies_limit=40, 
                                             limit=min(100, max_items), max_pages=max(1, -(-max_items // 100)))
             companies = targets
             _count(con, "brightdata_business_search")
+        elif via == "deepline":
+            terms = _title_terms(icp, 40)
+            countries = targeting.get(industry).get("countries") or \
+                [c.strip() for c in config.get("LINKEDIN_LOCATIONS", "India").split(",") if c.strip()]
+            log(f"  Deepline people search (free): {len(targets)} companies, titles {terms[:6]}, "
+                f"countries {countries}, max {max_items} people")
+            profiles = dlp.people_search([{"name": c["name"], "domain": c["domain"]} for c in targets], terms,
+                                         countries, max_items=max_items, log=log)
+            companies = targets
+            _count(con, "deepline_people_search", len(profiles))
+        elif via == "aiark":
+            terms = _title_terms(icp, 20)
+            locations = targeting.linkedin_locations(industry)
+            log(f"  AI Ark people search: {len(targets)} companies, titles {terms[:6]}, locations {locations}, "
+                f"max {max_items} people (0.5 credits each)")
+            profiles = lip.aiark_people_search([search_name(c["name"]) for c in targets], terms, locations,
+                                               max_items=max_items)
+            companies = targets
+            _count(con, "aiark_people_search")
         else:
             url_to_company = {}
             for c in targets:
@@ -440,7 +476,8 @@ def linkedin_people(con, industry, icp_code, max_items=150, companies_limit=40, 
     for p in profiles:
         if not p.get("name") or not p.get("url"):
             continue
-        comp = next((c for c in companies if (p.get("company") and strict_company_match(p["company"], c["name"]))
+        comp = next((c for c in companies if c["name"] == p.get("for_company")), None) or \
+            next((c for c in companies if (p.get("company") and strict_company_match(p["company"], c["name"]))
                      or (not p.get("company") and strict_company_match(p.get("headline"), c["name"]))), None)
         if not comp:
             unmatched += 1
@@ -456,8 +493,12 @@ def linkedin_people(con, industry, icp_code, max_items=150, companies_limit=40, 
                             f'LinkedIn search ({via}): {p.get("headline") or p.get("title") or ""} | {p.get("location") or ""}')
             added += 1
     con.commit()
-    return {"icp": icp_code, "via": via, "companies_searched": len(companies), "unresolved_companies": unresolved,
-            "profiles_returned": len(profiles), "people_added_or_matched": added, "unmatched_profiles": unmatched}
+    res = {"icp": icp_code, "via": via, "companies_searched": len(companies), "unresolved_companies": unresolved,
+           "profiles_returned": len(profiles), "people_added_or_matched": added, "unmatched_profiles": unmatched}
+    if via == "deepline":  # companies its index doesn't cover: the paid sources get a go at these
+        found = {p.get("for_company") for p in profiles}
+        res["companies_without_results"] = [c["name"] for c in companies if c["name"] not in found]
+    return res
 
 
 def company_posts(con, show, company_ids=None, limit_companies=15, limit_per_company=40, days_before=10,

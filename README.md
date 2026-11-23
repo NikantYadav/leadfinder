@@ -52,7 +52,7 @@ on the same industry continues where it stopped.
 | Find company websites | `./lf resolve-domains --industry X` | Hunter's domain finder (free), otherwise a search guess (TinySearch first) |
 | Find work emails | `./lf enrich-emails --industry X --top 30` | Prospeo → Hunter → Apollo → Tomba → BetterContact; stops at the first verified or catch-all email |
 | LinkedIn posts about a show | `./lf posts-api --show 3 --query '"IMTEX 2025"'` | Apify |
-| **Search LinkedIn directly** (by company + function + seniority + India) | `./lf linkedin-people --industry X --icp C` | Apify (no login) or Bright Data Business Search |
+| **Search LinkedIn directly** (by company + function + seniority + India) | `./lf linkedin-people --industry X --icp C` | Deepline (free, 5,000 results; first choice), then Apify, AI Ark, Bright Data Business Search |
 | Booth visitors tagged in exhibitors' LinkedIn posts | `./lf company-posts --show 3` | Bright Data |
 | Fix a wrong company website / LinkedIn page | `./lf set-company --name "X" --linkedin-url URL` | |
 | See remaining credits | `./lf credits` | |

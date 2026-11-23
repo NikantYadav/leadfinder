@@ -2,6 +2,7 @@
 via a resumable queue, parse result titles/snippets into people, and keep only title-relevant matches."""
 import json
 import re
+import time
 
 from . import db
 from .normalize import norm_company, same_company, search_name, strict_company_match
@@ -48,7 +49,7 @@ def company_rule_ok(rule, facts, min_shows=3):
     if rule in (None, "", "any"):
         return True
     if rule == "exhibitor_3plus":
-        return facts["exhibitor_window_count"] >= min_shows
+        return facts["exhibitor_window_count"] >= max(min_shows or 0, 1)
     if rule == "exhibitor":
         return len(facts["exhibitor_shows"]) > 0
     if rule == "visitor":
@@ -58,12 +59,44 @@ def company_rule_ok(rule, facts, min_shows=3):
     return True
 
 
-def effective_min_shows(industry):
-    """The '3+ shows' threshold actually in use for this search (relaxed automatically when no company meets 3)."""
+def requested_min_shows(industry):
+    """How many shows a year the user asked for ('exhibits at 5+ shows' -> 5): an explicit option, else the number in
+    the form's trade-show field, else in the persona text. With no number: 2 if a persona needs a repeat exhibitor
+    ('exhibits at multiple shows' -> exhibitor_3plus), else 0 - no show-count rule at all."""
+    from .targeting import get as target, shows_wanted
     try:
-        return int(json.loads(industry["options_json"] or "{}").get("min_shows", 3))
+        opts = json.loads(industry["options_json"] or "{}")
     except (KeyError, IndexError, TypeError, ValueError):
-        return 3
+        opts = {}
+    if opts.get("shows_wanted"):
+        return int(opts["shows_wanted"])
+    for text in (target(industry).get("company_rule"), _get(industry, "persona_text")):
+        n = shows_wanted(text)
+        if n:
+            return n
+    try:
+        multi = any(i.get("company_rule") == "exhibitor_3plus" for i in load_icps(industry))
+    except (SystemExit, KeyError, IndexError, TypeError, ValueError):
+        multi = False
+    return 2 if multi else 0
+
+
+def _get(row, key):
+    try:
+        return row[key]
+    except (KeyError, IndexError):
+        return None
+
+
+def effective_min_shows(industry):
+    """The shows threshold actually in use for this search: what was asked for, unless it was relaxed automatically
+    because too few companies met it (options_json.min_shows, set by the pipeline; never above what was asked)."""
+    try:
+        used = json.loads(industry["options_json"] or "{}").get("min_shows")
+    except (KeyError, IndexError, TypeError, ValueError):
+        used = None
+    wanted = requested_min_shows(industry)
+    return min(int(used), wanted) if used else wanted
 
 
 def companies_for_icp(con, industry, icp, min_shows=None, min_count=10):
@@ -74,8 +107,8 @@ def companies_for_icp(con, industry, icp, min_shows=None, min_count=10):
     facts = {c["id"]: company_facts(con, c["id"]) for c in comps}
     rule = icp.get("company_rule")
     rank = lambda c: (-facts[c["id"]]["exhibitor_window_count"], -facts[c["id"]]["visitor_evidence"])  # noqa: E731
-    levels = [x for x in (min_shows or 3, 2, 1) if x <= (min_shows or 3)] if rule == "exhibitor_3plus" \
-        else [min_shows or 3]
+    start = min_shows or requested_min_shows(industry)
+    levels = list(range(start, 0, -1)) if rule == "exhibitor_3plus" and start > 1 else [start]
     ok, used = [], levels[0]
     for m in levels:  # relax until there are enough companies to search (best-ranked first)
         ok = sorted([c for c in comps if company_rule_ok(rule, facts[c["id"]], m)], key=rank)
@@ -85,7 +118,7 @@ def companies_for_icp(con, industry, icp, min_shows=None, min_count=10):
     return ok, used
 
 
-def classify(con, icps, title, company_id, min_shows=3):
+def classify(con, icps, title, company_id, min_shows=0):
     """First ICP (in template order) whose title keywords match and whose company rule is satisfied."""
     facts = company_facts(con, company_id) if company_id else {"exhibitor_shows": [], "exhibitor_window_count": 0,
                                                                 "visitor_evidence": 0, "visitor_shows": 0}
@@ -179,36 +212,46 @@ def parse_post(result):
 # ---------- queue ----------
 def enqueue(con, purpose, query, site, context):
     params = json.dumps({"site": site}, sort_keys=True)
-    con.execute("""INSERT OR IGNORE INTO search_queue(purpose, query, params, context, created_at)
-                   VALUES (?,?,?,?,?)""", (purpose, query, params, json.dumps(context), db.now()))
+    cur = con.execute("""INSERT OR IGNORE INTO search_queue(purpose, query, params, context, created_at)
+                         VALUES (?,?,?,?,?)""", (purpose, query, params, json.dumps(context), db.now()))
+    return cur.rowcount
 
 
-def plan_people_searches(con, industry, icp_codes=None, limit=None, min_shows=None, keywords_per_query=4):
+def plan_people_searches(con, industry, icp_codes=None, limit=None, min_shows=None, keywords_per_query=4,
+                         max_companies=None):
+    """Queue one search per (company x ICP). Best companies first (most shows, then buyer evidence), so a cap keeps the
+    strongest. `limit` counts only NEWLY queued searches (searches already queued don't use it up, so repeated calls
+    keep advancing); `max_companies` caps how many top-ranked companies are considered."""
     min_shows = min_shows or effective_min_shows(industry)
     icps = load_icps(industry)
     if icp_codes:
         icps = [i for i in icps if i["code"] in icp_codes]
     companies = con.execute("""SELECT c.* FROM companies c JOIN company_industries ci ON ci.company_id=c.id
                                WHERE ci.industry_id=? ORDER BY c.id""", (industry["id"],)).fetchall()
-    planned, skipped = 0, 0
+    facts = {c["id"]: company_facts(con, c["id"]) for c in companies}
+    companies = sorted(companies, key=lambda c: (-facts[c["id"]]["exhibitor_window_count"],
+                                                 -facts[c["id"]]["visitor_evidence"], c["id"]))
+    planned, skipped, eligible = 0, 0, 0
     for c in companies:
-        facts = company_facts(con, c["id"])
+        queued_any = False
         for icp in icps:
             if icp.get("find_via") == "industry_search":
                 continue  # ICPs found without a company list (e.g. B) are searched by title + sector
-            if not company_rule_ok(icp.get("company_rule"), facts, min_shows):
+            if not company_rule_ok(icp.get("company_rule"), facts[c["id"]], min_shows):
                 skipped += 1
                 continue
             kws = icp.get("search_keywords") or icp.get("title_keywords", [])
             kws = kws[:keywords_per_query]
             q = f'"{search_name(c["name"])}" (' + " OR ".join(f'"{k}"' for k in kws) + ")"
-            enqueue(con, "people", q, "linkedin.com/in",
-                    {"company_id": c["id"], "company": c["name"], "icp": icp["code"], "industry_id": industry["id"]})
-            planned += 1
-        if limit and planned >= limit:
+            planned += enqueue(con, "people", q, "linkedin.com/in",
+                               {"company_id": c["id"], "company": c["name"], "icp": icp["code"],
+                                "industry_id": industry["id"]})
+            queued_any = True
+        eligible += queued_any
+        if (limit and planned >= limit) or (max_companies and eligible >= max_companies):
             break
     con.commit()
-    return {"planned": planned, "skipped_company_rule": skipped}
+    return {"planned": planned, "skipped_company_rule": skipped, "companies_considered": eligible}
 
 
 def plan_title_searches(con, industry, icp_code, sectors, locations, limit=None):
@@ -247,7 +290,7 @@ def _region_for(con, industry_id, cache):
     return cache[industry_id]
 
 
-def run_queue(con, max_items=20, purpose=None, log=print, retry_empty=False):
+def run_queue(con, max_items=20, purpose=None, log=print, retry_empty=False, industry_id=None, deadline=None):
     """Process queued searches. Items that returned nothing are marked 'empty' (not 'done'), so a later run with
     another provider (e.g. after adding a Serper key) can retry them with retry_empty=True."""
     sql = "SELECT * FROM search_queue WHERE status IN ('pending'" + (", 'empty')" if retry_empty else ")")
@@ -255,10 +298,16 @@ def run_queue(con, max_items=20, purpose=None, log=print, retry_empty=False):
     if purpose:
         sql += " AND purpose=?"
         args.append(purpose)
+    if industry_id:  # only this search's items (the queue is shared by every search)
+        sql += " AND json_extract(context, '$.industry_id')=?"
+        args.append(industry_id)
     items = con.execute(sql + " ORDER BY id LIMIT ?", (*args, max_items)).fetchall()
     stats = {"done": 0, "people_added": 0, "posts_added": 0, "stopped": None}
     regions = {}
     for it in items:
+        if deadline and time.time() > deadline:
+            stats["stopped"] = "time budget reached (run again to continue)"
+            break
         site = json.loads(it["params"]).get("site")
         ctx = json.loads(it["context"])
         try:
@@ -279,7 +328,9 @@ def run_queue(con, max_items=20, purpose=None, log=print, retry_empty=False):
         con.commit()
         stats["done"] += 1
         log(f"  [{provider}] {it['query'][:80]} -> {len(results)} results")
-    stats["pending"] = con.execute("SELECT COUNT(*) FROM search_queue WHERE status='pending'").fetchone()[0]
+    q = "SELECT COUNT(*) FROM search_queue WHERE status='pending'"
+    stats["pending"] = con.execute(q + (" AND json_extract(context, '$.industry_id')=?" if industry_id else ""),
+                                   (industry_id,) if industry_id else ()).fetchone()[0]
     return stats
 
 
