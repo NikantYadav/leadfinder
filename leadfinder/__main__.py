@@ -3,6 +3,7 @@ Run `./lf <command> -h` for options."""
 import argparse
 import json
 import sys
+import re
 
 from . import db, people
 from .providers import fetch as fetcher
@@ -108,7 +109,8 @@ def cmd_add_people(a, con):
             cid = db.upsert_company(con, r["company"], r.get("company_domain"), industry_id=ind["id"]) \
                 if r.get("company") else None
             pid = db.upsert_person(con, cid, r["name"], r.get("title"), r.get("location"), r.get("linkedin_url"),
-                                   r.get("email"), r.get("phone"), r.get("icp"), r.get("source", "manual"))
+                                   r.get("email"), r.get("phone"), r.get("icp"), r.get("source", "manual"),
+                                   industry_id=ind["id"])
             db.add_evidence(con, "person", pid, r.get("kind", a.kind), r.get("confidence", a.confidence),
                             r.get("url") or a.url, r.get("snippet"), r.get("show_id", a.show))
             if r.get("company_evidence", True) and cid and r.get("kind", a.kind) not in ("linkedin_profile",):
@@ -197,6 +199,27 @@ def cmd_search(a, con):
 
 def cmd_fetch(a, con):
     out(fetcher.fetch(con, a.url, a.mode, a.refresh))
+
+
+def cmd_site_map(a, con):
+    """Every link on a site in one Firecrawl call (1 credit, cached 30 days), ranked: exhibitor-list links for a
+    show (--show: only that edition's year), or a company's events / exhibitions pages (--events)."""
+    from .providers import firecrawl as fc
+    search = "exhibition events trade fair" if a.events else (a.search or "exhibitor")
+    if not re.match(r"^(https?://)?[\w.-]+\.[a-z]{2,}", a.url.strip(), re.I):
+        return out({"error": f"not a site address: {a.url!r} (give a domain like example.com or a full URL)"})
+    try:
+        links = fc.map_site(a.url.strip(), search, refresh=a.refresh)
+    except Exception as e:  # noqa: BLE001 - out of budget, HTTP error: report, don't crash Claude's step
+        return out({"error": str(e)[:300]})
+    if a.events:
+        return out({"site": fc.site_root(a.url), "links_on_site": len(links), "event_pages": fc.rank_event_links(links, a.limit)})
+    if a.show:
+        show = dict(con.execute("SELECT * FROM shows WHERE id=?", (a.show,)).fetchone() or {})
+        ranked, other = fc.rank_list_links(links, show)
+        return out({"site": fc.site_root(a.url), "show": show.get("name"), "list_links": ranked[:a.limit],
+                    "other_editions": other[:a.limit]})
+    out({"site": fc.site_root(a.url), "links": [{"url": l.get("url"), "title": l.get("title")} for l in links[:a.limit]]})
 
 
 def cmd_capture(a, con):
@@ -291,6 +314,44 @@ def cmd_exhibitors_apify(a, con):
     out(res)
 
 
+def cmd_import_exhibitors(a, con):
+    """Import a show's exhibitor list collected by hand or by a browser agent (JSON array, CSV, or one name per line)."""
+    from . import showhelp
+    ind = db.get_industry(con, a.industry)
+    show = dict(_show(con, ind, a.show))
+    with open(a.file) as f:
+        rows = showhelp.parse_rows(f.read())
+    if not rows:
+        raise SystemExit("no companies found in the file (expected a JSON array of {name, ...}, a CSV with a name "
+                         "column, or one company per line)")
+    out(showhelp.import_rows(con, ind, show, rows, a.url))
+
+
+def cmd_read_list(a, con):
+    """Read a show's exhibitors from a link (directory, PDF fair guide, or a page that lists them)."""
+    from . import showhelp
+    ind = db.get_industry(con, a.industry)
+    show = dict(_show(con, ind, a.show))
+    out(showhelp.read_url(con, ind, show, a.url, a.budget, log=lambda m: print(m, file=sys.stderr)))
+
+
+def cmd_read_file(a, con):
+    """Import a show's exhibitors from a file: PDF fair guide, CSV or Excel (.xlsx)."""
+    from . import showhelp
+    ind = db.get_industry(con, a.industry)
+    out(showhelp.read_file(con, ind, dict(_show(con, ind, a.show)), a.file, a.url))
+
+
+def cmd_help_shows(a, con):
+    """Shows whose exhibitor list the tool could not read and that wait for the user (paste a link / agent prompt)."""
+    from . import showhelp
+    ind = db.get_industry(con, a.industry)
+    if a.prompt:
+        print(showhelp.agent_prompt(con, ind, dict(_show(con, ind, a.prompt))))
+        return
+    out(showhelp.needing_help(con, ind))
+
+
 def cmd_discover_shows(a, con):
     """Trade shows by topic/country/date from 10times via Apify (candidates only; add the relevant ones with add-shows)."""
     from . import showdata
@@ -312,6 +373,25 @@ def cmd_show_people(a, con):
     ref = showdata.ev.adopt(showdata.ev.PEOPLE, a.run) if a.run else None
     out(showdata.show_people(con, ind, dict(show), a.budget, a.target, time.time() + a.minutes * 60,
                              log=lambda m: print(m, file=sys.stderr), ref=ref, role_based=a.role_based))
+
+
+def cmd_show_posts(a, con):
+    """LinkedIn posts about a show + their commenters / reactors who fit a persona (showposts.py), via Apify."""
+    import time
+    from . import showposts
+    ind = db.get_industry(con, a.industry)
+    show = _show(con, ind, a.show)
+    if not show["start_date"]:
+        raise SystemExit("this show has no start date: posts are kept by date, so add one first")
+    out(showposts.read_show(con, ind, dict(show), a.budget, time.time() + a.minutes * 60,
+                            log=lambda m: print(m, file=sys.stderr)))
+
+
+def cmd_customers(a, con):
+    """Exhibitors' clients / customers pages -> their customers as companies of this search (customers.py)."""
+    from . import customers
+    ind = db.get_industry(con, a.industry)
+    out(customers.run(con, ind, a.companies, log=lambda m: print(m, file=sys.stderr), allow_map=not a.no_map))
 
 
 def cmd_set_company(a, con):
@@ -368,6 +448,19 @@ def cmd_sync_tracker(a, con):
     out({"synced": sync_tracker(con, db.get_industry(con, a.industry))})
 
 
+def cmd_reparse(a, con):
+    """Re-read saved search results with the current parser and fix people found by search (no new searches).
+    Shows what would change; --apply writes it."""
+    from .people import reparse_cached
+    ind = db.get_industry(con, a.industry) if a.industry else None
+    st = reparse_cached(con, industry_id=ind["id"] if ind else None, apply=a.apply)
+    if not a.examples:
+        st.pop("examples")
+        st.pop("renamed_examples")
+    st["applied"] = a.apply
+    out(st)
+
+
 def cmd_stats(a, con):
     ind = db.get_industry(con, a.industry)
     q = lambda sql: con.execute(sql, (ind["id"],)).fetchone()[0]  # noqa: E731
@@ -377,8 +470,8 @@ def cmd_stats(a, con):
         "companies": q("SELECT COUNT(*) FROM company_industries WHERE industry_id=?"),
         "people": q("""SELECT COUNT(*) FROM people p JOIN company_industries ci ON ci.company_id=p.company_id
                        WHERE ci.industry_id=?"""),
-        "people_with_icp": q("""SELECT COUNT(*) FROM people p JOIN company_industries ci ON ci.company_id=p.company_id
-                                WHERE ci.industry_id=? AND p.icp IS NOT NULL"""),
+        "people_with_icp": q(f"""SELECT COUNT(*) FROM people p JOIN company_industries ci ON ci.company_id=p.company_id
+                                 {db.IN_GROUP} WHERE ci.industry_id=?"""),
         "companies_searched": q("""SELECT COUNT(DISTINCT json_extract(context, '$.company_id')) FROM search_queue
                                    WHERE purpose='people' AND status IN ('done','empty')
                                    AND json_extract(context, '$.industry_id')=?"""),
@@ -436,6 +529,8 @@ def main(argv=None):
         (["--region"], {"default": "IN"}))
     add("fetch", cmd_fetch, (["url"],), (["--mode"], {"default": "auto", "choices": ["auto", "direct", "tinyfetch", "openserp", "firecrawl"]}),
         (["--refresh"], {"action": "store_true"}))
+    add("site-map", cmd_site_map, (["url"],), (["--search"], {}), (["--events"], {"action": "store_true"}),
+        (["--show"], {"type": int}), (["--limit"], {"type": int, "default": 15}), (["--refresh"], {"action": "store_true"}))
     add("capture", cmd_capture, (["url"],), (["--minutes"], {"type": int, "default": 20}), (["--label"], {"default": "page"}))
     add("parse-list", cmd_parse_list, (["file"],), (["--layout"], {"default": "hall-stall", "choices": ["hall-stall"]}),
         (["--section"], {"help": "only pages containing this heading, e.g. \"Exhibitors’ Main List\""}),
@@ -463,6 +558,14 @@ def main(argv=None):
         (["--budget"], {"type": float, "default": 1.0, "help": "USD cap for this show (~$3 per 1,000 exhibitors)"}),
         (["--max"], {"type": int, "help": "max exhibitors (default: what the budget allows)"}),
         (["--minutes"], {"type": int, "default": 30}))
+    add("import-exhibitors", cmd_import_exhibitors, IND, (["--show"], {"type": int, "required": True}),
+        (["--file"], {"required": True}), (["--url"], {"help": "page the list was read from (evidence URL)"}))
+    add("read-list", cmd_read_list, IND, (["--show"], {"type": int, "required": True}), (["--url"], {"required": True}),
+        (["--budget"], {"type": float, "default": 0.5, "help": "USD cap for Apify catalog readers"}))
+    add("read-file", cmd_read_file, IND, (["--show"], {"type": int, "required": True}), (["--file"], {"required": True}),
+        (["--url"], {"help": "page the list came from (evidence URL; default: the show's list / site URL)"}))
+    add("help-shows", cmd_help_shows, IND, (["--prompt"], {"type": int, "metavar": "SHOW_ID",
+                                                         "help": "print the browser-agent prompt for this show"}))
     add("discover-shows", cmd_discover_shows, IND, (["--query"], {"required": True}),
         (["--countries"], {"help": "comma list of ISO codes, e.g. IN,DE,US"}), (["--start"], {}), (["--end"], {}),
         (["--max"], {"type": int, "default": 40}), (["--out"], {"help": "write the candidates to this JSON file"}))
@@ -472,15 +575,23 @@ def main(argv=None):
         (["--role-based"], {"action": "store_true", "help": "also list booth staff found by job title (no evidence)"}),
         (["--run"], {"help": "adopt a finished/running Apify run id instead of starting one"}),
         (["--minutes"], {"type": int, "default": 40}))
+    add("show-posts", cmd_show_posts, IND, (["--show"], {"type": int, "required": True}),
+        (["--budget"], {"type": float, "default": 0.8, "help": "USD in total (post search + comments + reactions)"}),
+        (["--minutes"], {"type": int, "default": 30}))
+    add("customers", cmd_customers, IND,
+        (["--companies"], {"type": int, "default": 20, "help": "new exhibitor websites to read"}),
+        (["--no-map"], {"action": "store_true", "help": "never use a Firecrawl credit to find the clients page"}))
     add("set-company", cmd_set_company, (["--id"], {"type": int}), (["--name"], {}), (["--linkedin-url"], {}),
         (["--domain"], {}))
     add("credits", cmd_credits)
     add("pipeline", cmd_pipeline, IND, (["--emails"], {"type": int}), (["--model"], {}),
-        (["--from-stage"], {"choices": ["persona", "research", "evidence", "attendees", "linkedin", "web", "verify", "emails", "export", "summary"]}))
+        (["--from-stage"], {"choices": ["persona", "research", "evidence", "attendees", "customers", "linkedin", "web", "verify", "emails", "export", "summary"]}))
     add("ui", cmd_ui, (["--port"], {"type": int, "default": 8787}))
     add("export", cmd_export, IND, (["--min-shows"], {"type": int, "default": None}))
     add("sync-tracker", cmd_sync_tracker, IND)
     add("stats", cmd_stats, IND)
+    add("reparse", cmd_reparse, (["--industry"], {}), (["--apply"], {"action": "store_true"}),
+        (["--examples"], {"action": "store_true"}))
     add("providers", cmd_providers)
 
     a = ap.parse_args(argv)

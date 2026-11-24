@@ -404,9 +404,10 @@ def _person(p, staff_of=None):
     url, snippet = _ev_url(p)
     score = float(p.get("attendanceScore") or 0)
     head = p.get("headline") or ""
-    at = re.search(r"\b(?:at|@|bei|chez)\s+([A-Z0-9][^|,;\n]{1,60})", head)  # "Sales Manager at EAGLE LASERS"
+    at = re.search(r"(?:\b(?:at|bei|chez)|@)\s*([A-Z0-9][^|,;\n]{1,60})", head)  # "Sales Manager at EAGLE LASERS"
     return {"name": name, "title": head or (p.get("roleBasis") or {}).get("title"),
-            "company": (staff_of or {}).get("name") or p.get("companyName") or (at.group(1).strip() if at else None),
+            "company": (staff_of or {}).get("name") or p.get("companyName")
+                       or (re.split(r"\.\s|\s[-–]\s", at.group(1))[0].strip() if at else None),
             "company_domain": (staff_of or {}).get("website"),
             "linkedin_url": p.get("personLinkedinUrl") or p.get("linkedinUrl"),
             "staff": bool(staff_of) or bool(p.get("isExhibitorStaff")),

@@ -5,6 +5,9 @@ Stages (each recorded in pipeline_stages so the web UI can show a checklist; fin
   research  Claude finds shows, exhibitor lists and visitor/buyer signals                      [Claude]
   evidence  when few companies meet the 'N+ shows' rule: retry thin exhibitor lists, then look up the top
             companies' own "visit us at" / exhibitions pages for other shows they exhibit at       [Claude]
+  attendees LinkedIn posts about the core shows (relevance-sorted, so older editions too), their commenters and
+            reactors who fit a persona (showposts.py); sherwood actor only with opts attendee_sherwood
+  customers exhibitors' own clients / case-studies pages -> their customers join the company pool (customers.py)
   linkedin  direct LinkedIn people search per ICP (Apify; free plan: 25 profiles/run, 10 runs)
   web       search-engine LinkedIn lookups per company x ICP (TinySearch first)
   verify    LinkedIn profile check of the top leads (country + current company)
@@ -26,7 +29,8 @@ STAGES = [
     ("persona", "Understand the persona"),
     ("research", "Find trade shows, exhibitors and buyers"),
     ("evidence", "Find more exhibitor evidence"),
-    ("attendees", "Find people who posted about recent shows"),
+    ("attendees", "Find people who posted about or engaged with show posts"),
+    ("customers", "Find exhibitors' customers"),
     ("linkedin", "Search LinkedIn"),
     ("web", "Search the web for more people"),
     ("verify", "Check LinkedIn profiles"),
@@ -38,7 +42,8 @@ CLAUDE_TOOLS = ["Bash(./lf:*)", "Read", "Glob", "Grep", "Write(data/work/**)", "
 
 
 class NeedsInput(Exception):
-    """A stage needs the user's answers before it can continue (the persona step's clarifying questions)."""
+    """A stage needs the user before it can continue: the persona step's clarifying questions (detail.questions ->
+    status 'questions'), or exhibitor lists only a human can open (detail.help -> status 'help', see showhelp.py)."""
     def __init__(self, detail):
         super().__init__("waiting for your answers")
         self.detail = detail
@@ -284,6 +289,84 @@ def _apify_catalogs(con, ind, opts):
     return {"catalogs": out, "apify_usd": round(spent, 2)} if out else {}
 
 
+FIRECRAWL_MAPS = 8          # thin core shows whose site is mapped per run (opts firecrawl_maps), 1 credit each
+FIRECRAWL_RUN_CREDITS = 40  # Firecrawl credits one pipeline run may use (opts firecrawl_credits); free plan: 1,000/month
+FIRECRAWL_APIFY_USD = 1.0   # Apify credit for directories the site map turned up (opts firecrawl_apify_usd)
+PLATFORM_WORDS = ("swapcard", "mapyourshow", "map your show", "expofp", "a2zinc", "a2z", "personify")
+
+
+def _firecrawl_lists(con, ind, opts):
+    """Thin core shows: map the show's site with Firecrawl (1 credit, every link on the site in one call), rank the
+    exhibitor list / directory / catalogue links of THIS edition (other years are only reported), and read the best
+    two through showhelp.read_url: Apify catalog readers for directory platforms, PDF parser, Claude reading the page,
+    a scrolling browser render. Each show is mapped once per search (progress saved)."""
+    from . import showhelp
+    from .providers import events as ev
+    from .providers import firecrawl as fc
+    if not fc.available():
+        return {}
+    prog = dict(_progress(con, ind["id"], "evidence").get("lists") or {})
+    shows = {r["id"]: dict(r) for r in con.execute(
+        "SELECT * FROM shows WHERE industry_id=? AND COALESCE(origin, '') != 'evidence'", (ind["id"],))}
+    todo = [s for s in show_coverage(con, ind) if s["exhibitors"] < THIN_LIST and s["id"] in shows
+            and str(s["id"]) not in prog and (shows[s["id"]]["url"] or shows[s["id"]]["exhibitor_list_url"])]
+    apify_left = float(opts.get("firecrawl_apify_usd", FIRECRAWL_APIFY_USD))
+    out, maps = {}, 0
+    for s in todo[:int(opts.get("firecrawl_maps", FIRECRAWL_MAPS))]:
+        show = shows[s["id"]]
+        site = show["url"] or show["exhibitor_list_url"]
+        try:
+            links = fc.map_site(site, "exhibitor")
+        except fc.OutOfBudget as e:
+            out[s["name"]] = f"not mapped: {e}"
+            break
+        except Exception as e:  # noqa: BLE001 - one show's site failing must not stop the others
+            prog[str(s["id"])] = {"error": str(e)[:200]}
+            out[s["name"]] = f"site map failed: {str(e)[:120]}"
+            continue
+        maps += 1
+        ranked, other = fc.rank_list_links(links, show)
+        entry = {"candidates": [r["url"] for r in ranked[:5]], "other_editions": [o["url"] for o in other[:5]]}
+        unconfirmed = [r["url"] for r in ranked if not r["confirmed"]]
+        if unconfirmed:
+            entry["unconfirmed"] = unconfirmed[:3]
+        for cand in [r for r in ranked if r["confirmed"]][:2]:   # unconfirmed edition: the user decides
+            # Apify only for directory platforms (Swapcard, MYS, ExpoFP, a2z - often on the show's own subdomain, the
+            # page title names the platform) and known fair sites; plain pages and PDFs are read for free
+            platform = cand["directory"] or any(w in f'{cand["url"]} {cand["title"]}'.lower() for w in PLATFORM_WORDS)
+            routed = any(sp["actor"] != ev.TIDY for sp, _ in ev.route({"name": "", "exhibitor_list_url": cand["url"]}))
+            use_apify = (platform or routed) and not cand["pdf"] and apify_left >= 0.3
+            log(f"  {s['name']}: reading {cand['url']} ({cand['why']})")
+            res = showhelp.read_url(con, ind, show, cand["url"], budget=min(0.5, apify_left), log=log,
+                                    apify=use_apify)
+            apify_left -= res.get("cost", 0) or 0
+            if res.get("added"):
+                entry["read"] = {"url": cand["url"], "added": res["added"], "via": res.get("via")}
+                break
+        prog[str(s["id"])] = entry
+        _save_progress(con, ind["id"], "evidence", {"lists": prog})
+        if entry.get("read"):
+            out[s["name"]] = f'{entry["read"]["added"]} exhibitors from {entry["read"]["url"]} ({entry["read"]["via"]})'
+        elif ranked and len(unconfirmed) == len(ranked):
+            out[s["name"]] = "not read: the show site has moved on to a later edition; its undated list link(s) may " \
+                             "not be this year's: " + ", ".join(unconfirmed[:2])
+        elif ranked:
+            out[s["name"]] = f'not read: {len(ranked)} list link(s) on the show site, none readable: ' \
+                             + ", ".join(entry["candidates"][:3])
+        else:
+            out[s["name"]] = "not read: no exhibitor-list link for this edition on the show site" + \
+                (f' (other editions: {", ".join(entry["other_editions"][:2])})' if other else "")
+    links = {shows[int(k)]["name"]: v["candidates"][:3] for k, v in prog.items()
+             if int(k) in shows and v.get("candidates") and not v.get("read")}
+    return {"firecrawl_lists": out, "firecrawl_maps": maps, **({"list_links": links} if links else {})} if out else {}
+
+
+def _list_hints(con, ind):
+    """'show name -> candidate links' from this run's site maps, for Claude's prompt and the help card."""
+    prog = _progress(con, ind["id"], "evidence").get("lists") or {}
+    return {int(k): v for k, v in prog.items() if v.get("candidates") or v.get("other_editions")}
+
+
 def stage_evidence(con, ind, opts):
     from .people import company_facts, load_icps, requested_min_shows
     ind = db.get_industry(con, ind["slug"])
@@ -297,7 +380,9 @@ def stage_evidence(con, ind, opts):
     if _at_least(before, n) >= target:
         return {"skipped": f"{_at_least(before, n)} companies already exhibit at {n}+ shows", "min_shows_wanted": n,
                 "companies_at_n_before": _at_least(before, n)}
-    apify = _apify_catalogs(con, ind, opts)
+    lists = _firecrawl_lists(con, ind, opts)
+    hints = _list_hints(con, ind)
+    apify = {**lists, **_apify_catalogs(con, ind, opts)}
     mid = shows_distribution(con, ind)
     if _at_least(mid, n) >= target:
         return {**apify, "min_shows_wanted": n, "companies_at_n_before": _at_least(before, n),
@@ -314,6 +399,15 @@ def stage_evidence(con, ind, opts):
     slug = ind["slug"]
     show_lines = "\n".join(f'  show_id={s["id"]} | {s["name"]} | series={s["series"]} | {s["start_date"]} | '
                             f'{s["exhibitors"]} exhibitors recorded | list url: {s["exhibitor_list_url"] or "-"}'
+                            + (f'\n      links on its site (already tried, could not be read): '
+                               f'{", ".join(u for u in hints[s["id"]]["candidates"][:3] if u not in hints[s["id"]].get("unconfirmed", []))}'
+                               if set(hints.get(s["id"], {}).get("candidates") or []) - set(hints.get(s["id"], {}).get("unconfirmed") or []) else "")
+                            + (f'\n      undated list links, but the site already shows a later edition (import only if the page '
+                               f'proves it is this year\'s list): {", ".join(hints[s["id"]]["unconfirmed"])}'
+                               if hints.get(s["id"], {}).get("unconfirmed") else "")
+                            + (f'\n      list links of OTHER editions (only for a show row of that year): '
+                               f'{", ".join(hints[s["id"]]["other_editions"][:3])}'
+                               if hints.get(s["id"], {}).get("other_editions") else "")
                             for s in shows)
     comp_lines = "\n".join(f'  {c["name"]}' + (f' ({c["domain"]})' if c["domain"] else "") + " | exhibits at: "
                             + ", ".join(x["name"] for x in facts[c["id"]]["exhibitor_shows"]) for c in top)
@@ -341,7 +435,9 @@ PART 2 - other shows the best companies exhibit at (only with search budget left
 These companies are closest to the bar:
 {comp_lines}
 For each, look for proof of exhibiting at OTHER shows: the company's own "events / exhibitions / meet us at" page,
-"visit us at <show> Hall X Stall Y" news or posts, exhibitor directories. Rules:
+"visit us at <show> Hall X Stall Y" news or posts, exhibitor directories. For a company with a domain,
+`./lf site-map <domain> --events` lists its events / exhibitions / news pages in one call (1 Firecrawl credit; at most
+{int(opts.get("evidence_site_maps", 12))} such calls, and only when a search did not already find the page); then `./lf fetch` the best one. Rules:
 - Reuse a show from the list above when it is the same event (same series and year) - use its show_id. Never add a
   second row for an event that is already there under another spelling.
 - A new show needs exact start_date/end_date (the rule counts shows within 12 months of each other); add it with
@@ -352,7 +448,13 @@ For each, look for proof of exhibiting at OTHER shows: the company's own "events
 
 Budget: about {int(opts.get("evidence_searches", 40))} searches in total. Do NOT run people searches, LinkedIn, email or
 export commands. In your summary give: lists retried (got / not got and why), companies checked, new show links added."""
+    known = {r[0] for r in con.execute("SELECT id FROM shows WHERE industry_id=?", (ind["id"],))}
     code = _claude(prompt, opts.get("model"), opts.get("effort"))
+    # shows added here are the companies' OTHER shows (often another industry's fair): they count toward the
+    # N-shows rule but are not core shows of this search, so the attendee step leaves them out
+    con.execute(f"""UPDATE shows SET origin='evidence' WHERE industry_id=? AND origin IS NULL
+                    AND id NOT IN ({",".join("?" * len(known)) or "NULL"})""", (ind["id"], *known))
+    con.commit()
     after = shows_distribution(con, db.get_industry(con, slug))
     out = {**apify, "min_shows_wanted": n, "companies_at_n_before": _at_least(before, n),
            "companies_at_n_after": _at_least(after, n), "distribution_after": {str(k): v for k, v in after.items()},
@@ -360,6 +462,13 @@ export commands. In your summary give: lists retried (got / not got and why), co
            "thin_shows_after": [s["name"] for s in show_coverage(con, ind) if s["exhibitors"] < THIN_LIST]}
     if code != 0:
         raise RuntimeError("Claude evidence step failed")
+    if thin and not opts.get("no_help"):
+        # core shows whose lists neither Apify nor Claude could read: ask the human before people search spends
+        # credits on an incomplete company pool. The result rides along, so Continue marks this step done with it.
+        from . import showhelp
+        need = showhelp.needing_help(con, db.get_industry(con, slug), core_names=[s["name"] for s in thin])
+        if need:
+            raise NeedsInput({"help": need, "result": out})
     return out
 
 
@@ -368,38 +477,119 @@ ATTENDEE_MAX_SHOWS = 2    # opts attendee_shows
 ATTENDEE_DAYS_BEFORE, ATTENDEE_DAYS_AFTER = 75, 45  # LinkedIn posts are read newest first: only recent shows yield
 
 
-def recent_shows(con, ind, today=None):
-    """Shows close enough to today that their LinkedIn posts are still among the newest: ended within ~75 days or
-    starting within ~45 days. Closest first."""
+def _show_key(text):
+    """'PETROTECH 2026' / 'ADIPEC-2026' -> 'petrotech' / 'adipec': lower case, no years, single spaces."""
+    t = re.sub(r"\b(19|20)\d\d\b", " ", (text or "").lower())
+    return " ".join(re.sub(r"[^a-z0-9&]+", " ", t).split())
+
+
+def asked_for_shows(ind, shows):
+    """Ids of shows the user named in the description, a clarification answer or the trade-show targeting field."""
+    try:
+        opts = json.loads(ind["options_json"] or "{}")
+    except (TypeError, ValueError):
+        opts = {}
+    said = " ".join([ind["persona_text"] or "", str((opts.get("target") or {}).get("company_rule") or "")]
+                    + [c.get("a") or "" for c in opts.get("clarifications") or []])
+    said = f" {_show_key(said)} "
+    out = set()
+    for s in shows:
+        for k in {_show_key(s["name"]), _show_key(s["series"])}:
+            if len(k) >= 4 and f" {k} " in said:
+                out.add(s["id"])
+    return out
+
+
+def recent_shows(con, ind, today=None, before=ATTENDEE_DAYS_BEFORE, after=ATTENDEE_DAYS_AFTER):
+    """Shows to read attendees from. Relevance first: only core shows of this search, never the companies' other
+    shows the evidence step added (often another industry's fair, e.g. a pharma show an oil & gas supplier also
+    attends). Then date: ended within ~75 days or starting within ~45 days, so their LinkedIn posts are still among
+    the newest. Shows running today are left out (their posts are still coming in and a read is never repeated)
+    unless the user named the show; a show the user named also goes first, even one the evidence step added.
+    Otherwise closest first."""
     from datetime import date, timedelta
     t = today or date.today()
-    lo, hi = (t - timedelta(days=ATTENDEE_DAYS_BEFORE)).isoformat(), (t + timedelta(days=ATTENDEE_DAYS_AFTER)).isoformat()
+    lo, hi = (t - timedelta(days=before)).isoformat(), (t + timedelta(days=after)).isoformat()
     rows = [dict(r) for r in con.execute(
         """SELECT * FROM shows WHERE industry_id=? AND start_date IS NOT NULL
            AND COALESCE(end_date, start_date) >= ? AND start_date <= ?""", (ind["id"], lo, hi))]
-    return sorted(rows, key=lambda s: abs((date.fromisoformat(s["start_date"][:10]) - t).days))
+    asked = asked_for_shows(ind, rows)
+    ts = t.isoformat()
+    running = lambda s: s["start_date"][:10] <= ts <= (s["end_date"] or s["start_date"])[:10]
+    rows = [s for s in rows if s["id"] in asked or (s["origin"] != "evidence" and not running(s))]
+    return sorted(rows, key=lambda s: (s["id"] not in asked, abs((date.fromisoformat(s["start_date"][:10]) - t).days)))
+
+
+POST_SHOWS = 3            # opts attendee_post_shows: core shows whose LinkedIn posts are read per run
+POST_SHOW_USD = 0.80      # opts attendee_post_usd: per show (post search ~$0.25, the rest commenters / reactors)
+POST_DAYS_BEFORE = 730    # opts attendee_post_days: relevance-sorted post search reached a 22-month-old show (IMTEX 2025)
 
 
 def stage_attendees(con, ind, opts):
-    """People who posted or commented about a recent show on LinkedIn (Apify sherwood actor, no login): visitors go
-    in as visitor_post evidence (persona C / buyers), exhibitor staff as exhibitor evidence. Paid Apify credit."""
-    from . import showdata
+    """LinkedIn posts about this search's core shows (showposts.py): authors, commenters and reactors who fit a
+    persona. Visit comments / visit posts make a person 'seen'; plain likes and comments are post_engaged (weaker).
+    The sherwood actor (newest posts only, $1.50 a show, measured 0 and 4 vendor people) runs only when
+    opts attendee_sherwood is set. Paid Apify credit; every run is capped and cached per show."""
+    from . import showposts
     from .providers import events as ev
-    shows = recent_shows(con, ind)[:int(opts.get("attendee_shows", ATTENDEE_MAX_SHOWS))]
-    if not shows:
-        return {"skipped": f"no show within {ATTENDEE_DAYS_BEFORE} days before or {ATTENDEE_DAYS_AFTER} days after "
-                           "today (older shows' posts are out of reach)"}
     if not ev.available():
         return {"skipped": "no Apify token"}
+    before = int(opts.get("attendee_post_days", POST_DAYS_BEFORE))
+    today = time.strftime("%Y-%m-%d")
+    asked = asked_for_shows(ind, recent_shows(con, ind, before=before))
+    # shows the user named first, then shows that already ended (their "thanks for visiting" posts and comments are
+    # in), closest first; upcoming shows last (only invitations so far)
+    shows = sorted(recent_shows(con, ind, before=before),
+                   key=lambda s: (s["id"] not in asked, s["start_date"][:10] > today))
+    shows = shows[:int(opts.get("attendee_post_shows", POST_SHOWS))]
+    per_show = float(opts.get("attendee_post_usd", POST_SHOW_USD))
+    prog = dict(_progress(con, ind["id"], "attendees"))
+    out, spent = {}, 0.0
+    for s in shows:
+        key = f"posts:{s['id']}"
+        if (prog.get(key) or {}).get("finished"):
+            out[s["name"]] = prog[key].get("summary")
+            continue
+
+        def started(refs, key=key):
+            prog[key] = {"refs": refs}
+            _save_progress(con, ind["id"], "attendees", prog)
+        try:
+            res = showposts.read_show(con, ind, s, per_show, time.time() + 30 * 60, log=log,
+                                      refs=(prog.get(key) or {}).get("refs"), on_start=started)
+        except Exception as e:  # noqa: BLE001 - one show failing must not stop the others
+            res = {"error": str(e)[:200]}
+        spent += res.get("cost") or 0
+        other = res.get("posts_for_other_editions") or 0
+        summary = (f'{res.get("posts_in_window", 0)} posts' + (f' (+{other} about other shows of this search)' if other
+                                                                else "")
+                   + f' · {res.get("seen", 0)} people seen at a show · {res.get("engaged", 0)} engaged with the posts'
+                   + (f' ({res["warning"]})' if res.get("warning") else "")
+                   if "error" not in res else f'not read: {res["error"]}')
+        prog[key] = {"finished": True, "summary": summary}
+        _save_progress(con, ind["id"], "attendees", prog)
+        out[s["name"]] = summary
+    if opts.get("attendee_sherwood"):
+        out.update(_sherwood(con, ind, opts, prog))
+    if not out:
+        return {"skipped": f"no core show in the last {before // 30} months or the next {ATTENDEE_DAYS_AFTER} days "
+                           "(shows running now are read after they end)"}
+    return {"shows": out, "cost_usd": round(spent, 2)}
+
+
+def _sherwood(con, ind, opts, prog):
+    """People who posted or commented about a recent show (Apify sherwood actor): visitors go in as visitor_post
+    evidence, exhibitor staff as exhibitor evidence. Reads the newest posts only, so recent shows only."""
+    from . import showdata
+    out = {}
+    shows = recent_shows(con, ind)[:int(opts.get("attendee_shows", ATTENDEE_MAX_SHOWS))]
     per_show = float(opts.get("attendee_usd", ATTENDEE_SHOW_USD))
     doc = json.loads(db.get_industry(con, ind["slug"])["icp_json"] or "{}")
     target = ", ".join((doc.get("sectors") or [])[:3]) or ind["name"]
-    prog = dict(_progress(con, ind["id"], "attendees"))
-    out = {}
     for s in shows:
         key = str(s["id"])
         if (prog.get(key) or {}).get("finished"):
-            out[s["name"]] = prog[key].get("summary")
+            out[s["name"] + " (sherwood)"] = prog[key].get("summary")
             continue
 
         def started(ref, key=key):
@@ -408,14 +598,32 @@ def stage_attendees(con, ind, opts):
         try:
             res = showdata.show_people(con, ind, s, per_show, target, time.time() + 40 * 60, log=log,
                                        ref=(prog.get(key) or {}).get("ref"), on_start=started)
-        except Exception as e:  # noqa: BLE001 - one show failing must not stop the others
+        except Exception as e:  # noqa: BLE001
             res = {"error": str(e)[:200]}
         summary = (f'{res.get("people", 0)} people ({res.get("visitors", 0)} visitors)' if "people" in res
                    else f'not read: {res.get("error")}')
         prog[key] = {"finished": True, "summary": summary}
         _save_progress(con, ind["id"], "attendees", prog)
-        out[s["name"]] = summary
-    return {"shows": out}
+        out[s["name"] + " (sherwood)"] = summary
+    return out
+
+
+CUSTOMER_EXHIBITORS = 20  # opts customer_companies: new exhibitor websites read per run
+BUYER_RULES = ("visitor", "visitor_or_exhibitor")
+
+
+def stage_customers(con, ind, opts):
+    """Exhibitors' clients / customers pages -> customer companies (customer_of_exhibitor, inferred) in this search's
+    company pool, so the people steps look for buyers there. Only for personas that buy at shows."""
+    from . import customers
+    from .people import load_icps
+    icps = load_icps(db.get_industry(con, ind["slug"]))
+    if not any(i.get("company_rule") in BUYER_RULES and i.get("find_via", "company_list") == "company_list"
+               for i in icps):
+        return {"skipped": "no target group buys at trade shows (only sellers / exhibitors are wanted)"}
+    res = customers.run(con, ind, int(opts.get("customer_companies", CUSTOMER_EXHIBITORS)), log=log,
+                        deadline=time.time() + 25 * 60)
+    return res
 
 
 def stage_linkedin(con, ind, opts):
@@ -610,8 +818,26 @@ def run_facts(con, ind):
             if not by_company:
                 d.pop("companies_searched", None)
                 d.pop("companies_total", None)
+            elif d.get("companies_total") is not None:
+                # one unambiguous phrase: the model misread two bare numbers as "searched all companies"
+                d["coverage"] = (f"searched {d.pop('companies_searched', 0) or 0} of the {d.pop('companies_total')} "
+                                 "companies (only companies meeting the target group's company requirement are searched)")
         elif key == "linkedin" and not by_company:
             d = {"note": "planned the job-title searches that the web step then ran"}
+        elif key == "linkedin":
+            # totals per target group, added up here: the summary model must not do arithmetic on nested counts
+            per = {c: linkedin_people(v) for c, v in d.items() if isinstance(v, dict)}
+            if per:
+                d = {"people_found_per_group": per, **({"note": d["note"]} if d.get("note") else {})}
+        elif key == "verify" and d.get("checked"):
+            d["result"] = (f"{d['checked']} of {d.get('requested', d['checked'])} profiles checked; {d.get('flagged', 0)} "
+                           "flagged (moved to another company or outside the target region). Flagged people are "
+                           "already checked and marked in the results; there is nothing to retry for them")
+            if d.get("error"):
+                d["warning"] = f"the rest were not checked because {d['error']}"
+        elif key == "verify" and d.get("error"):
+            d["warning"] = (f"checked {d.get('checked', 0)} of {d.get('requested', '?')} LinkedIn profiles "
+                            f"(employer / location of the rest not confirmed) because {d['error']}")
         elif key == "verify" and d.get("requested") and not d.get("checked"):
             d["warning"] = (f"asked the LinkedIn provider for {d['requested']} profiles but got none back, so no "
                             "profile was actually checked (employer / location not confirmed)")
@@ -623,14 +849,15 @@ def run_facts(con, ind):
         g = {"code": i["code"], "name": i.get("name"), "how_found": FOUND_WORDS.get(i.get("find_via", "company_list")),
              "company_requirement": (f"company must exhibit at {m}+ shows within 12 months" if rule == "exhibitor_3plus"
                                      else RULE_WORDS.get(rule, rule)),
-             "leads": q("""SELECT COUNT(*) FROM people p JOIN company_industries ci ON ci.company_id=p.company_id
-                           WHERE ci.industry_id=? AND p.icp=?""", i["code"])}
+             "leads": q(f"""SELECT COUNT(*) FROM people p JOIN company_industries ci ON ci.company_id=p.company_id
+                            {db.IN_GROUP} WHERE ci.industry_id=? AND g.icp=?""", i["code"])}
         if rule not in (None, "", "any"):
             g["companies_meeting_requirement"] = sum(company_rule_ok(rule, f, m) for f in facts.values())
             g["companies_total"] = len(comp_ids)
         groups.append(g)
 
-    out = {"search": ind["name"], "persona": ind["persona_text"], "target_groups": groups, "steps": steps}
+    out = {"search": ind["name"], "persona": ind["persona_text"], "target_groups": groups, "steps": steps,
+           "leads_in_these_target_groups_total": sum(g["leads"] for g in groups)}
     if has_count_rule:
         dist = shows_distribution(con, ind)
         out["shows_rule"] = {"asked_min_shows": asked, "used_min_shows": m,
@@ -646,11 +873,11 @@ def run_facts(con, ind):
             AND json_extract(context, '$.industry_id')=?""")
     out["people_searches_still_queued"] = q("""SELECT COUNT(*) FROM search_queue WHERE status='pending'
         AND json_extract(context, '$.industry_id')=?""")
-    out["people_matching_persona"] = q("""SELECT COUNT(*) FROM people p JOIN company_industries ci
-        ON ci.company_id=p.company_id WHERE ci.industry_id=? AND p.icp IS NOT NULL""")
+    out["people_matching_persona"] = q(f"""SELECT COUNT(*) FROM people p JOIN company_industries ci
+        ON ci.company_id=p.company_id {db.IN_GROUP} WHERE ci.industry_id=?""")
     out["email_search"] = "off - the user's choice" if int(opts.get("emails", 25)) <= 0 else "on"
-    out["people_with_email"] = q("""SELECT COUNT(*) FROM people p JOIN company_industries ci
-        ON ci.company_id=p.company_id WHERE ci.industry_id=? AND p.icp IS NOT NULL AND p.email IS NOT NULL""")
+    out["people_with_email"] = q(f"""SELECT COUNT(*) FROM people p JOIN company_industries ci
+        ON ci.company_id=p.company_id {db.IN_GROUP} WHERE ci.industry_id=? AND p.email IS NOT NULL""")
     resting = {}
     for svc in keys.SPECS:
         ks = keys.all_keys(svc)
@@ -659,7 +886,30 @@ def run_facts(con, ind):
             if n_rest:
                 resting[svc] = f"{n_rest} of {len(ks)} keys resting"
     out["api_keys_resting"] = resting or "none"
+    redo = [st["step"] for st in steps if st["status"] in ("warn", "failed", "stopped", "not run")]
+    queued = out["people_searches_still_queued"]
+    out["what_run_again_would_do"] = (
+        ("retry: " + ", ".join(redo) if redo else "") + ("; " if redo and queued else "")
+        + (f"continue {queued} queued searches" if queued else "")) or \
+        "nothing: every step is done and no searches are queued, so do not suggest Run again"
+    from . import showhelp
+    waiting = [h["name"] for h in showhelp.needing_help(con, ind)] if by_company or uses_shows else []
+    if waiting:
+        out["exhibitor_lists_waiting_for_the_user"] = {
+            "shows": waiting,
+            "how": "the 'Exhibitor lists the tool couldn't read' card on this page: paste a link, upload the list "
+                   "(PDF, CSV or Excel), or copy a prompt for a browser agent that collects it with the user"}
     return out
+
+
+def linkedin_people(v):
+    """People one LinkedIn step result added for a target group, including its fallback searches."""
+    if not isinstance(v, dict):
+        return 0
+    n = v.get("people_added_or_matched") or v.get("title_searches_planned") or 0
+    for sub in ("aiark_for_unresolved", "deepline", "paid_for_rest"):
+        n += linkedin_people(v.get(sub)) if isinstance(v.get(sub), dict) else 0
+    return n
 
 
 def unsupported_numbers(text, f):
@@ -681,6 +931,10 @@ def fallback_summary(f):
     for st in f["steps"]:
         d = st["detail"]
         why = d.get("warning") or d.get("skipped") or d.get("error") or d.get("note") or ""
+        if d.get("result"):
+            why = d["result"] + (f"; {why}" if why else "")
+        if d.get("people_found_per_group"):
+            why = ", ".join(f"{c}: {n} people" for c, n in d["people_found_per_group"].items()) + (f"; {why}" if why else "")
         lines.append(f"- {st['step']}: {st['status']}" + (f" - {why}" if why else ""))
     r = f.get("shows_rule")
     if r:
@@ -692,6 +946,10 @@ def fallback_summary(f):
     if "companies_searched_for_people" in f:
         lines.append(f"- People search covered {f['companies_searched_for_people']} of {f['companies_total']} "
                      "companies.")
+    w = f.get("exhibitor_lists_waiting_for_the_user")
+    if w:
+        lines.append(f"- Exhibitor lists waiting for you: {', '.join(w['shows'])}. Use the card above: paste a link, "
+                     "upload the list (PDF, CSV or Excel), or copy the browser-agent prompt.")
     if f["people_searches_still_queued"]:
         lines.append(f"- {f['people_searches_still_queued']} searches still queued; Run again continues them.")
     return "\n".join(lines)
@@ -723,9 +981,13 @@ Write plain text, no markdown headings, at most ~14 short lines:
    lists). Something the user turned off on purpose is their choice, NEVER a bottleneck - don't list it there or
    suggest turning it back on. If nothing else limited the results, write "Bottleneck: none found".
 4. "Next:" 1-3 concrete actions the user can take (reword the persona, upload an exhibitor list, add an API key...).
+   If exhibitor_lists_waiting_for_the_user is present, name those shows and point to that card as one action.
+   A step's "warning" that names a cause (e.g. a free allowance used up) must be reported with that cause.
+   Copy coverage phrases such as "searched X of the Y companies" as given; never round them up to "all".
    How the buttons work: "Run again" only continues steps whose status is warn/failed/stopped/not run, plus people
    searches still queued; it never redoes a step whose status is "done". "Edit & re-run" redoes the steps affected
-   by the edit. Only suggest a button that will actually do what you say.
+   by the edit. Only suggest a button that will actually do what you say: what_run_again_would_do says exactly
+   what Run again does now.
 
 FACTS:
 {json.dumps(f, default=str)[:12000]}"""
@@ -750,15 +1012,19 @@ def _empty_warning(key, d):
     if key == "web" and d.get("pending"):
         return (f"Searched {d['done']} so far; {d['pending']} searches still queued"
                 + (f" ({d['stopped']})" if d.get("stopped") else "") + ". Resume continues them.")
+    if key == "verify" and d.get("error"):
+        return (f"Checked {d.get('checked', 0)} of {d.get('requested', '?')} LinkedIn profiles: {d['error']}"
+                if d.get("checked") else f"No LinkedIn profiles were checked: {d['error']}")
     if key == "verify" and d.get("requested") and not d.get("checked"):
-        return f"Asked for {d['requested']} LinkedIn profiles but none came back, so nothing was checked."
+        return (f"Asked for {d['requested']} LinkedIn profiles but none came back (private or removed profiles, "
+                "or the provider returned nothing), so nothing was checked.")
     if key == "export" and not d.get("leads"):
         return "No people matched this persona yet. Use 'Edit & re-run' to broaden the description."
     return None
 
 
 RUNNERS = {"persona": stage_persona, "research": stage_research, "evidence": stage_evidence,
-           "attendees": stage_attendees,
+           "attendees": stage_attendees, "customers": stage_customers,
            "linkedin": stage_linkedin, "web": stage_web, "verify": stage_verify, "emails": stage_emails,
            "export": stage_export, "summary": stage_summary}
 
@@ -779,6 +1045,8 @@ def _progress(con, ind_id, stage):
 
 
 def _save_progress(con, ind_id, stage, partial):
+    """Merged into what the stage saved before, so two parts of one stage (e.g. evidence: lists, catalogs) keep both."""
+    partial = {**_progress(con, ind_id, stage), **partial}
     con.execute("UPDATE pipeline_stages SET detail=? WHERE industry_id=? AND stage=?",
                 (json.dumps({"partial": partial}, default=str), ind_id, stage))
     con.commit()
@@ -793,10 +1061,19 @@ def _on_term(signum, frame):
     raise Stopped()
 
 
+def firecrawl_env(slug, opts):
+    """Firecrawl budget for this run, inherited by `./lf` commands Claude runs (see providers/firecrawl.py)."""
+    import os
+    os.environ["LF_FIRECRAWL_AUTO"] = "1"
+    os.environ["LF_FIRECRAWL_CAP"] = str(int(opts.get("firecrawl_credits", FIRECRAWL_RUN_CREDITS)))
+    os.environ["LF_FIRECRAWL_BUCKET"] = f"firecrawl_run:{slug}:{db.now()}"
+
+
 def run(slug, opts, from_stage=None):
     signal.signal(signal.SIGTERM, _on_term)
     con = db.connect()
     ind = db.get_industry(con, slug)
+    firecrawl_env(slug, opts)
     (config.DATA / "work" / slug).mkdir(parents=True, exist_ok=True)  # Claude may write here (no mkdir permission)
     keys = [k for k, _ in STAGES]
     if from_stage:
@@ -822,16 +1099,24 @@ def run(slug, opts, from_stage=None):
         if status == "questions":
             log(f"{label}: waiting for your answers to its questions (answer them in the web UI)")
             return 0
+        if status == "help":
+            log(f"{label}: waiting for your help with exhibitor lists it could not read (see the web UI)")
+            return 0
         if key == "persona" and not ind["persona_text"] and ind["icp_json"]:
             _stage_set(con, ind["id"], key, "done", {"note": "personas defined earlier"})
             continue
         log(f"{label}…")
-        ran_finder = ran_finder or key in ("research", "evidence", "attendees", "linkedin", "web")
+        ran_finder = ran_finder or key in ("research", "evidence", "attendees", "customers", "linkedin", "web")
         _stage_set(con, ind["id"], key, "running")
         t = time.time()
         try:
             detail = RUNNERS[key](con, ind, opts)
         except NeedsInput as e:
+            if "help" in e.detail:
+                _stage_set(con, ind["id"], key, "help", {**e.detail, "seconds": round(time.time() - t)})
+                log(f"{label}: could not read the exhibitor list of {', '.join(h['name'] for h in e.detail['help'])}. "
+                    "Paste a link or use the agent prompt in the web UI, or continue without them.")
+                return 0
             _stage_set(con, ind["id"], key, "questions", {**e.detail, "seconds": round(time.time() - t)})
             log(f"{label}: has {len(e.detail['questions'])} question(s) for you. Answer them in the web UI, "
                 "or let it continue with its best guess.")

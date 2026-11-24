@@ -99,9 +99,9 @@ def verify_profiles(con, industry, top=50, icps=None, recheck=False, log=print):
             _count(con, prof["source"])
         con.commit()
     try:
-        lip.check_profiles([l["linkedin_url"] for l in leads], on_batch=save)
+        lip.check_profiles([l["linkedin_url"] for l in leads], on_batch=save, con=con, log=log)
     except (ProviderBusy, ProviderError) as e:
-        return {"checked": st["checked"], "error": str(e)}
+        return {"checked": st["checked"], "flagged": st["flagged"], "requested": len(leads), "error": str(e)}
     flagged, checked = st["flagged"], st["checked"]
     return {"checked": checked, "flagged": flagged, "requested": len(leads)}
 
@@ -151,10 +151,10 @@ def _guess_domain(con, company):
 def resolve_domains(con, industry, limit=50, log=print, redo_guesses=False):
     if redo_guesses:
         con.execute("UPDATE companies SET domain=NULL, domain_source=NULL WHERE domain_source='search_guess'")
-    rows = con.execute("""SELECT DISTINCT c.* FROM companies c JOIN people p ON p.company_id=c.id
-                          JOIN company_industries ci ON ci.company_id=c.id
-                          WHERE ci.industry_id=? AND p.icp IS NOT NULL AND (c.domain IS NULL OR c.domain='')
-                          LIMIT ?""", (industry["id"], limit)).fetchall()
+    rows = con.execute(f"""SELECT DISTINCT c.* FROM companies c JOIN people p ON p.company_id=c.id
+                           JOIN company_industries ci ON ci.company_id=c.id {db.IN_GROUP}
+                           WHERE ci.industry_id=? AND (c.domain IS NULL OR c.domain='')
+                           LIMIT ?""", (industry["id"], limit)).fetchall()
     hunter = emailp.Hunter()
     stats = {"companies": len(rows), "hunter": 0, "search_guess": 0, "unresolved": []}
     for c in rows:
@@ -291,6 +291,12 @@ def balances():
         out.append(row)
     out.append({"provider": "apify", "configured": lip.apify_available(), "free_tier": "$5 platform credit/month"})
     out.append({"provider": "brightdata", "configured": lip.brightdata_available(), "free_tier": "see account"})
+    from .providers import firecrawl as fc
+    row = {"provider": "firecrawl", "configured": fc.available(), "free_tier": "1,000 credits/month per key",
+           "reserve_for_manual_use": fc.RESERVE}
+    if fc.available():
+        row["remaining"] = fc.balance(max_age=0)
+    out.append(row)
     return out
 
 
@@ -484,7 +490,7 @@ def linkedin_people(con, industry, icp_code, max_items=150, companies_limit=40, 
             continue
         pid = db.upsert_person(con, comp["id"], p["name"], title=p.get("title") or p.get("headline"),
                                location=p.get("location"), linkedin_url=p["url"], icp=icp_code,
-                               source=f"linkedin_search:{via}")
+                               source=f"linkedin_search:{via}", industry_id=industry["id"])
         if pid:
             con.execute("""UPDATE people SET country=COALESCE(country, ?), li_company=COALESCE(li_company, ?),
                            li_checked_at=COALESCE(li_checked_at, ?) WHERE id=?""",

@@ -80,7 +80,10 @@ select.status{border-radius:999px;padding:5px 10px;font-size:12px;font-weight:60
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;display:none;z-index:50}
 .ico.skipped,.ico.skipping{background:var(--panel2);border-style:dashed}
 .ico.stopped{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
-.ico.questions{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.ico.questions,.ico.help{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.hshow{border-top:1px solid var(--line);padding:12px 0}.hshow:first-of-type{border-top:0}.hshow .why{font-size:12px;color:var(--muted);margin:2px 0 8px}
+.hrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.hrow input{flex:1 1 260px;min-width:0}
+.hcard textarea.prompt{min-height:220px;font-family:ui-monospace,monospace;font-size:12px}
 .qcard{border:2px solid var(--accent)}.qitem{margin:14px 0}.qitem .q{font-weight:600}.qitem .why{font-size:12px;color:var(--muted);margin:2px 0 6px}
 .qopts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}.qopts button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:3px 10px;cursor:pointer;font-size:12.5px}
 .qopts button:hover{border-color:var(--accent)}.qitem textarea,.qcard textarea{min-height:44px}
@@ -162,8 +165,8 @@ $("#themeBtn").onclick = () => { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]
 async function loadSearches(){
   S.searches = await api("/api/searches");
   $("#slist").innerHTML = S.searches.map(s => {
-    const running = s.running_job, asks = s.stages.some(x => x.status === "questions"), attn = s.stages.some(x => ["failed","warn"].includes(x.status)), done = s.stages.every(x => ["done","skipped"].includes(x.status));
-    const st = running ? `<span class="warn">● running</span>` : asks ? `<span class="warn">? needs your answers</span>` : attn ? `<span class="warn">needs a look</span>` : done ? `<span class="ok">✓ ready</span>` : `<span class="muted">not run</span>`;
+    const running = s.running_job, asks = s.stages.some(x => x.status === "questions"), helps = s.stages.some(x => x.status === "help"), attn = s.stages.some(x => ["failed","warn"].includes(x.status)), done = s.stages.every(x => ["done","skipped"].includes(x.status));
+    const st = running ? `<span class="warn">● running</span>` : asks ? `<span class="warn">? needs your answers</span>` : helps ? `<span class="warn">? needs your help</span>` : attn ? `<span class="warn">needs a look</span>` : done ? `<span class="ok">✓ ready</span>` : `<span class="muted">not run</span>`;
     return `<div class="sitem ${S.view==="search"&&S.slug===s.slug?"on":""}" data-s="${s.slug}"><b>${esc(s.name)}</b><small>${st} · ${s.people} people · ${s.emails} emails</small></div>`;
   }).join("") || `<div class="muted small" style="padding:6px">No searches yet.</div>`;
   document.querySelectorAll(".sitem").forEach(el => el.onclick = () => go("search", el.dataset.s));
@@ -247,13 +250,14 @@ function bindNew(){
 }
 
 // ---------- search: header + progress ----------
-const ICON = {done:"✓", failed:"!", warn:"!", skipped:"↷", skipping:"↷", stopped:"❚❚", questions:"?"};
+const ICON = {done:"✓", failed:"!", warn:"!", skipped:"↷", skipping:"↷", stopped:"❚❚", questions:"?", help:"?"};
 function stageText(st){
   const d = st.detail || {};
   if (st.status === "skipped" || st.status === "skipping") return `<span class="muted">${st.status === "skipping" ? "Skipping…" : esc(d.note || "Skipped by you.")}</span>`;
   if (st.status === "stopped") return `<span class="warn">${esc(d.note || "Stopped. Resume continues from here.")}</span>`;
   if (st.status === "failed") return `<span class="bad">${esc(d.error || "failed")}</span>`;
   if (st.status === "questions") return `<span class="warn">Has ${(d.questions||[]).length} question(s) for you (see above)</span>`;
+  if (st.status === "help") return `<span class="warn">Needs your help with ${(d.help||[]).length} exhibitor list(s) (see above)</span>`;
   if (st.status !== "done" && st.status !== "warn") return "";
   if (d.warning) return `<span class="warn">${esc(d.warning)}</span>` + (d.note ? `<br>${esc(d.note)}` : "");
   if (d.skipped) return esc(d.skipped);
@@ -262,6 +266,7 @@ function stageText(st){
   if (k === "research") return `${d.shows ?? 0} shows · ${d.companies ?? 0} companies`;
   if (k === "evidence") return `companies at ${d.min_shows_wanted ?? 3}+ shows: ${d.companies_at_n_before ?? 0} → ${d.companies_at_n_after ?? 0}` + ((d.thin_shows_after||[]).length ? ` · lists still missing: ${esc(d.thin_shows_after.join(", "))}` : "");
   if (k === "attendees") return d.skipped ? esc(d.skipped) : Object.entries(d.shows||{}).map(([n,v]) => `${esc(n)}: ${esc(v)}`).join(" · ");
+  if (k === "customers") return `${d.exhibitors_checked ?? 0} exhibitor sites read · ${d.client_pages_found ?? 0} customer pages · ${d.customers_added ?? 0} customer companies`;
   if (k === "summary") return d.by === "fallback" ? "Written without Sonnet (it could not be reached)" : "See the summary above";
   if (k === "linkedin") return (d.note ? esc(d.note) + " · " : "") + Object.entries(d).filter(([,v]) => typeof v === "object").map(([c,v]) => `${(v.people_added_or_matched ?? v.title_searches_planned ?? 0) + (v.aiark_for_unresolved?.people_added_or_matched || 0) + (v.deepline?.people_added_or_matched || 0) + (v.paid_for_rest?.people_added_or_matched || 0) + (v.paid_for_rest?.aiark_for_unresolved?.people_added_or_matched || 0)} people`).join(" · ");
   if (k === "web") return `${d.done ?? 0} searches · ${d.people_added ?? 0} people` + (d.companies_total != null
@@ -280,6 +285,7 @@ function summaryText(s){
 }
 async function viewSearch(){
   const s = await api(`/api/searches/${S.slug}`); S.cur = s;
+  const help = await api(`/api/searches/${S.slug}/help`).catch(() => ({shows: [], settled: []})); S.help = help;
   const running = !!s.running_job, stopped = !running && s.stages.some(x => x.status === "stopped"), attn = s.stages.find(x => x.status === "failed") || s.stages.find(x => x.status === "warn");
   const allDone = !running && s.stages.every(x => x.status !== "pending" && x.status !== "running");
   const started = s.stages.find(x => x.started_at)?.started_at, ended = [...s.stages].reverse().find(x => x.ended_at)?.ended_at;
@@ -290,17 +296,20 @@ async function viewSearch(){
         ${st.status==="skipped" ? `<button class="iconbtn" data-include="${st.key}" title="Run this step again">Include</button>`
           : ["pending","running","failed","warn","stopped"].includes(st.status) && !(st.key==="persona" && !s.icps.length) ? `<button class="iconbtn" data-skip="${st.key}" title="${st.status==="running"?"Interrupt this step and continue with the next":"Don't run this step"}">Skip</button>` : ""}</div></div>`).join("");
   const asking = !running && s.stages.find(x => x.key === "persona" && x.status === "questions");
-  const progressOpen = running || stopped || !allDone || attn || asking || S.showSteps;
+  const progressOpen = running || stopped || !allDone || attn || asking || help.paused || S.showSteps;
   return `<div class="card"><div class="hdr"><div style="flex:1 1 380px;min-width:0"><h2 style="font-size:20px">${esc(s.name)}</h2>
       ${s.persona?`<div class="persona">${esc(s.persona)}${(s.clarifications||[]).length ? s.clarifications.map(c => `<div class="clar"><b>${esc(c.q === "Extra note from the user" ? "Your note" : c.q)}</b> ${esc(c.a)}</div>`).join("") : ""}</div>`:`<div class="muted small">Created from the command line.</div>`}
       <div class="small muted">${targetSummary(s.target||{}) || "Region: " + esc(s.region)} · ${s.icps.map(i => `<span class="chip" title="${esc(i.titles.join(", "))}">${esc(i.name)}</span>`).join(" ")}</div></div>
       <div class="acts"><button class="btn ghost" id="edit" ${running?"disabled":""}>Edit &amp; re-run</button>
         ${running ? `<button class="btn ghost" id="stop" ${s.stopping?"disabled":""}>Stop</button>`
-                  : s.stages.some(x => x.status === "questions") ? "" : `<button class="btn ${stopped?"":"ghost"}" id="rerun">${stopped?"Resume":"Run again"}</button>`}
+                  : s.stages.some(x => ["questions","help"].includes(x.status)) ? "" : `<button class="btn ${stopped?"":"ghost"}" id="rerun">${stopped?"Resume":"Run again"}</button>`}
         <button class="btn ghost" id="refreshView" title="Reload the people, companies and progress for this search without reloading the page">↻ Refresh</button>
-        <a class="btn ghost" href="/download/${s.slug}.xlsx">Excel</a></div></div></div>
+        <a class="btn ghost" href="/download/${s.slug}.xlsx">Excel</a>
+        <button class="btn ghost" id="renameBtn" title="Change this search's name">Rename</button>
+        <button class="btn ghost" id="deleteBtn" ${running?"disabled":""} title="${running?"Stop the search before deleting it":"Delete this search and the people found for it"}" style="color:var(--bad)">Delete</button></div></div></div>
     ${running?`<div class="banner"><div class="ico running" style="flex:0 0 24px"></div><div><b>Working on it</b> <span class="muted">· started ${ago(started)} · people appear below as they're found · you can close this tab, or Stop and resume later</span></div></div>`:""}
     ${asking ? questionCard(s, asking.detail || {}) : ""}
+    ${!running && (help.paused || help.shows.length) ? helpCard(s, help) : ""}
     ${stopped?`<div class="banner warn"><b class="warn">❚❚</b><div><b>Stopped.</b> <span class="muted">Finished steps and everyone found so far are kept. “Resume” continues from “${esc(s.stages.find(x => x.status==="stopped").label)}”.</span></div></div>`:""}
     ${!running && summaryText(s)?`<div class="card runsummary"><div class="row" style="margin-bottom:6px"><h3>What happened</h3></div><div class="sumtext">${summaryText(s)}</div></div>`:""}
     ${!running && attn?`<div class="banner warn"><b class="warn">!</b><div><b>${esc(attn.label)}:</b> ${esc(attn.detail?.warning || attn.detail?.error || "did not finish")} <span class="muted">· “Run again” retries steps that didn't produce results.</span></div></div>`:""}
@@ -322,6 +331,88 @@ function questionCard(s, d){
     <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
       <button class="btn ghost" id="qa_guess" ${d.icps?.length ? "" : "disabled title='No draft persona yet: answer the questions'"}>Skip questions, use its best guess</button>
       <button class="btn" id="qa_send">Send answers &amp; continue</button></div></div>`;
+}
+function helpCard(s, h){
+  const done = (h.settled||[]).filter(x => x.status === "done");
+  return `<div class="card qcard hcard" id="hcard"><h3>${h.paused ? "Paused: some exhibitor lists need your help" : "Exhibitor lists the tool couldn't read"}</h3>
+    <p class="muted small">${h.paused ? "Before searching for people, the tool needs the exhibitor lists below. It could not open them on its own, usually because the list only appears after typing in a search box or only loads in a browser." : "These shows' exhibitor lists are still missing, so their companies aren't in the results."}
+      For each show: paste a link to the list (a2z, ExpoFP, Map Your Show or Swapcard directory, a PDF, or any page that lists the companies), upload the list as a PDF, CSV or Excel file, or copy a prompt for a Claude agent with a browser that collects the list with you, then paste or upload its result here.</p>
+    ${h.shows.map(x => `<div class="hshow"><div class="q"><b>${esc(x.name)}</b> <span class="muted small">· ${esc(x.start_date || "")}${x.city ? " · " + esc(x.city) : ""} · ${x.exhibitors} exhibitors so far${x.url ? ` · <a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.url)}</a>` : ""}</span></div>
+      <div class="why">Why: ${esc(String(x.reason).split(". Next step")[0].slice(0, 220))}</div>
+      ${(x.links||[]).length ? `<div class="small muted">Found on the show's site (not read automatically: unreadable, or the year is unclear - check it is this edition's list): ${x.links.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\//, "").slice(0, 70))}</a>`).join(" · ")}</div>` : ""}
+      <div class="hrow"><input id="hu_${x.id}" placeholder="https://… link to the exhibitor list (directory, PDF or page)"><button class="btn sm" data-hurl="${x.id}">Read this link</button></div>
+      <div class="hrow" style="margin-top:8px"><label class="btn ghost sm" title="A PDF fair guide / exhibitor catalogue, or a CSV or Excel list of the exhibitors">Upload the list (PDF, CSV, Excel)<input type="file" hidden data-hfile="${x.id}" accept=".pdf,.csv,.tsv,.txt,.json,.xlsx,.xlsm"></label><button class="btn ghost sm" data-hprompt="${x.id}">Copy prompt for a browser agent</button><button class="btn ghost sm" data-hpaste="${x.id}" data-hname="${esc(x.name)}">Paste the agent's result</button><button class="linkbtn" data-hskip="${x.id}">Skip this show</button></div></div>`).join("")}
+    ${done.length ? `<p class="small ok">Added: ${done.map(d => `${esc(d.name)} (${d.exhibitors} exhibitors)`).join(", ")}</p>` : ""}
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+      ${h.paused ? `<button class="btn" id="h_continue">${h.shows.length ? "Continue without the rest" : "Continue"}</button>`
+                 : done.length ? `<button class="btn" id="h_continue" title="Searches LinkedIn and the web again, now including the new companies (uses search credits)">Re-run people search with the new lists</button>` : ""}</div></div>`;
+}
+async function uploadList(slug, showId, file, src){
+  const fd = new FormData(); fd.append("file", file); if (src) fd.append("source_url", src);
+  const r = await fetch(`/api/searches/${slug}/help/${showId}/file`, {method:"POST", body: fd, headers: {"X-Requested-With":"leadfinder"}});
+  if (!r.ok) { const t = (await r.text()).replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim(); toast(t.slice(0,220)); throw new Error(t); }
+  const res = await r.json();
+  if (res.job) { toast("Reading the PDF… this can take a few minutes"); const j = await waitJob(res.job);
+    const m = (j.log || "").match(/"added":\s*(\d+)/), e = (j.log || "").match(/"error":\s*"([^"]+)"/);
+    return {added: m ? +m[1] : 0, error: e && e[1]}; }
+  return res;
+}
+async function waitJob(jid){
+  for (;;) { await new Promise(r => setTimeout(r, 3000)); const j = await api(`/api/jobs/${jid}`).catch(() => null);
+    if (j && j.status !== "running" && j.status !== "stopping") return j; }
+}
+function bindHelp(s){
+  if (!$("#hcard")) return;
+  document.querySelectorAll("[data-hurl]").forEach(b => b.onclick = async () => {
+    const id = b.dataset.hurl, url = $("#hu_" + id).value.trim();
+    if (!/^https?:\/\//.test(url)) return toast("Paste a full link starting with https://");
+    b.disabled = true; b.innerHTML = `<span class="spin"></span> Reading…`;
+    try { const r = await api(`/api/searches/${s.slug}/help/${id}/url`, {method:"POST", body: JSON.stringify({url})});
+      const j = await waitJob(r.job); const m = (j.log || "").match(/"added":\s*(\d+)/);
+      toast(m && +m[1] ? `Added ${m[1]} exhibitors` : "No exhibitors could be read from that link. Try the agent prompt.");
+    } finally { render(); } });
+  document.querySelectorAll("[data-hprompt]").forEach(b => b.onclick = async () => {
+    const r = await api(`/api/searches/${s.slug}/help/${b.dataset.hprompt}/prompt`);
+    $("#modalBody").innerHTML = `<div class="hcard"><h2>Prompt for a browser agent</h2><p class="muted small">Paste this into a Claude agent that can use a browser, such as Claude in Chrome. It works through the show's site with you: you log in, solve checks and click where it asks. It either imports the list itself or gives you JSON to paste back here.</p>
+      <textarea class="prompt" id="h_prompt" readonly>${esc(r.prompt)}</textarea>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost" id="h_close">Close</button><button class="btn" id="h_copy">Copy</button></div></div>`;
+    $("#modal").style.display = "grid";
+    $("#h_close").onclick = () => $("#modal").style.display = "none";
+    $("#h_copy").onclick = () => copy(r.prompt, "Prompt");
+    copy(r.prompt, "Prompt"); });
+  document.querySelectorAll("[data-hpaste]").forEach(b => b.onclick = () => {
+    $("#modalBody").innerHTML = `<h2>Add the agent's result</h2><p class="muted small">${esc(b.dataset.hname)}: upload the CSV or Excel file it made, or paste its JSON, a CSV with a name column, or one company per line.</p>
+      <label class="f">Page the list came from <span class="hint">recommended: kept as evidence</span></label><input id="h_src" placeholder="https://…">
+      <label class="f">Upload the result file <span class="hint">CSV or Excel (.xlsx); or paste below instead</span></label><input type="file" id="h_file" accept=".csv,.tsv,.txt,.json,.xlsx,.xlsm">
+      <label class="f">…or paste the exhibitors</label><textarea id="h_text" style="min-height:180px"></textarea>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost" id="h_cancel">Cancel</button><button class="btn" id="h_import">Import</button></div>`;
+    $("#modal").style.display = "grid"; $("#h_text").focus();
+    $("#h_cancel").onclick = () => $("#modal").style.display = "none";
+    $("#h_import").onclick = async () => {
+      const text = $("#h_text").value, file = $("#h_file").files[0];
+      if (!text.trim() && !file) return toast("Choose a file or paste the list first");
+      $("#h_import").disabled = true;
+      if (file) {
+        try { const r = await uploadList(s.slug, b.dataset.hpaste, file, $("#h_src").value.trim());
+          toast(r.added ? `Added ${r.added} exhibitors (${r.exhibitors_now ?? ""} for this show now)` : (r.error || "No exhibitors found in the file"));
+          $("#modal").style.display = "none"; render(); }
+        catch { $("#h_import").disabled = false; }
+        return;
+      }
+      try { const r = await api(`/api/searches/${s.slug}/help/${b.dataset.hpaste}/paste`, {method:"POST", body: JSON.stringify({text, source_url: $("#h_src").value.trim()})});
+        toast(`Added ${r.added} exhibitors (${r.exhibitors_now} for this show now)`); $("#modal").style.display = "none"; render(); }
+      catch { $("#h_import").disabled = false; } }; });
+  document.querySelectorAll("[data-hfile]").forEach(inp => inp.onchange = async () => {
+    const file = inp.files[0]; if (!file) return; const lab = inp.parentElement; lab.style.pointerEvents = "none"; lab.style.opacity = ".6"; lab.firstChild.textContent = "Uploading… ";
+    try { const r = await uploadList(s.slug, inp.dataset.hfile, file);
+      toast(r.added ? `Added ${r.added} exhibitors from ${file.name}` : (r.error || `No exhibitors found in ${file.name}`)); }
+    catch {} finally { render(); } });
+  document.querySelectorAll("[data-hskip]").forEach(b => b.onclick = async () => {
+    await api(`/api/searches/${s.slug}/help/${b.dataset.hskip}/skip`, {method:"POST", body:"{}"}); toast("Skipped"); render(); });
+  if ($("#h_continue")) $("#h_continue").onclick = async () => {
+    $("#h_continue").disabled = true;
+    try { await api(`/api/searches/${s.slug}/help/continue`, {method:"POST", body:"{}"}); } catch { $("#h_continue").disabled = false; return; }
+    toast("Continuing"); loadSearches(); render(); };
 }
 function clarifyModal(s){
   $("#modalBody").innerHTML = `<h2>Clarify the persona</h2><p class="muted small">Add or correct details about the people you mean, e.g. “only the buying side, not sellers” or “companies with 50–500 staff”. The personas are rebuilt with this, and the search re-runs from that step. People already found are kept.</p>
@@ -354,6 +445,7 @@ function bindQuestions(s){
 async function bindSearch(){
   const s = S.cur;
   bindQuestions(s);
+  bindHelp(s);
   if ($("#clarifyBtn")) $("#clarifyBtn").onclick = () => clarifyModal(s);
   if ($("#rerun")) $("#rerun").onclick = async () => { const resume = $("#rerun").textContent === "Resume"; await api(`/api/searches/${s.slug}/run`, {method:"POST", body:"{}"}); toast(resume ? "Resuming" : "Running again"); loadSearches(); render(); };
   document.querySelectorAll("[data-skip]").forEach(b => b.onclick = async () => {
@@ -365,6 +457,8 @@ async function bindSearch(){
     toast("Included: it runs on the next Run again / Resume"); render(); });
   if ($("#stop")) $("#stop").onclick = async () => { if (!confirm("Stop this search? Everything found so far is kept, and Resume continues from the current step.")) return; $("#stop").disabled = true; await api(`/api/searches/${s.slug}/stop`, {method:"POST", body:"{}"}); toast("Stopping…"); };
   $("#edit").onclick = () => editModal(s);
+  $("#renameBtn").onclick = () => renameModal(s);
+  $("#deleteBtn").onclick = () => deleteModal(s);
   $("#refreshView").onclick = async () => {  // re-read everything for this search; filters, tab and scroll position stay
     const b = $("#refreshView"); b.disabled = true; b.textContent = "Refreshing…"; const y = window.scrollY;
     try { await loadSearches(); await render(); window.scrollTo(0, y); toast("Up to date"); }
@@ -380,6 +474,35 @@ async function refreshLog(){
   const j = await api(`/api/jobs/${jid}`); const pre = $("#log"); if (!pre) return;
   const atBottom = pre.scrollTop + pre.clientHeight >= pre.scrollHeight - 40;
   pre.textContent = j.log || "(no output yet)"; if (atBottom) pre.scrollTop = pre.scrollHeight;
+}
+function renameModal(s){
+  $("#modalBody").innerHTML = `<h2>Rename search</h2><label class="f">Name</label><input id="m_name" maxlength="120" value="${esc(s.name)}">
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost" id="m_cancel">Cancel</button><button class="btn" id="m_go">Save</button></div>`;
+  $("#modal").style.display = "grid"; const inp = $("#m_name"); inp.focus(); inp.select();
+  $("#m_cancel").onclick = () => $("#modal").style.display = "none";
+  const save = async () => {
+    const name = inp.value.trim(); if (!name) { toast("Give the search a name"); return; }
+    if (name === s.name) { $("#modal").style.display = "none"; return; }
+    $("#m_go").disabled = true;
+    try { await api(`/api/searches/${s.slug}/rename`, {method:"POST", body: JSON.stringify({name})}); }
+    catch { $("#m_go").disabled = false; return; }
+    $("#modal").style.display = "none"; toast("Renamed"); await loadSearches(); render();
+  };
+  $("#m_go").onclick = save; inp.onkeydown = e => { if (e.key === "Enter") save(); };
+}
+function deleteModal(s){
+  $("#modalBody").innerHTML = `<h2>Delete “${esc(s.name)}”?</h2>
+    <p class="muted small">This permanently removes the search with its ${s.people_all ?? s.people} people, ${s.emails} emails, ${s.shows} shows, progress, activity log and Excel file, plus any notes you saved in the tracker for those people. People at companies another search also uses are kept. It can't be undone.</p>
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost" id="m_cancel">Cancel</button><button class="btn" id="m_go" style="background:var(--bad);color:#fff">Delete search</button></div>`;
+  $("#modal").style.display = "grid";
+  $("#m_cancel").onclick = () => $("#modal").style.display = "none";
+  $("#m_go").onclick = async () => {
+    $("#m_go").disabled = true;
+    try { await api(`/api/searches/${s.slug}`, {method:"DELETE"}); } catch { $("#m_go").disabled = false; return; }
+    $("#modal").style.display = "none"; toast("Search deleted");
+    S.slug = null; store.set("slug", ""); S.cur = null;
+    await loadSearches(); go(S.searches.length ? "search" : "new", S.searches[0]?.slug);
+  };
 }
 function editModal(s){
   $("#modalBody").innerHTML = `<h2>Edit search</h2><p class="muted small">Changing the description or the people filters re-runs from the personas (changing the description clears earlier clarifications, so put anything still true into the text); changing only cities, excluded places or company size re-runs from the LinkedIn search. People already found are kept.</p>
@@ -402,17 +525,23 @@ const STATUSES = ["new","contacted","replied","interview booked","interviewed","
 const STATUS_CLS = {"new":"b-soft","contacted":"b-warn","replied":"b-warn","interview booked":"b-ok","interviewed":"b-ok","not interested":"b-bad","wrong person":"b-bad"};
 const KIND = {exhibitor:"Exhibited at", visitor_post:"Posted about visiting", thanked_by_exhibitor:"Tagged by an exhibitor at", order:"Ordered at",
   delegation:"In a delegation to", speaker:"Spoke at", buyer_meet:"At a buyer-seller meet", report_named:"Named in the show report of", matchmaking:"Matchmaking at",
-  app_attendee:"Event-app attendee at", testimonial:"Quoted at", profile_inferred:"Fits the visitor profile of", linkedin_profile:"LinkedIn profile"};
-const CONF = {confirmed:["Seen at a show","b-ok"], likely:["Company at a show","b-warn"], inferred:["Profile match","b-soft"]};
+  app_attendee:"Event-app attendee at", testimonial:"Quoted at", profile_inferred:"Fits the visitor profile of", linkedin_profile:"LinkedIn profile",
+  visit_comment:"Commented about meeting at", post_engaged:"Liked or commented on a post about", customer_of_exhibitor:"Named as a customer by an exhibitor"};
+const CONF = {confirmed:["Company at a show","b-warn"], likely:["Company at a show","b-warn"], inferred:["Profile match","b-soft"]};
+// "Seen" = the person's own evidence (a post, photo, listing); otherwise only their company is on record
+// "Engaged" = liked / commented on a post about the show (not proof of attendance); "Buys from an exhibitor" = the
+// company is named as a customer on an exhibitor's website
+const confOf = l => l?.seen ? ["Seen at a show","b-ok"] : (l && l.confidence !== "inferred") ? CONF[l.confidence]
+  : l?.engaged ? ["Engaged with a show post","b-soft"] : l?.customer ? ["Buys from an exhibitor","b-soft"] : (CONF[l?.confidence] || ["", "b-soft"]);
 const initials = n => (n||"?").replace(/[^A-Za-z\s]/g,"").trim().split(/\s+/).slice(0,2).map(w => w[0]).join("").toUpperCase() || "?";
 const avColor = n => `hsl(${[...(n||"x")].reduce((a,c) => a + c.charCodeAt(0), 0) % 360} 45% 46%)`;
-const QF = {all: () => true, email: l => !!l.email, seen: l => l.confidence === "confirmed", todo: l => !l.tracker.status || l.tracker.status === "new"};
+const QF = {all: () => true, email: l => !!l.email, seen: l => !!l.seen, todo: l => !l.tracker.status || l.tracker.status === "new"};
 
 async function loadResults(){ S.leads = await api(`/api/industries/${S.slug}/leads`); drawResults(); }
 function filtered(){
   const q = S.q.toLowerCase();
   const rows = S.leads.filter(l => !l.profile_flag && QF[S.qf](l) && (!S.icp || l.icp === S.icp) && (!S.company || l.company === S.company)
-    && (!q || `${l.name} ${l.title} ${l.company} ${l.location||""}`.toLowerCase().includes(q)));
+    && (!q || `${l.name} ${l.title} ${l.company||""} ${l.location||""}`.toLowerCase().includes(q)));
   const by = {best: (a,b) => b.score - a.score, name: (a,b) => a.name.localeCompare(b.name), company: (a,b) => (a.company||"").localeCompare(b.company||"") || b.score - a.score,
     status: (a,b) => STATUSES.indexOf(b.tracker.status||"new") - STATUSES.indexOf(a.tracker.status||"new") || b.score - a.score};
   return rows.sort(by[S.sort]);
@@ -422,7 +551,7 @@ function drawResults(){
   if (!S.leads.length) { el.innerHTML = `<div class="empty">${S.cur.running_job ? "People will appear here as the search finds them." : "No people yet. Try “Edit & re-run” with a broader description."}</div>`; return; }
   const base = S.leads.filter(l => !l.profile_flag), flagged = S.leads.length - base.length;
   const cnt = k => base.filter(QF[k]).length, icps = [...new Set(S.leads.map(l => l.icp))];
-  const shown = filtered(), nPeople = shown.length, nCos = new Set(shown.map(l => l.company)).size;
+  const shown = filtered(), nPeople = shown.length, nCos = new Set(shown.filter(l => l.company).map(l => l.company)).size;
   el.innerHTML = `<div class="row" style="align-items:center"><h3 style="flex:0;white-space:nowrap">Results</h3>
       <div style="flex:0" class="tabs"><button data-tab="people" class="${S.tab==="people"?"on":""}">People <span class="muted">${nPeople}</span></button><button data-tab="companies" class="${S.tab==="companies"?"on":""}">Companies <span class="muted">${nCos}</span></button></div>
       <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost sm" id="copyEmails">Copy emails</button></div></div>
@@ -432,7 +561,7 @@ function drawResults(){
       <select id="sort">${[["best","Best match first"],["company","By company"],["name","By name"],["status","By status"]].map(([k,l]) => `<option value="${k}" ${S.sort===k?"selected":""}>${l}</option>`).join("")}</select></div>
     ${S.company ? `<div class="banner" style="margin:10px 0 0">Showing people at <b>${esc(S.company)}</b> <button class="btn ghost sm" id="clearCo">Show everyone</button></div>` : ""}
     <div id="rbody"></div>
-    ${flagged ? `<div class="small muted" style="margin-top:8px">${flagged} people hidden because their profile check flagged them (outside the region or moved company). They're still in the Excel file.</div>` : ""}`;
+    ${flagged ? `<div class="small muted" style="margin-top:8px">${flagged} people hidden because a check flagged them (outside the region, moved, or left the company). They're still in the Excel file.</div>` : ""}`;
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { S.tab = b.dataset.tab; drawResults(); });
   document.querySelectorAll("[data-qf]").forEach(b => b.onclick = () => { S.qf = b.dataset.qf; S.limit = 50; drawResults(); });
   $("#q").oninput = e => { S.q = e.target.value; S.limit = 50; drawBody(); };
@@ -448,13 +577,13 @@ function drawBody(){
   const rows = filtered();
   if (!rows.length) { b.innerHTML = `<div class="empty">Nobody matches these filters.</div>`; return; }
   b.innerHTML = `<div class="plist">${rows.slice(0, S.limit).map(l => {
-      const [cl, cc] = CONF[l.confidence] || ["", "b-soft"], st = l.tracker.status || "new";
+      const [cl, cc] = confOf(l), st = l.tracker.status || "new";
       return `<div class="prow" data-pid="${l.id}">
         <div class="av" style="background:${avColor(l.name)}">${esc(initials(l.name))}</div>
         <div style="min-width:0"><div class="pname">${l.linkedin_url?`<a href="${esc(l.linkedin_url)}" target="_blank" rel="noopener" title="Open LinkedIn">${esc(l.name)} ↗</a>`:esc(l.name)}
             <span class="badge ${cc}">${cl}</span></div>
           <div class="sub" title="${esc(l.title)}">${esc(l.title||"")}</div></div>
-        <div class="c-company" style="min-width:0"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.company)}</div><div class="sub">${esc(l.location||l.country||"")}</div></div>
+        <div class="c-company" style="min-width:0"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.company?esc(l.company):`<span class="muted">Company unknown</span>`}</div><div class="sub">${esc(l.location||l.country||"")}</div></div>
         <div class="c-contact" style="min-width:0">${l.email?`<div class="email"><span title="${esc(l.email)}">${esc(l.email)}</span><button class="iconbtn" data-copy="${esc(l.email)}" title="Copy email">⧉</button></div>
             <div class="sub ${l.email_status==="verified"?"ok":"warn"}">${l.email_status==="verified"?"✓ verified":esc(l.email_status||"")}</div>`:`<span class="sub">No email yet</span>`}</div>
         <div><select class="status badge ${STATUS_CLS[st]}" data-status="${l.id}" aria-label="Status">${STATUSES.map(x => `<option ${st===x?"selected":""}>${x}</option>`).join("")}</select></div>
@@ -467,7 +596,7 @@ function drawBody(){
 }
 function drawCompanies(b){
   const by = {};
-  filtered().forEach(l => { const c = by[l.company] ||= {name: l.company, people: 0, emails: 0, seen: 0, shows: l.shows, best: 0}; c.people++; if (l.email) c.emails++; if (l.confidence==="confirmed") c.seen++; c.best = Math.max(c.best, l.score); });
+  filtered().forEach(l => { if (!l.company) return; const c = by[l.company] ||= {name: l.company, people: 0, emails: 0, seen: 0, shows: l.shows, best: 0}; c.people++; if (l.email) c.emails++; if (l.seen) c.seen++; c.best = Math.max(c.best, l.score); });
   const rows = Object.values(by).sort((a,b) => b.best - a.best || b.people - a.people);
   b.innerHTML = rows.length ? `<div class="small muted" style="margin-top:10px">${rows.length} ${rows.length === 1 ? "company" : "companies"}</div><div style="overflow:auto;margin-top:6px"><table class="ctable"><thead><tr><th>Company</th><th>People</th><th>With email</th><th>Seen at a show</th><th>Trade shows</th></tr></thead><tbody>
     ${rows.map(c => `<tr class="click" data-co="${esc(c.name)}"><td><b>${esc(c.name)}</b></td><td>${c.people}</td><td>${c.emails}</td><td>${c.seen}</td><td class="small muted">${esc(c.shows||"")}</td></tr>`).join("")}
@@ -488,7 +617,7 @@ async function openPerson(pid){
   S.openPid = pid; const lead = S.leads.find(x => x.id === pid);
   $("#drawer").innerHTML = `<div class="dhead"><div class="muted small">Loading…</div></div>`; $("#drawer").classList.add("on"); $("#scrim").classList.add("on");
   const p = await api(`/api/people/${pid}`); const st = p.tracker.status || "new";
-  const [cl, cc] = CONF[lead?.confidence] || ["", "b-soft"];
+  const [cl, cc] = confOf(lead);
   const g = "https://www.google.com/search?q=" + encodeURIComponent(`"${p.name}" "${p.company?.name || ""}"`);
   $("#drawer").innerHTML = `<div class="dhead"><div style="display:flex;gap:12px;align-items:center">
       <div class="av" style="background:${avColor(p.name)};width:48px;height:48px">${esc(initials(p.name))}</div>

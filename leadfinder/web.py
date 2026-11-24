@@ -7,6 +7,7 @@
 """
 import json
 import os
+import re
 import signal
 import subprocess
 import threading
@@ -24,6 +25,7 @@ JOBS_DIR = config.DATA / "jobs"
 JOBS_DIR.mkdir(parents=True, exist_ok=True)
 
 app = Flask(__name__, static_folder=None)
+app.config["MAX_CONTENT_LENGTH"] = 40 * 1024 * 1024  # uploaded exhibitor lists (PDF fair guides can be large)
 
 # ---------------- jobs ----------------
 JOB_SCHEMA = """CREATE TABLE IF NOT EXISTS jobs (
@@ -90,6 +92,12 @@ def build_command(action, p, slug):
         if p.get("from_stage"):
             args += ["--from-stage", p["from_stage"]]
         return _lf(*args), "Find people (full pipeline)"
+    if action == "read_list":
+        return _lf("read-list", *i, "--show", num("show", 0), "--url", p["url"], "--budget", "0.5"), \
+            f"Read exhibitor list for show {p['show']}"
+    if action == "read_file":
+        return _lf("read-file", *i, "--show", num("show", 0), "--file", p["file"],
+                   *(["--url", p["url"]] if p.get("url") else [])), f"Read uploaded exhibitor list for show {p['show']}"
     if action == "claude_personas":
         return _claude(f'/find-leads {p["name"]} --geo "{p.get("geo") or "India + export markets"}"\n\n{HEADLESS_NOTE} '
                        "Do Step 0 and Step 1 up to and including `./lf set-icp`. Do NOT run `./lf approve-icp`: the "
@@ -214,10 +222,7 @@ def industries():
         out.append({**dict(r),
                     "shows": q("SELECT COUNT(*) FROM shows WHERE industry_id=?"),
                     "companies": q("SELECT COUNT(*) FROM company_industries WHERE industry_id=?"),
-                    "people": q("""SELECT COUNT(*) FROM people p JOIN company_industries ci ON ci.company_id=p.company_id
-                                   WHERE ci.industry_id=? AND p.icp IS NOT NULL"""),
-                    "emails": q("""SELECT COUNT(*) FROM people p JOIN company_industries ci ON ci.company_id=p.company_id
-                                   WHERE ci.industry_id=? AND p.email IS NOT NULL""")})
+                    **db.listed_counts(con, r["id"])})   # same people as the results list
     return jsonify(out)
 
 
@@ -277,7 +282,7 @@ def leads(slug):
     tr = {r["person_id"]: dict(r) for r in con.execute("SELECT * FROM tracker").fetchall()}
     keep = ("id", "icp", "score", "confidence", "name", "title", "company", "location", "country", "profile_flag",
             "linkedin_url", "email", "email_status", "email_source", "shows", "evidence_kind", "evidence_url", "why",
-            "company_id", "show_ids")
+            "company_id", "show_ids", "seen", "engaged", "customer")
     return jsonify([{**{k: l.get(k) for k in keep}, "tracker": tr.get(l["id"], {})} for l in rows])
 
 
@@ -336,7 +341,9 @@ def companies(slug):
         f = company_facts(con, c["id"])
         fit = [i["code"] for i in icps if i.get("find_via", "company_list") == "company_list"
                and company_rule_ok(i.get("company_rule"), f, m)]
-        n = con.execute("SELECT COUNT(*) FROM people WHERE company_id=? AND icp IS NOT NULL", (c["id"],)).fetchone()[0]
+        n = con.execute("""SELECT COUNT(*) FROM person_groups g JOIN people p ON p.id=g.person_id
+                           WHERE p.company_id=? AND g.industry_id=? AND g.icp IS NOT NULL""",
+                        (c["id"], ind["id"])).fetchone()[0]
         out.append({"id": c["id"], "name": c["name"], "fit": fit, "domain": c["domain"], "domain_source": c["domain_source"],
                     "linkedin_url": c["linkedin_url"], "shows_12mo": f["exhibitor_window_count"],
                     "exhibitor_at": [s["name"] for s in f["exhibitor_shows"]], "visitor_signals": f["visitor_evidence"],
@@ -404,10 +411,7 @@ def _search_summary(con, ind):
             "options": json.loads(ind["options_json"] or "{}"), "icps": icps,
             "clarifications": json.loads(ind["options_json"] or "{}").get("clarifications") or [], "stages": stages,
             "running_job": job["id"] if job else None, "stopping": bool(job and job["status"] == "stopping"), "last_job": dict(last) if last else None,
-            "people": q("""SELECT COUNT(*) FROM people p JOIN company_industries ci ON ci.company_id=p.company_id
-                           WHERE ci.industry_id=? AND p.icp IS NOT NULL"""),
-            "emails": q("""SELECT COUNT(*) FROM people p JOIN company_industries ci ON ci.company_id=p.company_id
-                           WHERE ci.industry_id=? AND p.icp IS NOT NULL AND p.email IS NOT NULL"""),
+            **db.listed_counts(con, ind["id"]),   # same people as the results list (flagged ones are hidden there)
             "shows": q("SELECT COUNT(*) FROM shows WHERE industry_id=?"),
             "companies": q("SELECT COUNT(*) FROM company_industries WHERE industry_id=?")}
 
@@ -477,6 +481,10 @@ def rerun_search(slug):
                       (ind["id"],)).fetchone()
     if pst and pst["status"] == "questions" and from_stage != "persona":
         abort(409, "Answer the persona's questions first, or use its best guess.")
+    est = con.execute("SELECT status FROM pipeline_stages WHERE industry_id=? AND stage='evidence'",
+                      (ind["id"],)).fetchone()
+    if est and est["status"] == "help" and from_stage not in ("persona", "research", "evidence"):
+        abort(409, "Help with the exhibitor lists first, or press “Continue without them”.")
     if "target" in p:  # a targeting change must re-run the steps it affects, not be skipped as "already done"
         # compare with what the form showed (older searches derive countries from Region), not the raw stored value
         changed = targeting.rerun_from(targeting.get(ind), new.get("target") or {})
@@ -493,6 +501,48 @@ def rerun_search(slug):
     con.execute("UPDATE industries SET options_json=? WHERE id=?", (json.dumps(new), ind["id"]))
     con.commit()
     return jsonify({"job": start_job("pipeline", {"from_stage": from_stage} if from_stage else {}, slug)})
+
+
+@app.post("/api/searches/<slug>/rename")
+def rename_search(slug):
+    """Change the display name only. The slug (work folder, Excel file name, job history) stays the same."""
+    name = " ".join(str((request.get_json(force=True) or {}).get("name") or "").split())[:120]
+    if not name:
+        abort(400, "Give the search a name.")
+    con = _con()
+    ind = db.get_industry(con, slug)
+    con.execute("UPDATE industries SET name=? WHERE id=?", (name, ind["id"]))
+    con.commit()
+    return jsonify({"slug": ind["slug"], "name": name})
+
+
+@app.delete("/api/searches/<slug>")
+def delete_search(slug):
+    """Delete a search with its shows, steps, job history, Excel file and work files. People and companies that no
+    other search uses are deleted too (the tracker notes on them go with them)."""
+    import shutil
+    con = _con()
+    ind = db.get_industry(con, slug)
+    if _running_pipeline(con, ind["slug"]) or con.execute(
+            "SELECT 1 FROM jobs WHERE industry=? AND status IN ('running','stopping')", (ind["slug"],)).fetchone():
+        abort(409, "This search is running. Stop it first.")
+    logs = [r["log_path"] for r in con.execute("SELECT log_path FROM jobs WHERE industry=?", (ind["slug"],))]
+    counts = db.delete_industry(con, ind)
+    con.execute("DELETE FROM jobs WHERE industry=?", (ind["slug"],))
+    con.commit()
+    for lp in logs:
+        try:
+            if lp and os.path.commonpath([os.path.realpath(lp), str(JOBS_DIR.resolve())]) == str(JOBS_DIR.resolve()):
+                os.remove(lp)
+        except OSError:
+            pass
+    if ind["slug"] and db.slugify(ind["slug"]) == ind["slug"]:  # never build a path from an odd slug
+        shutil.rmtree(config.DATA / "work" / ind["slug"], ignore_errors=True)
+        try:
+            path_for(ind).unlink()
+        except OSError:
+            pass
+    return jsonify({"deleted": ind["slug"], **counts})
 
 
 @app.post("/api/searches/<slug>/clarify")
@@ -534,6 +584,148 @@ def clarify_persona(slug):
     con.execute("UPDATE industries SET options_json=?, icp_approved=0 WHERE id=?", (json.dumps(opts), ind["id"]))
     con.commit()
     return jsonify({"job": start_job("pipeline", {"from_stage": "persona"}, slug)})
+
+
+# ---------------- exhibitor lists that need a human (showhelp.py) ----------------
+def _help_show(con, ind, show_id):
+    row = con.execute("SELECT * FROM shows WHERE id=? AND industry_id=?", (show_id, ind["id"])).fetchone()
+    if not row:
+        abort(404, "unknown show for this search")
+    return dict(row)
+
+
+def _evidence_paused(con, ind):
+    row = con.execute("SELECT status, detail FROM pipeline_stages WHERE industry_id=? AND stage='evidence'",
+                      (ind["id"],)).fetchone()
+    return (json.loads(row["detail"]) if row["detail"] else {}) if row and row["status"] == "help" else None
+
+
+@app.get("/api/searches/<slug>/help")
+def help_shows(slug):
+    from . import showhelp
+    con = _con()
+    ind = db.get_industry(con, slug)
+    paused = _evidence_paused(con, ind)
+    shows = showhelp.needing_help(con, ind)
+    # shows imported or skipped since the pause, so the card can show what's settled
+    settled = [{"name": s["name"], "status": d["status"], "note": d["note"],
+                "exhibitors": showhelp.exhibitor_count(con, d["show_id"])}
+               for d in showhelp.decisions(con, ind).values()
+               for s in [con.execute("SELECT name FROM shows WHERE id=?", (d["show_id"],)).fetchone()] if s]
+    return jsonify({"paused": paused is not None, "shows": shows, "settled": settled})
+
+
+@app.get("/api/searches/<slug>/help/<int:show_id>/prompt")
+def help_prompt(slug, show_id):
+    from . import showhelp
+    con = _con()
+    ind = db.get_industry(con, slug)
+    return jsonify({"prompt": showhelp.agent_prompt(con, ind, _help_show(con, ind, show_id))})
+
+
+@app.post("/api/searches/<slug>/help/<int:show_id>/url")
+def help_url(slug, show_id):
+    url = str((request.get_json(force=True) or {}).get("url") or "").strip()
+    if not re.match(r"^https?://[^\s]+$", url) or len(url) > 2000:
+        abort(400, "Paste a full web address starting with https://")
+    con = _con()
+    ind = db.get_industry(con, slug)
+    _help_show(con, ind, show_id)
+    return jsonify({"job": start_job("read_list", {"show": show_id, "url": url}, slug)})
+
+
+@app.post("/api/searches/<slug>/help/<int:show_id>/paste")
+def help_paste(slug, show_id):
+    from . import showhelp
+    p = request.get_json(force=True) or {}
+    text = str(p.get("text") or "")
+    if len(text) > 3_000_000:
+        abort(400, "That's too much text to paste; save it as a file and use ./lf import-exhibitors.")
+    src = str(p.get("source_url") or "").strip()
+    if src and not re.match(r"^https?://[^\s]+$", src):
+        abort(400, "The source page must be a full web address starting with https://")
+    con = _con()
+    ind = db.get_industry(con, slug)
+    show = _help_show(con, ind, show_id)
+    rows = showhelp.parse_rows(text)
+    if not rows:
+        abort(400, "No companies found in what you pasted. Paste the agent's JSON, a CSV with a name column, or one "
+                   "company per line.")
+    return jsonify(showhelp.import_rows(con, ind, show, rows, src or None))
+
+
+@app.post("/api/searches/<slug>/help/<int:show_id>/file")
+def help_file(slug, show_id):
+    """Upload the list as a file (PDF fair guide, CSV, Excel, JSON). CSV / Excel / JSON import at once; a PDF may
+    need Claude to read it, so it runs as a job the page waits for."""
+    from . import showhelp
+    f = request.files.get("file")
+    if not f or not f.filename:
+        abort(400, "Choose a file to upload.")
+    name = re.sub(r"[^A-Za-z0-9._-]+", "_", os.path.basename(f.filename))[-80:]
+    ext = "." + name.rsplit(".", 1)[-1].lower() if "." in name else ""
+    if ext == ".xls":
+        abort(400, "Old .xls files can't be read: save it as .xlsx or CSV and upload again.")
+    if ext not in showhelp.UPLOAD_TYPES:
+        abort(400, "Upload a PDF, CSV or Excel (.xlsx) file.")
+    src = str(request.form.get("source_url") or "").strip()
+    if src and not re.match(r"^https?://[^\s]+$", src):
+        abort(400, "The source page must be a full web address starting with https://")
+    con = _con()
+    ind = db.get_industry(con, slug)
+    show = _help_show(con, ind, show_id)
+    if db.slugify(ind["slug"]) != ind["slug"]:
+        abort(400, "unexpected search name")
+    folder = config.DATA / "work" / ind["slug"] / "uploads"
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / f"show{show_id}_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}_{name}"
+    f.save(path)
+    if ext == ".pdf":
+        return jsonify({"job": start_job("read_file", {"show": show_id, "file": str(path), "url": src}, slug)})
+    res = showhelp.read_file(con, ind, show, str(path), src or None, use_claude=False)
+    if res.get("error") and not res.get("added"):
+        abort(400, res["error"][:300])
+    return jsonify(res)
+
+
+@app.post("/api/searches/<slug>/help/<int:show_id>/skip")
+def help_skip(slug, show_id):
+    from . import showhelp
+    con = _con()
+    ind = db.get_industry(con, slug)
+    showhelp.decide(con, ind, _help_show(con, ind, show_id), "skipped", "Skipped by you")
+    return jsonify({"ok": True})
+
+
+@app.post("/api/searches/<slug>/help/continue")
+def help_continue(slug):
+    """Carry on after the exhibitor-list pause: the evidence step is marked done with the result it had (refreshed
+    for any lists imported meanwhile), shows still open are marked skipped so they aren't asked about again, and the
+    run resumes at the next step. On a finished search with new lists, re-runs people search from LinkedIn."""
+    from . import pipeline, showhelp
+    con = _con()
+    ind = db.get_industry(con, slug)
+    if _running_pipeline(con, slug):
+        abort(409, "This search is already running.")
+    paused = _evidence_paused(con, ind)
+    for h in showhelp.needing_help(con, ind):
+        showhelp.decide(con, ind, h, "skipped", "Went on without it")
+    if paused is None:
+        return jsonify({"job": start_job("pipeline", {"from_stage": "linkedin"}, slug)})
+    result = dict(paused.get("result") or {})
+    dist = pipeline.shows_distribution(con, ind)
+    n = result.get("min_shows_wanted") or 2
+    result.update({"companies_at_n_after": pipeline._at_least(dist, n),
+                   "distribution_after": {str(k): v for k, v in dist.items()},
+                   "thin_shows_after": [s["name"] for s in pipeline.show_coverage(con, ind)
+                                        if s["exhibitors"] < pipeline.THIN_LIST],
+                   "help": [f'{d["show_id"]}: {d["status"]}' + (f' ({d["note"]})' if d["note"] else "")
+                            for d in showhelp.decisions(con, ind).values()],
+                   "seconds": paused.get("seconds")})
+    con.execute("UPDATE pipeline_stages SET status='done', detail=?, ended_at=? WHERE industry_id=? AND stage='evidence'",
+                (json.dumps(result), db.now(), ind["id"]))
+    con.commit()
+    return jsonify({"job": start_job("pipeline", {}, slug)})
 
 
 @app.get("/api/credits")

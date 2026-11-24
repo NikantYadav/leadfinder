@@ -2,7 +2,7 @@
 
 Chain (mode=auto): direct download -> TinyFetch (TINYFISH_API_KEY, 1,000 free URLs/day) ->
 OpenSERP /extract (local headless render) -> Firecrawl (FIRECRAWL_API_KEY,
-1,000 free pages/month). If all fail (bot check, login wall), use `lf capture` - a visible browser you drive.
+1,000 free credits/month; skipped after a hard 404). If all fail (bot check, login wall), use `lf capture` - a visible browser you drive.
 Downloaded content is untrusted data: it is only stored as text, never executed.
 """
 import hashlib
@@ -98,24 +98,21 @@ def openserp_extract(url):
 
 
 def firecrawl(url):
-    if not keys.configured("firecrawl"):
+    """Last resort (it costs monthly credits, see providers/firecrawl.py). A PDF is fetched raw for a flat 1 credit
+    (parsers=[]) and read here; Firecrawl's own PDF parser would cost 1 credit per page."""
+    from . import firecrawl as fc
+    if not fc.available():
         raise RuntimeError("firecrawl: FIRECRAWL_API_KEY not set")
-    return keys.run("firecrawl", lambda k: _firecrawl(url, k))
-
-
-def _firecrawl(url, key):
-    r = requests.post("https://api.firecrawl.dev/v2/scrape", timeout=180,
-                      headers={"Authorization": f"Bearer {key.value}"},
-                      json={"url": url, "formats": ["markdown"], "onlyMainContent": False, "waitFor": 3000,
-                            "proxy": "basic"})
-    if r.status_code in (402, 429):
-        raise ProviderBusy(f"firecrawl HTTP {r.status_code}" + (" (rate limited)" if r.status_code == 429 else ""))
-    if not r.ok:
-        raise RuntimeError(f"firecrawl: HTTP {r.status_code} {r.text[:150]}")
-    keys.count(key)
-    text = (r.json().get("data") or {}).get("markdown") or ""
+    if url.lower().split("?")[0].endswith(".pdf"):
+        return _pdf_to_text(fc.scrape_pdf(url))
+    page = fc.scrape(url, links=True)
+    text = page["markdown"]
+    if page["status"] and page["status"] >= 400:
+        raise RuntimeError(f"firecrawl: HTTP {page['status']}")
     if _looks_blocked(text) or len(text) < MIN_USEFUL_CHARS:
         raise RuntimeError(f"firecrawl: {len(text)} chars")
+    if page["links"]:   # keep link targets: exhibitor lists often carry company websites
+        text += "\n\nLINKS:\n" + "\n".join(page["links"][:2000])
     return text
 
 
@@ -162,6 +159,9 @@ def fetch(con, url, mode="auto", refresh=False):
         order = ["direct", "tinyfetch", "firecrawl"]  # renderers would return the HTML of a soft-404 page
     tried = []
     for m in order:
+        if m == "firecrawl" and mode == "auto" and any(re.search(r"HTTP (404|410)\b", t) for t in tried):
+            tried.append("firecrawl: not tried, the page does not exist (Firecrawl charges for error pages too)")
+            continue
         try:
             text = METHODS[m](url)
         except Exception as e:  # noqa: BLE001 - any failure means: try next method

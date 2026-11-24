@@ -19,6 +19,11 @@ extracting rows. Write extracted rows to JSON files under `data/work/<industry-s
   WebSearch only when `./lf search` fails or `./lf providers` shows no search key - then cap it at ~25 per run.
   People / LinkedIn searches always go through `./lf` (your WebSearch ignores `site:` filters).
 - Page reads: always `./lf fetch <url>` (direct -> TinyFetch 1,000/day -> OpenSERP -> Firecrawl) rather than WebFetch.
+- Finding a page on a known site: `./lf site-map <site> [--show <show_id>]` lists the site's exhibitor-list /
+  directory / catalogue links for that show's edition (other years listed apart - never import them into this show);
+  `./lf site-map <company domain> --events` lists a company's events / fairs / news pages. 1 Firecrawl credit each
+  (1,000/month shared with the pipeline, cached 30 days): use it when one search didn't find the page, not for every
+  company.
 - `./lf run-queue` is slow on purpose (OpenSERP is paced ~45s/query to avoid Google captchas). Run it with
   `run_in_background` and a sensible `--max`; when it pauses (all providers busy) tell the user and offer
   `./lf queue-links` (clickable fallbacks) or adding a Serper key to `.env`.
@@ -55,6 +60,7 @@ Exact dates matter (the 3+ shows rule uses a rolling 12-month window).
 ## Step 3a - exhibitors (-> ICP A)
 For each show, get the exhibitor list:
 1. `./lf fetch <exhibitor_list_url>` (tries direct -> OpenSERP render -> Firecrawl). Read the saved file.
+   No list URL, or it 404s: `./lf site-map <show site> --show <show_id>` finds the list / directory / PDF link.
    Paginated lists: fetch each page. PDFs (exhibitor catalogues, floor plans) work too.
 2. If fetch fails (bot check / JS app / login): `./lf capture <url> --label <show> --minutes 15` with
    `run_in_background`; tell the user a browser window opened and to scroll the full list (and pass any
@@ -74,6 +80,8 @@ Work through these sources per show, highest yield first. Company-level rows -> 
 `--kind` shown; named people -> `add-people` (rows include `company`, `title`, `kind`, `confidence`, `url`).
 | Source | how | kind / confidence |
 |---|---|---|
+| LinkedIn posts + their commenters / reactors (automatic in the pipeline's `attendees` step) | `./lf show-posts --industry <slug> --show <id>` (Apify, ~$0.50-0.80 a show, cached) | person `visitor_post` / `visit_comment` likely; `post_engaged` inferred (NOT attendance) |
+| Exhibitors' clients / case-study pages (automatic `customers` step, buyer personas) | `./lf customers --industry <slug> --companies 20` | company `customer_of_exhibitor` / inferred |
 | LinkedIn posts ("visited", "see you at", hashtags) | `./lf plan-posts --show <id> --hashtag IMTEX2025` then `./lf run-queue --purpose posts`, then `./lf post-candidates --show <id>`: classify each author (visitor vs exhibitor staff), look up title/company (`./lf search '"<author>" <company?>' --site linkedin.com/in`), import, then `./lf mark-posts --status done <ids>` | person `visitor_post` / confirmed |
 | Exhibitor "thank you for visiting" posts naming/tagging visitors | same post queue, or company news pages | person `thanked_by_exhibitor` / confirmed |
 | Post-show reports / retrospects naming visiting companies & delegations | WebSearch `"<show>" retrospect OR "post show report" pdf`, `./lf fetch` the PDF | company `report_named` / likely |

@@ -3,6 +3,7 @@
 In .env, put several keys in one variable separated by commas, or use numbered variables:
     SERPER_API_KEY=key_one,key_two
     SERPER_API_KEY_2=key_three
+or simply repeat the variable on another line (every non-empty line counts).
 Tomba has a second value paired by position: TOMBA_API_KEY + TOMBA_API_SECRET
 (the n-th key goes with the n-th secret).
 
@@ -51,6 +52,9 @@ def _split(v):
 
 def _values(var):
     out = _split(config.get(var, ""))
+    if out:   # the same variable on a second line of .env = another key (ignored once the variable is unset)
+        for v in config.ENV_REPEATS.get(var, []):
+            out += _split(v)
     for n in range(2, 21):
         out += _split(config.get(f"{var}_{n}", ""))
     seen, uniq = set(), []

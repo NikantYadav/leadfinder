@@ -25,7 +25,8 @@ _bg = {"running": False}
 SERVICES = [  # (service, label, what it is used for, free allowance text)
     ("tinyfish", "TinyFish", "web search + page fetch", "12,000 searches + 1,000 fetches per day"),
     ("serper", "Serper", "web search", "2,500 searches, one-time"),
-    ("firecrawl", "Firecrawl", "page fetch", "1,000 pages per month"),
+    ("firecrawl", "Firecrawl", "exhibitor-list finder (site maps), browser-only lists, page fetch",
+     "1,000 credits per month (1 per site map or page)"),
     ("apify", "Apify", "LinkedIn search, profile checks, trade-show exhibitor lists", "$5 platform credit per month (~$0.10 per search)"),
     ("ai_ark", "AI Ark", "LinkedIn search by company name", "100 trial credits (0.5 per person found)"),
     ("brightdata", "Bright Data", "LinkedIn profile checks, company posts, people search (backup)", "trial credit"),

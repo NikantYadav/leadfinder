@@ -301,7 +301,9 @@ def test_linkedin_people_search_ingest():
     assert "21" in b["functionIds"] and b["locations"] == ["India"] and b["profileScraperMode"] == "Short"
     assert "harvestapi~linkedin-profile-search" in sent["url"]
     p = con.execute("SELECT * FROM people").fetchone()
-    assert p["icp"] == "C" and p["icp_locked"] == 1 and p["title"].startswith("Senior General Manager")
+    assert p["title"].startswith("Senior General Manager")
+    g = con.execute("SELECT industry_id, icp, locked FROM person_groups WHERE person_id=?", (p["id"],)).fetchall()
+    assert [tuple(r) for r in g] == [(ind["id"], "C", 1)]        # locked, for this search only
 
 
 def _db_with_wheels():
@@ -347,7 +349,9 @@ def test_brightdata_business_search_people():
     assert b["mode"] == "ludicrous" and b["source"] == "linkedin_people" and b["view"] == "summary"
     assert {"equals": {"country_code": "IN"}} in b["query"]["and"]
     p = con.execute("SELECT * FROM people").fetchone()
-    assert p["linkedin_url"] == "https://www.linkedin.com/in/vijay-nelson" and p["icp"] == "C"
+    assert p["linkedin_url"] == "https://www.linkedin.com/in/vijay-nelson"
+    assert con.execute("SELECT icp FROM person_groups WHERE person_id=? AND industry_id=?",
+                       (p["id"], ind["id"])).fetchone()[0] == "C"
     LI.requests.post = lambda *a, **k: R(403, {"error": "not allowlisted"})
     assert "not enabled" in enrich.linkedin_people(con, ind, "C", log=lambda m: None, via="brightdata")["error"]
     k = __import__("leadfinder.keys", fromlist=["x"]).all_keys("brightdata")[0]

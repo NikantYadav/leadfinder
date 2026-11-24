@@ -2,7 +2,7 @@
 from datetime import date, timedelta
 
 ATTEND_KINDS = {"exhibitor", "visitor_post", "thanked_by_exhibitor", "order", "delegation", "speaker",
-                "buyer_meet", "report_named", "matchmaking", "app_attendee", "testimonial"}
+                "buyer_meet", "report_named", "matchmaking", "app_attendee", "testimonial", "visit_comment"}
 SENIOR = ("chief", "cxo", "ceo", "cro", "cpo", "president", "vp", "vice president", "director", "head", "gm",
           "general manager", "country manager", "national", "partner", "owner", "founder", "managing")
 MID = ("manager", "lead", "principal", "senior", "sr.", "key account", "enterprise")
@@ -60,6 +60,12 @@ def score_person(person, person_ev, company_ev, company_window_count, min_shows=
         why.append(f"company at show ({', '.join(kinds)})")
     else:
         conf = "inferred"
+    if not p_att and any(e["kind"] == "post_engaged" for e in person_ev):
+        s += 4   # weaker than any attendance proof: a like or comment on a post about the show
+        why.append("liked or commented on a post about a show")
+    if not c_att and any(e["kind"] == "customer_of_exhibitor" for e in company_ev):
+        s += 4
+        why.append("company is named as a customer on an exhibitor's website")
     s += {"confirmed": 30, "likely": 18, "inferred": 5}[conf]
     if company_window_count >= max(min_shows or 0, 1):
         s += 15
@@ -76,7 +82,7 @@ def score_person(person, person_ev, company_ev, company_window_count, min_shows=
     if "outside target geo" in flag:
         s -= 25
         why.append(flag)
-    if "now at" in flag:
+    if "now at" in flag or "left " in flag:   # moved (profile check), or left (search excerpt)
         s -= 30
         why.append(flag)
     return max(min(s, 100), 0), conf, "; ".join(why)

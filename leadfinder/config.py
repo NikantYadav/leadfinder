@@ -10,6 +10,9 @@ DB_PATH = DATA / "leads.db"
 BROWSER_PROFILE = DATA / "browser-profile"
 
 
+ENV_REPEATS = {}  # values from the 2nd+ line of a variable in .env; key pools (keys.py) add them to the pool
+
+
 def _load_env():
     env_file = ROOT / ".env"
     if not env_file.exists():
@@ -19,8 +22,12 @@ def _load_env():
         if not line or line.startswith("#") or "=" not in line:
             continue
         k, v = line.split("=", 1)
-        v = v.split(" #", 1)[0].split("\t#", 1)[0]  # allow inline comments
-        os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+        k = k.strip()
+        v = v.split(" #", 1)[0].split("\t#", 1)[0].strip().strip('"').strip("'")  # allow inline comments
+        if not os.environ.get(k):   # the first non-empty line wins for plain settings (an empty template line doesn't)
+            os.environ[k] = v
+        elif v and v != os.environ[k]:
+            ENV_REPEATS.setdefault(k, []).append(v)   # a second (third...) line: only key pools use it
 
 
 _load_env()

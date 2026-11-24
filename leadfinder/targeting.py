@@ -196,9 +196,10 @@ def refresh_geo_flags(con, ind):
     """Re-derive the 'outside target geo' part of every flag for this search from the stored country, so changing
     the countries un-hides (or hides) people already found. No API calls."""
     tc = target_countries(ind)
-    rows = con.execute("""SELECT p.id, p.country, p.profile_flag FROM people p
-                          JOIN company_industries ci ON ci.company_id=p.company_id
-                          WHERE ci.industry_id=? AND p.icp IS NOT NULL""", (ind["id"],)).fetchall()
+    from .db import IN_GROUP
+    rows = con.execute(f"""SELECT p.id, p.country, p.profile_flag FROM people p
+                           JOIN company_industries ci ON ci.company_id=p.company_id {IN_GROUP}
+                           WHERE ci.industry_id=?""", (ind["id"],)).fetchall()
     changed = 0
     for r in rows:
         parts = [x for x in (r["profile_flag"] or "").split("; ") if x and not x.startswith("outside target geo")]

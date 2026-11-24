@@ -8,6 +8,8 @@ Profiles (check location + current company before spending email credits):
 Posts (people posting about a show):
   Apify  harvestapi~linkedin-post-search  (~$2 per 1k posts)
 """
+import re
+
 import requests
 
 from .. import config, db, keys
@@ -126,15 +128,79 @@ def _apify(actor, body, timeout=310, only=None):
     return keys.run("apify", call, only=only)
 
 
-def profiles_apify(urls):
-    items = _apify("harvestapi~linkedin-profile-scraper",
-                   {"profileScraperMode": "Profile details no email ($4 per 1k)", "queries": urls})
+PROFILE_ACTOR = "harvestapi~linkedin-profile-scraper"
+# Free Apify plans: this actor reads at most 10 profiles per run. Asked for more, it "succeeds" with ONE row
+# {"error": "Free users are limited to 10 items per run..."} (run statusMessage "free user item limit exceeded").
+FREE_PROFILES_PER_RUN = 10
+_PER_RUN_RE = re.compile(r"limited to (\d+) items? per run", re.I)
+_per_run_cap = {}   # key state_id -> profiles per run learned from the actor's own error
+
+
+class ProfileReaderError(ProviderError):
+    """The profile reader answered with an error row instead of profiles (its message is kept for the UI)."""
+
+
+def _profile_rows(urls, key):
+    return _apify(PROFILE_ACTOR, {"profileScraperMode": "Profile details no email ($4 per 1k)", "queries": urls},
+                  only=lambda x: x.state_id == key.state_id)
+
+
+def _read_profiles(urls, key, log=None):
+    """Raw profile rows for urls on one key, in runs no larger than the key's per-run cap (10 on free plans)."""
+    cap = _per_run_cap.get(key.state_id) or len(urls)
+    rows = []
+    for i in range(0, len(urls), cap):
+        part = urls[i:i + cap]
+        items = _profile_rows(part, key) or []
+        errs = [str(it.get("error")) for it in items if isinstance(it, dict) and it.get("error")
+                and not (it.get("publicIdentifier") or it.get("linkedinUrl"))]
+        good = [it for it in items if isinstance(it, dict) and not it.get("error")]
+        m = _PER_RUN_RE.search(errs[0]) if errs and not good else None
+        if m and 0 < int(m.group(1)) < len(part):
+            _per_run_cap[key.state_id] = int(m.group(1))
+            if log:
+                log(f"  apify key {key.fp}: free plan reads {m.group(1)} profiles per run, splitting into smaller runs")
+            rows += _read_profiles(part, key, log)
+            continue
+        if errs and not good:
+            raise ProfileReaderError(f"the LinkedIn profile reader (Apify) answered: {errs[0][:200]}")
+        rows += good
+    return rows
+
+
+def profiles_apify(urls, con=None, log=None):
+    """{slug: profile} for urls. Free-plan keys read in runs of 10; an error row from the actor is raised with its
+    own message (never counted as 'no profiles found')."""
+    ks = keys.usable("apify", con)
+    if not ks:
+        raise ProviderBusy("apify: no usable key")
+    free = None
+    items, last = None, None
+    for key in ks:   # a key that is out of credit / rate limited (HTTP 402/429) is rested and the next one tried
+        if key.state_id not in _per_run_cap:
+            if free is None:
+                try:
+                    from . import events as ev
+                    free = not ev.paid_plan()
+                except Exception:  # noqa: BLE001 - unknown plan: learn the cap from the actor's error instead
+                    free = False
+            if free:
+                _per_run_cap[key.state_id] = FREE_PROFILES_PER_RUN
+        try:
+            items = _read_profiles(urls, key, log)
+            break
+        except ProviderBusy as e:
+            last = e
+    if items is None:
+        raise last or ProviderBusy("apify: all keys busy")
     out = {}
     for it in items or []:
         loc = (it.get("location") or {}).get("parsed") or {}
         cur = (it.get("currentPosition") or [{}])
         cur = cur[0] if cur else {}
         slug = (it.get("publicIdentifier") or _slug(it.get("linkedinUrl")) or "").lower()
+        if not slug:
+            continue
         out[slug] = {"name": " ".join(x for x in (it.get("firstName"), it.get("lastName")) if x),
                      "headline": it.get("headline"), "company": cur.get("companyName"),
                      "title": cur.get("position") or cur.get("title"),
@@ -166,17 +232,33 @@ def _profile_brightdata(url, key):
             "url": it.get("url"), "source": "brightdata"}
 
 
-def check_profiles(urls, batch=25, on_batch=None):
-    """Return {slug: profile} using Apify (batched) or Bright Data (one by one)."""
+def check_profiles(urls, batch=25, on_batch=None, con=None, log=None):
+    """Return {slug: profile} using Apify (batched) or Bright Data (one by one). When every Apify key has used the
+    profile reader's free allowance, Bright Data is tried; if that fails too, the Apify reason is raised."""
     out = {}
+    limit = None
     if apify_available():
-        for i in range(0, len(urls), batch):
-            got = profiles_apify(urls[i:i + batch])
-            out.update(got)
-            if on_batch:
-                on_batch(got)  # saved per batch, so a Stop never throws away profiles already paid for
-        return out
+        try:
+            for i in range(0, len(urls), batch):
+                got = profiles_apify(urls[i:i + batch], con=con, log=log)
+                out.update(got)
+                if on_batch:
+                    on_batch(got)  # saved per batch, so a Stop never throws away profiles already paid for
+            return out
+        except ProfileReaderError as e:
+            if not brightdata_available():
+                raise
+            limit = e
     if brightdata_available():
+        if limit:
+            try:
+                p = profile_brightdata(urls[0])
+            except (ProviderBusy, ProviderError) as e:
+                raise ProfileReaderError(f"{limit}; Bright Data also failed ({str(e)[:100]})") from e
+            out[_slug(urls[0])] = p
+            if on_batch:
+                on_batch({_slug(urls[0]): p})
+            urls = urls[1:]
         for u in urls:
             p = profile_brightdata(u)
             out[_slug(u)] = p

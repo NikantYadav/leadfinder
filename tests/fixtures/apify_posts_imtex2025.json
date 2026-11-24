@@ -1,0 +1,1922 @@
+[
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAF7sYIQBeKNTtpWEYg4SOLPJ5SbnARiLGEQ,urn:li:ugcPost:7411396331069440000,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAF7sYIQBeKNTtpWEYg4SOLPJ5SbnARiLGEQ",
+"name": "Rohit GN",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAF7sYIQBeKNTtpWEYg4SOLPJ5SbnARiLGEQ",
+"position": "Business Development Executive at Form B Design"
+},
+"postId": "7411639690551853056",
+"query": {
+"post": "https://www.linkedin.com/posts/sanjithak_as-we-close-2025-at-form-b-design-research-activity-7411639690551853056-PN3v"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAzMhKEB5pY-njtV8apdzGtVrlEQsbUzFbI,urn:li:ugcPost:7411396331069440000,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAzMhKEB5pY-njtV8apdzGtVrlEQsbUzFbI",
+"name": "arpita pattanaik",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAzMhKEB5pY-njtV8apdzGtVrlEQsbUzFbI",
+"position": "Business Development , PRODUCT DESIGN at Tata Elxsi."
+},
+"postId": "7411639690551853056",
+"query": {
+"post": "https://www.linkedin.com/posts/sanjithak_as-we-close-2025-at-form-b-design-research-activity-7411639690551853056-PN3v"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAC41epcBXoXob8fDdWkyUEWdhdA_3FFRv6k,urn:li:ugcPost:7411396331069440000,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAC41epcBXoXob8fDdWkyUEWdhdA_3FFRv6k",
+"name": "Dr Sunitha Madhavan",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAC41epcBXoXob8fDdWkyUEWdhdA_3FFRv6k",
+"position": "ENT Consultant at Apollo medical centre Marathahalli"
+},
+"postId": "7411639690551853056",
+"query": {
+"post": "https://www.linkedin.com/posts/sanjithak_as-we-close-2025-at-form-b-design-research-activity-7411639690551853056-PN3v"
+}
+},
+{
+"type": "post",
+"id": "7411639690551853056",
+"linkedinUrl": "https://www.linkedin.com/posts/sanjithak_as-we-close-2025-at-form-b-design-research-activity-7411639690551853056-PN3v",
+"content": "As we close 2025 at Form B Design + Research, one moment stands out clearly.\n\nIMTEX 2025.\n\nNot one stall.\nNot one machine.\n\n\ud83d\udc49 9 of our design projects exhibited across multiple client stalls.\n\nEach one built for a different brand.\nEach one solving a different engineering and market problem.\nBut all carrying the same design intent.\n\nThat didn\u2019t happen by chance.\nOver the past year, we made deliberate investments:\nIn marketing (telling our story consistently)\nIn positioning (design as a strategic lever, not a styling service)\nIn process (clear phases from concept \u2192 engineering \u2192 manufacturable reality)\nIn people and partnerships (working deeply with R&D, engineering, and leadership teams)\n\nAnd we stayed anchored to\nOne clear belief:\nIndustrial design is not how a machine looks.\nIt\u2019s how a machine performs before it is switched on.\n\nThat belief shaped everything:\nHow we speak to clients\nHow we structure engagements\nHow we design machine enclosures, interfaces, and systems\nHow we balance aesthetics, DFMA, serviceability, safety, and brand presence\n\nIMTEX 2025 was not a marketing milestone for us.\nIt was a validation milestone.\nValidation that:\nDesign-led machines get noticed\nThoughtful engineering earns trust\nConsistent storytelling compounds over time\n\nMost importantly, it reinforced something we\u2019ve believed all along:\n\ud83d\udc49 When design is treated as strategy, it shows up on the shop floor, on the exhibition floor, and in the market.\n\nGrateful to the clients who trusted the process.\nGrateful to the teams who executed under real constraints.\nAnd excited about where this journey is heading next.\nOnwards, with clarity, consistency, and conviction.",
+"author": {
+"id": "ACoAAAAtsJEB66xPe8tEj9oSwoHzb64hOAMhRMw",
+"universalName": null,
+"publicIdentifier": "sanjithak",
+"type": "profile",
+"name": "Sanjith A. K.",
+"linkedinUrl": "https://www.linkedin.com/in/sanjithak?miniProfileUrn=urn%3Ali%3Afsd_profile%3AACoAAAAtsJEB66xPe8tEj9oSwoHzb64hOAMhRMw",
+"info": "I help machine manufacturers design and build export-ready, design-led products \u25ba Industrial Design \u25ba Product Innovation \u25ba Design for Manufacturing \u25ba IMTEX Award-Winning \u25baConsulting \u25ba Engineering Aesthetics",
+"website": "https://topmate.io/sanjith_a_k/1841498?utm_source=public_profile&utm_campaign=sanjith_a_k",
+"websiteLabel": "Book an appointment",
+"urn": "2994321",
+"profileId": "ACoAAAAtsJEB66xPe8tEj9oSwoHzb64hOAMhRMw"
+},
+"postedAt": {
+"timestamp": 1767072603834,
+"date": "2025-12-30T05:30:03.834Z",
+"postedAgoShort": "10mo",
+"postedAgoText": "10 months ago \u2022 Visible to anyone on or off LinkedIn"
+},
+"comments": [],
+"entityId": "7411639690551853056",
+"shareUrn": "urn:li:ugcPost:7411396331069440000",
+"shareLinkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7411396331069440000",
+"engagement": {
+"id": "7411396331069440000",
+"likes": 11,
+"comments": 0,
+"shares": 1,
+"reactions": [
+{
+"type": "LIKE",
+"count": 9
+},
+{
+"type": "PRAISE",
+"count": 1
+},
+{
+"type": "APPRECIATION",
+"count": 1
+}
+]
+},
+"reactions": [
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAzMhKEB5pY-njtV8apdzGtVrlEQsbUzFbI,urn:li:ugcPost:7411396331069440000,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAzMhKEB5pY-njtV8apdzGtVrlEQsbUzFbI",
+"name": "arpita pattanaik",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAzMhKEB5pY-njtV8apdzGtVrlEQsbUzFbI",
+"position": "Business Development , PRODUCT DESIGN at Tata Elxsi."
+},
+"postId": "7411639690551853056"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAC41epcBXoXob8fDdWkyUEWdhdA_3FFRv6k,urn:li:ugcPost:7411396331069440000,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAC41epcBXoXob8fDdWkyUEWdhdA_3FFRv6k",
+"name": "Dr Sunitha Madhavan",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAC41epcBXoXob8fDdWkyUEWdhdA_3FFRv6k",
+"position": "ENT Consultant at Apollo medical centre Marathahalli"
+},
+"postId": "7411639690551853056"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAF7sYIQBeKNTtpWEYg4SOLPJ5SbnARiLGEQ,urn:li:ugcPost:7411396331069440000,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAF7sYIQBeKNTtpWEYg4SOLPJ5SbnARiLGEQ",
+"name": "Rohit GN",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAF7sYIQBeKNTtpWEYg4SOLPJ5SbnARiLGEQ",
+"position": "Business Development Executive at Form B Design"
+},
+"postId": "7411639690551853056"
+}
+],
+"reactionIds": [
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAzMhKEB5pY-njtV8apdzGtVrlEQsbUzFbI,urn:li:ugcPost:7411396331069440000,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAC41epcBXoXob8fDdWkyUEWdhdA_3FFRv6k,urn:li:ugcPost:7411396331069440000,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAF7sYIQBeKNTtpWEYg4SOLPJ5SbnARiLGEQ,urn:li:ugcPost:7411396331069440000,0)"
+],
+"commentIds": [],
+"query": {
+"sortBy": "relevance",
+"page": 1,
+"search": "\"IMTEX 2025\""
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAADxQFaABiIWPicap1lzC8cED6adbqMxbgpw,urn:li:ugcPost:7288832641032720385,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAADxQFaABiIWPicap1lzC8cED6adbqMxbgpw",
+"name": "William Zang",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAADxQFaABiIWPicap1lzC8cED6adbqMxbgpw",
+"position": "."
+},
+"postId": "7288832641494106114",
+"query": {
+"post": "https://www.linkedin.com/posts/bichamp-cutting-technology_exhibition-news-bichamp-shines-at-imtex-activity-7288832641494106114-ecnb"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAACG-YO0BRigTz6Wn_z7ug_xT3G6XbHDh_oA,urn:li:ugcPost:7288832641032720385,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAACG-YO0BRigTz6Wn_z7ug_xT3G6XbHDh_oA",
+"name": "Uwe Liedebrand",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAACG-YO0BRigTz6Wn_z7ug_xT3G6XbHDh_oA",
+"position": "Vertriebsleiter AMADA Machinery Europe GmbH"
+},
+"postId": "7288832641494106114",
+"query": {
+"post": "https://www.linkedin.com/posts/bichamp-cutting-technology_exhibition-news-bichamp-shines-at-imtex-activity-7288832641494106114-ecnb"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAE4CTP4BJigOd_HvPalN69W1QKKTqGzj4As,urn:li:ugcPost:7288832641032720385,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAE4CTP4BJigOd_HvPalN69W1QKKTqGzj4As",
+"name": "Suman Pai",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAE4CTP4BJigOd_HvPalN69W1QKKTqGzj4As",
+"position": "Social Media Manager at Confluencr - Global Influencer Marketing Agency"
+},
+"postId": "7288832641494106114",
+"query": {
+"post": "https://www.linkedin.com/posts/bichamp-cutting-technology_exhibition-news-bichamp-shines-at-imtex-activity-7288832641494106114-ecnb"
+}
+},
+{
+"type": "comment",
+"id": "7289087150883516416",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7288832641032720385?commentUrn=urn%3Ali%3Acomment%3A%28ugcPost%3A7288832641032720385%2C7289087150883516416%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287289087150883516416%2Curn%3Ali%3AugcPost%3A7288832641032720385%29",
+"commentary": "It was a nice interaction with you... Expecting a quick trial of circular saw blades to proceed further",
+"createdAt": "2025-01-26T01:10:01.461Z",
+"createdAtTimestamp": 1737853801461,
+"engagement": {
+"likes": 0,
+"comments": 0,
+"shares": 0,
+"reactions": []
+},
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "ACoAAA7SB6EBbuJyq6CBCX-lB_xTjugkSv7Odh0",
+"type": "profile",
+"name": "Subash chandra Behera",
+"linkedinUrl": "https://www.linkedin.com/in/subash-chandra-behera-1153306b",
+"position": "Manager",
+"author": false
+},
+"postId": "7288832641494106114",
+"query": {
+"post": "https://www.linkedin.com/posts/bichamp-cutting-technology_exhibition-news-bichamp-shines-at-imtex-activity-7288832641494106114-ecnb"
+}
+},
+{
+"type": "comment",
+"id": "7289087240255811584",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7288832641032720385?commentUrn=urn%3Ali%3Acomment%3A%28ugcPost%3A7288832641032720385%2C7289087240255811584%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287289087240255811584%2Curn%3Ali%3AugcPost%3A7288832641032720385%29",
+"commentary": "It was a nice interaction with you... Expecting a quick trial of circular saw blades to proceed further",
+"createdAt": "2025-01-26T01:10:22.769Z",
+"createdAtTimestamp": 1737853822769,
+"engagement": {
+"likes": 0,
+"comments": 0,
+"shares": 0,
+"reactions": []
+},
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "ACoAAA7SB6EBbuJyq6CBCX-lB_xTjugkSv7Odh0",
+"type": "profile",
+"name": "Subash chandra Behera",
+"linkedinUrl": "https://www.linkedin.com/in/subash-chandra-behera-1153306b",
+"position": "Manager",
+"author": false
+},
+"postId": "7288832641494106114",
+"query": {
+"post": "https://www.linkedin.com/posts/bichamp-cutting-technology_exhibition-news-bichamp-shines-at-imtex-activity-7288832641494106114-ecnb"
+}
+},
+{
+"type": "post",
+"id": "7288832641494106114",
+"linkedinUrl": "https://www.linkedin.com/posts/bichamp-cutting-technology_exhibition-news-bichamp-shines-at-imtex-activity-7288832641494106114-ecnb",
+"content": "Exhibition News | Bichamp Shines at IMTEX 2025",
+"author": {
+"id": "10399948",
+"universalName": "bichamp-cutting-technology",
+"publicIdentifier": null,
+"type": "company",
+"name": "Bichamp Cutting Technology",
+"linkedinUrl": "https://www.linkedin.com/company/bichamp-cutting-technology/posts",
+"info": "1,020 followers",
+"website": null,
+"websiteLabel": null,
+"urn": "10399948",
+"companyId": "10399948"
+},
+"postedAt": {
+"timestamp": 1737793121694,
+"date": "2025-01-25T08:18:41.694Z",
+"postedAgoShort": "1yr",
+"postedAgoText": "1 year ago \u2022 Visible to anyone on or off LinkedIn"
+},
+"article": {
+"title": "Exhibition News | Bichamp Shines at IMTEX 2025",
+"subtitle": "Bichamp Cutting Technology",
+"link": "https://www.linkedin.com/pulse/exhibition-news-bichamp-shines-imtex-2025-btfnc?trackingId=dBp6vtNqTDeZ1VutJ6Rb%2Fg%3D%3D",
+"linkLabel": "Open article: Exhibition News | Bichamp Shines at IMTEX 2025 by Bichamp Cutting Technology \u2022 1 min read",
+"description": "On January 23, 2025, the International Machine Tool and Manufacturing Technology Exhibition (IMTEX 2025) grandly opened in Bengaluru,India. The Indian",
+"image": {
+"url": "https://media.licdn.com/dms/image/v2/D5612AQFOttK8JSipFQ/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1737792464045?e=1796860800&v=beta&t=2DzPfr-uQURbC02fXkqIfmVjiwVJf6vmV1nld-ecOWo",
+"width": 960,
+"height": 720
+}
+},
+"comments": [
+{
+"id": "7289087240255811584",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7288832641032720385?commentUrn=urn%3Ali%3Acomment%3A%28ugcPost%3A7288832641032720385%2C7289087240255811584%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287289087240255811584%2Curn%3Ali%3AugcPost%3A7288832641032720385%29",
+"commentary": "It was a nice interaction with you... Expecting a quick trial of circular saw blades to proceed further",
+"createdAt": "2025-01-26T01:10:22.769Z",
+"createdAtTimestamp": 1737853822769,
+"engagement": {
+"likes": 0,
+"comments": 0,
+"shares": 0,
+"reactions": []
+},
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "ACoAAA7SB6EBbuJyq6CBCX-lB_xTjugkSv7Odh0",
+"type": "profile",
+"name": "Subash chandra Behera",
+"linkedinUrl": "https://www.linkedin.com/in/subash-chandra-behera-1153306b",
+"position": "Manager",
+"author": false
+},
+"postId": "7288832641494106114"
+},
+{
+"id": "7289087150883516416",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7288832641032720385?commentUrn=urn%3Ali%3Acomment%3A%28ugcPost%3A7288832641032720385%2C7289087150883516416%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287289087150883516416%2Curn%3Ali%3AugcPost%3A7288832641032720385%29",
+"commentary": "It was a nice interaction with you... Expecting a quick trial of circular saw blades to proceed further",
+"createdAt": "2025-01-26T01:10:01.461Z",
+"createdAtTimestamp": 1737853801461,
+"engagement": {
+"likes": 0,
+"comments": 0,
+"shares": 0,
+"reactions": []
+},
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "ACoAAA7SB6EBbuJyq6CBCX-lB_xTjugkSv7Odh0",
+"type": "profile",
+"name": "Subash chandra Behera",
+"linkedinUrl": "https://www.linkedin.com/in/subash-chandra-behera-1153306b",
+"position": "Manager",
+"author": false
+},
+"postId": "7288832641494106114"
+}
+],
+"entityId": "7288832641494106114",
+"shareUrn": "urn:li:ugcPost:7288832641032720385",
+"shareLinkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7288832641032720385",
+"engagement": {
+"id": "7288832641032720385",
+"likes": 20,
+"comments": 2,
+"shares": 0,
+"reactions": [
+{
+"type": "LIKE",
+"count": 20
+}
+]
+},
+"reactions": [
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAE4CTP4BJigOd_HvPalN69W1QKKTqGzj4As,urn:li:ugcPost:7288832641032720385,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAE4CTP4BJigOd_HvPalN69W1QKKTqGzj4As",
+"name": "Suman Pai",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAE4CTP4BJigOd_HvPalN69W1QKKTqGzj4As",
+"position": "Social Media Manager at Confluencr - Global Influencer Marketing Agency"
+},
+"postId": "7288832641494106114"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAACG-YO0BRigTz6Wn_z7ug_xT3G6XbHDh_oA,urn:li:ugcPost:7288832641032720385,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAACG-YO0BRigTz6Wn_z7ug_xT3G6XbHDh_oA",
+"name": "Uwe Liedebrand",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAACG-YO0BRigTz6Wn_z7ug_xT3G6XbHDh_oA",
+"position": "Vertriebsleiter AMADA Machinery Europe GmbH"
+},
+"postId": "7288832641494106114"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAADxQFaABiIWPicap1lzC8cED6adbqMxbgpw,urn:li:ugcPost:7288832641032720385,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAADxQFaABiIWPicap1lzC8cED6adbqMxbgpw",
+"name": "William Zang",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAADxQFaABiIWPicap1lzC8cED6adbqMxbgpw",
+"position": "."
+},
+"postId": "7288832641494106114"
+}
+],
+"reactionIds": [
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAE4CTP4BJigOd_HvPalN69W1QKKTqGzj4As,urn:li:ugcPost:7288832641032720385,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAACG-YO0BRigTz6Wn_z7ug_xT3G6XbHDh_oA,urn:li:ugcPost:7288832641032720385,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAADxQFaABiIWPicap1lzC8cED6adbqMxbgpw,urn:li:ugcPost:7288832641032720385,0)"
+],
+"commentIds": [
+"7289087240255811584",
+"7289087150883516416"
+],
+"query": {
+"sortBy": "relevance",
+"page": 1,
+"search": "\"IMTEX 2025\""
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAl4PisBSCYlSFptnp__5a5ybykVxCXT50M,urn:li:ugcPost:7515736389326512128,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAl4PisBSCYlSFptnp__5a5ybykVxCXT50M",
+"name": "Paul Jones",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAl4PisBSCYlSFptnp__5a5ybykVxCXT50M",
+"position": "CEO - MTDCNC / Producing and delivering content to promote manufacturing around the World"
+},
+"postId": "7515736390358233088",
+"query": {
+"post": "https://www.linkedin.com/posts/ashutosh-arora-director_machines-run-on-the-shop-floor-but-the-people-activity-7515736390358233088-nHah"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAVAEG8BxPy940mMt96ANJJbuRwxQv4-8nI,urn:li:ugcPost:7515736389326512128,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAVAEG8BxPy940mMt96ANJJbuRwxQv4-8nI",
+"name": "Carlo Coenraad",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAVAEG8BxPy940mMt96ANJJbuRwxQv4-8nI",
+"position": "International Correspondent and Head of African Operations"
+},
+"postId": "7515736390358233088",
+"query": {
+"post": "https://www.linkedin.com/posts/ashutosh-arora-director_machines-run-on-the-shop-floor-but-the-people-activity-7515736390358233088-nHah"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAUaRIQBr5AuWGxOt9simmVwNtDKqwHkjXY,urn:li:ugcPost:7515736389326512128,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAUaRIQBr5AuWGxOt9simmVwNtDKqwHkjXY",
+"name": "Dheeraj Kumar Singh",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAUaRIQBr5AuWGxOt9simmVwNtDKqwHkjXY",
+"position": "Industrial Sales Leader | Founder at LoadX Solutions | Strategic Growth in Material Handling & Intralogistics | Expert in Technical Project Management & Solution Selling"
+},
+"postId": "7515736390358233088",
+"query": {
+"post": "https://www.linkedin.com/posts/ashutosh-arora-director_machines-run-on-the-shop-floor-but-the-people-activity-7515736390358233088-nHah"
+}
+},
+{
+"type": "post",
+"id": "7515736390358233088",
+"linkedinUrl": "https://www.linkedin.com/posts/ashutosh-arora-director_machines-run-on-the-shop-floor-but-the-people-activity-7515736390358233088-nHah",
+"content": "Machines run on the shop floor, but the people running the business often can't see what they're doing. Gedee Weiler is fixing that with Yantra 24/7, their own CNC machine monitoring software, which they showed on their machines at IMTEX 2025. It gives top management machine data, traceability and the OEE of each machine.\n\nAnjay Goliya of Gedee Weiler said the response was strong, with 80 to 90 percent quality footfall at their stand and one of the best IMTEX editions yet. Good to see an Indian machine builder selling the data along with the machine.",
+"author": {
+"id": "ACoAAA1YK9cBnuFxdYW1LKWlNiwWPlkqvnqgr14",
+"universalName": null,
+"publicIdentifier": "ashutosh-arora-director",
+"type": "profile",
+"name": "Ashutosh Arora",
+"linkedinUrl": "https://www.linkedin.com/in/ashutosh-arora-director?miniProfileUrn=urn%3Ali%3Afsd_profile%3AACoAAA1YK9cBnuFxdYW1LKWlNiwWPlkqvnqgr14",
+"info": "Director, India @ MTDCNC | I help machine-tool & manufacturing brands get seen by buyers \u2014 CNC video marketing, live demos & industry storytelling",
+"website": null,
+"websiteLabel": null,
+"urn": "223882199",
+"profileId": "ACoAAA1YK9cBnuFxdYW1LKWlNiwWPlkqvnqgr14"
+},
+"postedAt": {
+"timestamp": 1791891191091,
+"date": "2026-10-13T11:33:11.091Z",
+"postedAgoShort": "1mo",
+"postedAgoText": "1 month ago \u2022 Visible to anyone on or off LinkedIn"
+},
+"comments": [],
+"entityId": "7515736390358233088",
+"shareUrn": "urn:li:ugcPost:7515736389326512128",
+"shareLinkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7515736389326512128",
+"engagement": {
+"id": "7515736389326512128",
+"likes": 62,
+"comments": 0,
+"shares": 10,
+"reactions": [
+{
+"type": "LIKE",
+"count": 62
+}
+]
+},
+"reactions": [
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAl4PisBSCYlSFptnp__5a5ybykVxCXT50M,urn:li:ugcPost:7515736389326512128,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAl4PisBSCYlSFptnp__5a5ybykVxCXT50M",
+"name": "Paul Jones",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAl4PisBSCYlSFptnp__5a5ybykVxCXT50M",
+"position": "CEO - MTDCNC / Producing and delivering content to promote manufacturing around the World"
+},
+"postId": "7515736390358233088"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAUaRIQBr5AuWGxOt9simmVwNtDKqwHkjXY,urn:li:ugcPost:7515736389326512128,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAUaRIQBr5AuWGxOt9simmVwNtDKqwHkjXY",
+"name": "Dheeraj Kumar Singh",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAUaRIQBr5AuWGxOt9simmVwNtDKqwHkjXY",
+"position": "Industrial Sales Leader | Founder at LoadX Solutions | Strategic Growth in Material Handling & Intralogistics | Expert in Technical Project Management & Solution Selling"
+},
+"postId": "7515736390358233088"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAVAEG8BxPy940mMt96ANJJbuRwxQv4-8nI,urn:li:ugcPost:7515736389326512128,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAVAEG8BxPy940mMt96ANJJbuRwxQv4-8nI",
+"name": "Carlo Coenraad",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAVAEG8BxPy940mMt96ANJJbuRwxQv4-8nI",
+"position": "International Correspondent and Head of African Operations"
+},
+"postId": "7515736390358233088"
+}
+],
+"reactionIds": [
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAl4PisBSCYlSFptnp__5a5ybykVxCXT50M,urn:li:ugcPost:7515736389326512128,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAUaRIQBr5AuWGxOt9simmVwNtDKqwHkjXY,urn:li:ugcPost:7515736389326512128,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAVAEG8BxPy940mMt96ANJJbuRwxQv4-8nI,urn:li:ugcPost:7515736389326512128,0)"
+],
+"commentIds": [],
+"query": {
+"sortBy": "relevance",
+"page": 1,
+"search": "\"IMTEX 2025\""
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAADlvrl8BS6R68fNg_mZ_kL1JziNE8VS6_-M,urn:li:ugcPost:7303379942065483776,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAADlvrl8BS6R68fNg_mZ_kL1JziNE8VS6_-M",
+"name": "Rishabh Tiwari",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAADlvrl8BS6R68fNg_mZ_kL1JziNE8VS6_-M",
+"position": "Associate Business Analyst at UCAM"
+},
+"postId": "7303379942627516416",
+"query": {
+"post": "https://www.linkedin.com/posts/ucamind_ucam-imtex-cncmachining-activity-7303379942627516416-a91N"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAACJDav8BJJVHLcoI2bZUWcp5WPCJlvUrtrw,urn:li:ugcPost:7303379942065483776,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAACJDav8BJJVHLcoI2bZUWcp5WPCJlvUrtrw",
+"name": "Rangegowda Bk",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAACJDav8BJJVHLcoI2bZUWcp5WPCJlvUrtrw",
+"position": "Cmm programmer and operater at UCAM Pvt ltd"
+},
+"postId": "7303379942627516416",
+"query": {
+"post": "https://www.linkedin.com/posts/ucamind_ucam-imtex-cncmachining-activity-7303379942627516416-a91N"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAFMkbw4BI9665ezwbA_8ci3tFl_J19wv0-E,urn:li:ugcPost:7303379942065483776,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAFMkbw4BI9665ezwbA_8ci3tFl_J19wv0-E",
+"name": "Kumara Kumara",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAFMkbw4BI9665ezwbA_8ci3tFl_J19wv0-E",
+"position": "Vmc operator cum setter at Ace Multi Axes Systems Limited"
+},
+"postId": "7303379942627516416",
+"query": {
+"post": "https://www.linkedin.com/posts/ucamind_ucam-imtex-cncmachining-activity-7303379942627516416-a91N"
+}
+},
+{
+"type": "post",
+"id": "7303379942627516416",
+"linkedinUrl": "https://www.linkedin.com/posts/ucamind_ucam-imtex-cncmachining-activity-7303379942627516416-a91N",
+"content": "Missed us at IMTEX 2025?\n\nWe\u2019ve got you covered!\n\nOur latest newsletter recaps everything from IMTEX 2025\u2014exclusive highlights, new product launches, and key industry insights.\n\nGet a closer look at how our latest innovations in precision rotary tables are shaping the future of manufacturing and our plan for 2025.\n\nDon\u2019t miss out\u2014read the full newsletter now!\n\n#UCAM #IMTEX #CNCMachining #RotaryTables #Innovation #Technology #MadeInIndia #VocalForLocal",
+"author": {
+"id": "14466908",
+"universalName": "ucamind",
+"publicIdentifier": null,
+"type": "company",
+"name": "UCAM",
+"linkedinUrl": "https://www.linkedin.com/company/ucamind/posts",
+"info": "11,711 followers",
+"website": null,
+"websiteLabel": null,
+"urn": "14466908",
+"companyId": "14466908"
+},
+"postedAt": {
+"timestamp": 1741261468560,
+"date": "2025-03-06T11:44:28.560Z",
+"postedAgoShort": "1yr",
+"postedAgoText": "1 year ago \u2022 Visible to anyone on or off LinkedIn"
+},
+"article": {
+"title": "Our Highlights From IMTEX 2025",
+"subtitle": "UCAM",
+"link": "https://www.linkedin.com/pulse/our-highlights-from-imtex-2025-ucamind-oqjzc?trackingId=3VAuq8WsSkO5qLkrVzW0XA%3D%3D",
+"linkLabel": "Open article: Our Highlights From IMTEX 2025 by UCAM \u2022 5 min read",
+"description": "IMTEX 2025 was a milestone event for us!We proudly unveiled our latest cutting-edge rotary solutions, designed to drive automation, precision, and inn",
+"image": {
+"url": "https://media.licdn.com/dms/image/v2/D5612AQFu_Oyd91yEAg/article-cover_image-shrink_720_1280/B56ZVrOTGXGQAI-/0/1741260665779?e=1796860800&v=beta&t=_U3r6OxoBVHb1PC9ezwLkrRsiuukvmcrd-wsSN856BU",
+"width": 744,
+"height": 418
+}
+},
+"newsletterUrl": "https://www.linkedin.com/newsletters/ucam-techtalk-7097522100709576705",
+"newsletterTitle": "UCAM TechTalk",
+"comments": [],
+"entityId": "7303379942627516416",
+"shareUrn": "urn:li:ugcPost:7303379942065483776",
+"shareLinkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7303379942065483776",
+"engagement": {
+"id": "7303379942065483776",
+"likes": 42,
+"comments": 0,
+"shares": 0,
+"reactions": [
+{
+"type": "LIKE",
+"count": 42
+}
+]
+},
+"reactions": [
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAADlvrl8BS6R68fNg_mZ_kL1JziNE8VS6_-M,urn:li:ugcPost:7303379942065483776,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAADlvrl8BS6R68fNg_mZ_kL1JziNE8VS6_-M",
+"name": "Rishabh Tiwari",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAADlvrl8BS6R68fNg_mZ_kL1JziNE8VS6_-M",
+"position": "Associate Business Analyst at UCAM"
+},
+"postId": "7303379942627516416"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAACJDav8BJJVHLcoI2bZUWcp5WPCJlvUrtrw,urn:li:ugcPost:7303379942065483776,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAACJDav8BJJVHLcoI2bZUWcp5WPCJlvUrtrw",
+"name": "Rangegowda Bk",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAACJDav8BJJVHLcoI2bZUWcp5WPCJlvUrtrw",
+"position": "Cmm programmer and operater at UCAM Pvt ltd"
+},
+"postId": "7303379942627516416"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAFMkbw4BI9665ezwbA_8ci3tFl_J19wv0-E,urn:li:ugcPost:7303379942065483776,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAFMkbw4BI9665ezwbA_8ci3tFl_J19wv0-E",
+"name": "Kumara Kumara",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAFMkbw4BI9665ezwbA_8ci3tFl_J19wv0-E",
+"position": "Vmc operator cum setter at Ace Multi Axes Systems Limited"
+},
+"postId": "7303379942627516416"
+}
+],
+"reactionIds": [
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAADlvrl8BS6R68fNg_mZ_kL1JziNE8VS6_-M,urn:li:ugcPost:7303379942065483776,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAACJDav8BJJVHLcoI2bZUWcp5WPCJlvUrtrw,urn:li:ugcPost:7303379942065483776,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAFMkbw4BI9665ezwbA_8ci3tFl_J19wv0-E,urn:li:ugcPost:7303379942065483776,0)"
+],
+"commentIds": [],
+"query": {
+"sortBy": "relevance",
+"page": 1,
+"search": "\"IMTEX 2025\""
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAACkuWmsBbaVDTL29Bei9XbT1H0x1tAZuVoM,urn:li:ugcPost:7267391168231936000,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAACkuWmsBbaVDTL29Bei9XbT1H0x1tAZuVoM",
+"name": "Gianfranco Bianco",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAACkuWmsBbaVDTL29Bei9XbT1H0x1tAZuVoM",
+"position": "Made of gluten \ud83c\udf5d and passion \ud83d\udd25"
+},
+"postId": "7267391187731308547",
+"query": {
+"post": "https://www.linkedin.com/posts/sandvik-coromant_sandvikcoromant-imtex2025-manufacturingwellness-activity-7267391187731308547-1Lch"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAFXh34BmWhd7eIcKHo0NJwfx8Eehknhe8U,urn:li:ugcPost:7267391168231936000,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAFXh34BmWhd7eIcKHo0NJwfx8Eehknhe8U",
+"name": "Sourabh Kulkarni",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAFXh34BmWhd7eIcKHo0NJwfx8Eehknhe8U",
+"position": "Owner at World Wide Web Pune"
+},
+"postId": "7267391187731308547",
+"query": {
+"post": "https://www.linkedin.com/posts/sandvik-coromant_sandvikcoromant-imtex2025-manufacturingwellness-activity-7267391187731308547-1Lch"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAdff04BB2xG2nAyEoa-qTC-uyDSGK3zuaA,urn:li:ugcPost:7267391168231936000,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAdff04BB2xG2nAyEoa-qTC-uyDSGK3zuaA",
+"name": "Shankar Thombare",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAdff04BB2xG2nAyEoa-qTC-uyDSGK3zuaA",
+"position": "Deputy Plant Manager at Taural India Private Limited"
+},
+"postId": "7267391187731308547",
+"query": {
+"post": "https://www.linkedin.com/posts/sandvik-coromant_sandvikcoromant-imtex2025-manufacturingwellness-activity-7267391187731308547-1Lch"
+}
+},
+{
+"type": "post",
+"id": "7267391187731308547",
+"linkedinUrl": "https://www.linkedin.com/posts/sandvik-coromant_sandvikcoromant-imtex2025-manufacturingwellness-activity-7267391187731308547-1Lch",
+"content": "IMTEX 2025 is coming! Want to make the most of it? Read our article for insights on smarter strategies and what\u2019s new this year.\n\nLet\u2019s shape the future together!\n\n#SandvikCoromant #IMTEX2025 #ManufacturingWellness",
+"author": {
+"id": "5173",
+"universalName": "sandvik-coromant",
+"publicIdentifier": null,
+"type": "company",
+"name": "Sandvik Coromant",
+"linkedinUrl": "https://www.linkedin.com/company/sandvik-coromant/posts",
+"info": "210,882 followers",
+"website": null,
+"websiteLabel": null,
+"urn": "5173",
+"companyId": "5173"
+},
+"postedAt": {
+"timestamp": 1732681080754,
+"date": "2024-11-27T04:18:00.754Z",
+"postedAgoShort": "1yr",
+"postedAgoText": "1 year ago \u2022 Visible to anyone on or off LinkedIn"
+},
+"article": {
+"title": "IMTEX 2025: Shaping the future together!",
+"subtitle": "Sandvik Coromant",
+"link": "https://www.linkedin.com/pulse/imtex-2025-shaping-future-together-sandvik-coromant-ujv2c?trackingId=Ol3NhFLESzSk%2FoBPDiQS7Q%3D%3D",
+"linkLabel": "Open article: IMTEX 2025: Shaping the future together!  by Sandvik Coromant \u2022 2 min read",
+"description": "With IMTEX 2025 just around the corner, the manufacturing world is gearing up to witness innovation, collaboration, and insights that shape the future",
+"image": {
+"url": "https://media.licdn.com/dms/image/v2/D5612AQGh5XwwNng5EA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1732679712689?e=1796860800&v=beta&t=_C0OIOC0Fg5jmb-CRneE3OTd80r7LMRrZvcZxYwouMc",
+"width": 1280,
+"height": 719
+}
+},
+"comments": [],
+"entityId": "7267391187731308547",
+"shareUrn": "urn:li:ugcPost:7267391168231936000",
+"shareLinkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7267391168231936000",
+"engagement": {
+"id": "7267391168231936000",
+"likes": 20,
+"comments": 0,
+"shares": 4,
+"reactions": [
+{
+"type": "LIKE",
+"count": 19
+},
+{
+"type": "EMPATHY",
+"count": 1
+}
+]
+},
+"reactions": [
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAFXh34BmWhd7eIcKHo0NJwfx8Eehknhe8U,urn:li:ugcPost:7267391168231936000,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAFXh34BmWhd7eIcKHo0NJwfx8Eehknhe8U",
+"name": "Sourabh Kulkarni",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAFXh34BmWhd7eIcKHo0NJwfx8Eehknhe8U",
+"position": "Owner at World Wide Web Pune"
+},
+"postId": "7267391187731308547"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAdff04BB2xG2nAyEoa-qTC-uyDSGK3zuaA,urn:li:ugcPost:7267391168231936000,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAdff04BB2xG2nAyEoa-qTC-uyDSGK3zuaA",
+"name": "Shankar Thombare",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAdff04BB2xG2nAyEoa-qTC-uyDSGK3zuaA",
+"position": "Deputy Plant Manager at Taural India Private Limited"
+},
+"postId": "7267391187731308547"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAACkuWmsBbaVDTL29Bei9XbT1H0x1tAZuVoM,urn:li:ugcPost:7267391168231936000,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAACkuWmsBbaVDTL29Bei9XbT1H0x1tAZuVoM",
+"name": "Gianfranco Bianco",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAACkuWmsBbaVDTL29Bei9XbT1H0x1tAZuVoM",
+"position": "Made of gluten \ud83c\udf5d and passion \ud83d\udd25"
+},
+"postId": "7267391187731308547"
+}
+],
+"reactionIds": [
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAFXh34BmWhd7eIcKHo0NJwfx8Eehknhe8U,urn:li:ugcPost:7267391168231936000,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAdff04BB2xG2nAyEoa-qTC-uyDSGK3zuaA,urn:li:ugcPost:7267391168231936000,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAACkuWmsBbaVDTL29Bei9XbT1H0x1tAZuVoM,urn:li:ugcPost:7267391168231936000,0)"
+],
+"commentIds": [],
+"query": {
+"sortBy": "relevance",
+"page": 1,
+"search": "\"IMTEX 2025\""
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAABoXYBABNZ7zqtplmx8QrF543kbMhA2Z-xw,urn:li:activity:7479525918747541504,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAABoXYBABNZ7zqtplmx8QrF543kbMhA2Z-xw",
+"name": "CHIRANJIT DAS",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAABoXYBABNZ7zqtplmx8QrF543kbMhA2Z-xw",
+"position": "Deputy Manager R&D at Gtz India Pvt Ltd"
+},
+"postId": "7479525918747541504",
+"query": {
+"post": "https://www.linkedin.com/posts/sachin-mahajan-10610a22_sachin-mahajan-marketing-manager-india-activity-7479525918747541504-picL"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAyldRwBoysg0C5lN9fnHukiXyi6xI1j1zY,urn:li:activity:7479525918747541504,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAyldRwBoysg0C5lN9fnHukiXyi6xI1j1zY",
+"name": "Leandro Bittencourt",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAyldRwBoysg0C5lN9fnHukiXyi6xI1j1zY",
+"position": "S\u00f3cio Diretor | Consultoria em Excel\u00eancia Operacional para Tintas, Impress\u00e3o e Embalagens | 30+ anos transformando opera\u00e7\u00e3o em resultado. \ud83d\udcca"
+},
+"postId": "7479525918747541504",
+"query": {
+"post": "https://www.linkedin.com/posts/sachin-mahajan-10610a22_sachin-mahajan-marketing-manager-india-activity-7479525918747541504-picL"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAZmqecB2s0kKrqcSs_wi7MglVmUdzegzZk,urn:li:activity:7479525918747541504,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAZmqecB2s0kKrqcSs_wi7MglVmUdzegzZk",
+"name": "Vivek Ranjan",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAZmqecB2s0kKrqcSs_wi7MglVmUdzegzZk",
+"position": "B2B Sales & GTM Leader | Sales Transformation | Channel Strategy | Industrial & Manufacturing | Building Predictable Revenue Engines | XLRI"
+},
+"postId": "7479525918747541504",
+"query": {
+"post": "https://www.linkedin.com/posts/sachin-mahajan-10610a22_sachin-mahajan-marketing-manager-india-activity-7479525918747541504-picL"
+}
+},
+{
+"type": "comment",
+"id": "7481059374853959680",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:activity:7479525918747541504?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7479525918747541504%2C7481059374853959680%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287481059374853959680%2Curn%3Ali%3Aactivity%3A7479525918747541504%29",
+"commentary": "Congrats Sachin!",
+"createdAt": "2026-07-09T18:59:06.327Z",
+"createdAtTimestamp": 1783623546327,
+"engagement": {
+"likes": 2,
+"comments": 0,
+"shares": 0,
+"reactions": [
+{
+"type": "LIKE",
+"count": 2
+}
+]
+},
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "ACoAAAcJVqwBI73SFrK2idhBG4Xx2zQs5sb0vVE",
+"type": "profile",
+"name": "Mar\u00eda Elisa R\u00edos",
+"linkedinUrl": "https://www.linkedin.com/in/mariaelisarioscantu",
+"position": "B2B - B2C | Commercial Strategy & Marketing Ops Manager",
+"author": false
+},
+"postId": "7479525918747541504",
+"query": {
+"post": "https://www.linkedin.com/posts/sachin-mahajan-10610a22_sachin-mahajan-marketing-manager-india-activity-7479525918747541504-picL"
+}
+},
+{
+"type": "post",
+"id": "7479525918747541504",
+"linkedinUrl": "https://www.linkedin.com/posts/sachin-mahajan-10610a22_sachin-mahajan-marketing-manager-india-activity-7479525918747541504-picL",
+"content": "Time flies! It feels like IMTEX 2025 just wrapped up yesterday. In 2 years, our QH customer base and followers have grown manifold \u2014 and we\u2019re just getting started.At IMTEX 2027, Quaker Houghton is gearing up with new surprises and technology innovations designed to help our customers reduce waste, increase uptime, and boost productivity on the shopfloor.\n\nCan\u2019t wait to see you there. \n\nThe next chapter of FluidCare is coming.\n\nhttps://lnkd.in/gMqFzXdC",
+"author": {
+"id": "ACoAAASksBYBfYDDKuILcwm31d6R449-VePb3qA",
+"universalName": null,
+"publicIdentifier": "sachin-mahajan-10610a22",
+"type": "profile",
+"name": "Sachin Mahajan",
+"linkedinUrl": "https://www.linkedin.com/in/sachin-mahajan-10610a22?miniProfileUrn=urn%3Ali%3Afsd_profile%3AACoAAASksBYBfYDDKuILcwm31d6R449-VePb3qA",
+"info": "Marketing Manager - India at Quaker Houghton",
+"website": null,
+"websiteLabel": null,
+"urn": "77901846",
+"profileId": "ACoAAASksBYBfYDDKuILcwm31d6R449-VePb3qA"
+},
+"postedAt": {
+"timestamp": 1783257941901,
+"date": "2026-07-05T13:25:41.901Z",
+"postedAgoShort": "4mo",
+"postedAgoText": "4 months ago \u2022 Visible to anyone on or off LinkedIn"
+},
+"article": {
+"title": "Sachin Mahajan, Marketing Manager - India, Quaker Houghton @ IMTEX 2025",
+"subtitle": "youtube.com",
+"link": "https://youtu.be/1pnFJxn3wKM?si=0h_bFQIKyE_dkojn",
+"linkLabel": "Open video: Sachin Mahajan, Marketing Manager - India, Quaker Houghton @ IMTEX 2025 on youtu.be",
+"description": null,
+"image": {
+"url": "https://media.licdn.com/dms/image/sync/v2/D5627AQH1OKSzq06e9Q/articleshare-shrink_1280_800/B56Z8ybqUdGgAk-/0/1783257541674?e=1796112000&v=beta&t=0fz2PTn0IzR6l2y0XrPd-TE9bOHlbh_jjrPLYcmjXXA",
+"width": 1280,
+"height": 720
+}
+},
+"comments": [
+{
+"id": "7481059374853959680",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:activity:7479525918747541504?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7479525918747541504%2C7481059374853959680%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287481059374853959680%2Curn%3Ali%3Aactivity%3A7479525918747541504%29",
+"commentary": "Congrats Sachin!",
+"createdAt": "2026-07-09T18:59:06.327Z",
+"createdAtTimestamp": 1783623546327,
+"engagement": {
+"likes": 2,
+"comments": 0,
+"shares": 0,
+"reactions": [
+{
+"type": "LIKE",
+"count": 2
+}
+]
+},
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "ACoAAAcJVqwBI73SFrK2idhBG4Xx2zQs5sb0vVE",
+"type": "profile",
+"name": "Mar\u00eda Elisa R\u00edos",
+"linkedinUrl": "https://www.linkedin.com/in/mariaelisarioscantu",
+"position": "B2B - B2C | Commercial Strategy & Marketing Ops Manager",
+"author": false
+},
+"postId": "7479525918747541504"
+}
+],
+"entityId": "7479525918747541504",
+"shareUrn": "urn:li:share:7479525917766103040",
+"shareLinkedinUrl": "https://www.linkedin.com/feed/update/urn:li:share:7479525917766103040",
+"engagement": {
+"id": "7479525918747541504",
+"likes": 16,
+"comments": 1,
+"shares": 0,
+"reactions": [
+{
+"type": "LIKE",
+"count": 15
+},
+{
+"type": "PRAISE",
+"count": 1
+}
+]
+},
+"reactions": [
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAABoXYBABNZ7zqtplmx8QrF543kbMhA2Z-xw,urn:li:activity:7479525918747541504,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAABoXYBABNZ7zqtplmx8QrF543kbMhA2Z-xw",
+"name": "CHIRANJIT DAS",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAABoXYBABNZ7zqtplmx8QrF543kbMhA2Z-xw",
+"position": "Deputy Manager R&D at Gtz India Pvt Ltd"
+},
+"postId": "7479525918747541504"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAyldRwBoysg0C5lN9fnHukiXyi6xI1j1zY,urn:li:activity:7479525918747541504,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAyldRwBoysg0C5lN9fnHukiXyi6xI1j1zY",
+"name": "Leandro Bittencourt",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAyldRwBoysg0C5lN9fnHukiXyi6xI1j1zY",
+"position": "S\u00f3cio Diretor | Consultoria em Excel\u00eancia Operacional para Tintas, Impress\u00e3o e Embalagens | 30+ anos transformando opera\u00e7\u00e3o em resultado. \ud83d\udcca"
+},
+"postId": "7479525918747541504"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAZmqecB2s0kKrqcSs_wi7MglVmUdzegzZk,urn:li:activity:7479525918747541504,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAZmqecB2s0kKrqcSs_wi7MglVmUdzegzZk",
+"name": "Vivek Ranjan",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAZmqecB2s0kKrqcSs_wi7MglVmUdzegzZk",
+"position": "B2B Sales & GTM Leader | Sales Transformation | Channel Strategy | Industrial & Manufacturing | Building Predictable Revenue Engines | XLRI"
+},
+"postId": "7479525918747541504"
+}
+],
+"reactionIds": [
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAABoXYBABNZ7zqtplmx8QrF543kbMhA2Z-xw,urn:li:activity:7479525918747541504,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAyldRwBoysg0C5lN9fnHukiXyi6xI1j1zY,urn:li:activity:7479525918747541504,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAZmqecB2s0kKrqcSs_wi7MglVmUdzegzZk,urn:li:activity:7479525918747541504,0)"
+],
+"commentIds": [
+"7481059374853959680"
+],
+"query": {
+"sortBy": "relevance",
+"page": 1,
+"search": "\"IMTEX 2025\""
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAB_EJzYBKTB4VQqFjdEmQtCANffGoV0E9xs,urn:li:ugcPost:7285895849488883712,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAB_EJzYBKTB4VQqFjdEmQtCANffGoV0E9xs",
+"name": "Bimal Rawal",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAB_EJzYBKTB4VQqFjdEmQtCANffGoV0E9xs",
+"position": "Senior Engineer sales and service."
+},
+"postId": "7285895850210304000",
+"query": {
+"post": "https://www.linkedin.com/posts/span-filtration-systems-pvt-ltd-_4-solid-reasons-to-make-sfs-your-first-stop-activity-7285895850210304000-G15J"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAGLIwYBcwgc5VcvSqtDS_Gk_cS59l-cERM,urn:li:ugcPost:7285895849488883712,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAGLIwYBcwgc5VcvSqtDS_Gk_cS59l-cERM",
+"name": "Pranav Dixit",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAGLIwYBcwgc5VcvSqtDS_Gk_cS59l-cERM",
+"position": "Strategies to enable high ROI marketing"
+},
+"postId": "7285895850210304000",
+"query": {
+"post": "https://www.linkedin.com/posts/span-filtration-systems-pvt-ltd-_4-solid-reasons-to-make-sfs-your-first-stop-activity-7285895850210304000-G15J"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_company:13182208,urn:li:ugcPost:7285895849488883712,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "13182208",
+"name": "Span Filtration Systems Pvt. Ltd.",
+"linkedinUrl": "https://www.linkedin.com/company/span-filtration-systems-pvt-ltd-/",
+"position": "8,113 followers"
+},
+"postId": "7285895850210304000",
+"query": {
+"post": "https://www.linkedin.com/posts/span-filtration-systems-pvt-ltd-_4-solid-reasons-to-make-sfs-your-first-stop-activity-7285895850210304000-G15J"
+}
+},
+{
+"type": "comment",
+"id": "7288482960406700032",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7285895849488883712?commentUrn=urn%3Ali%3Acomment%3A%28ugcPost%3A7285895849488883712%2C7288482960406700032%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287288482960406700032%2Curn%3Ali%3AugcPost%3A7285895849488883712%29",
+"commentary": "\ud83d\ude0d\ud83d\ude0d",
+"createdAt": "2025-01-24T09:09:11.227Z",
+"createdAtTimestamp": 1737709751227,
+"engagement": {
+"likes": 0,
+"comments": 0,
+"shares": 0,
+"reactions": []
+},
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "ACoAABS2BMoBSqAIuGP2DUgJ-TD0qy8XyNwsiUg",
+"type": "profile",
+"name": "Dhanesh Kanungo \ud83c\uddee\ud83c\uddf3",
+"linkedinUrl": "https://www.linkedin.com/in/dhanesh-kanungo-%F0%9F%87%AE%F0%9F%87%B3-b7644b98",
+"position": "SUPPLY CHAIN @ ALLCON METALS | STAINLESS STEEL & FLANGES MANUFACTURING \ud83d\udd29 | EQUITY & GOLD INVESTOR \ud83d\udcca\ud83d\udfe1 | MARKETING - GROWTH STRATEGIST.",
+"author": false
+},
+"postId": "7285895850210304000",
+"query": {
+"post": "https://www.linkedin.com/posts/span-filtration-systems-pvt-ltd-_4-solid-reasons-to-make-sfs-your-first-stop-activity-7285895850210304000-G15J"
+}
+},
+{
+"type": "post",
+"id": "7285895850210304000",
+"linkedinUrl": "https://www.linkedin.com/posts/span-filtration-systems-pvt-ltd-_4-solid-reasons-to-make-sfs-your-first-stop-activity-7285895850210304000-G15J",
+"content": "4 solid reasons to make SFS your first stop at IMTEX 2025!\n\nThis isn\u2019t just another sales pitch\u2014it\u2019s a chance to transform the way you handle filtration challenges.",
+"author": {
+"id": "13182208",
+"universalName": "span-filtration-systems-pvt-ltd-",
+"publicIdentifier": null,
+"type": "company",
+"name": "Span Filtration Systems Pvt. Ltd.",
+"linkedinUrl": "https://www.linkedin.com/company/span-filtration-systems-pvt-ltd-/posts",
+"info": "8,113 followers",
+"website": null,
+"websiteLabel": null,
+"urn": "13182208",
+"companyId": "13182208"
+},
+"postedAt": {
+"timestamp": 1737092936089,
+"date": "2025-01-17T05:48:56.089Z",
+"postedAgoShort": "1yr",
+"postedAgoText": "1 year ago \u2022 Visible to anyone on or off LinkedIn"
+},
+"article": {
+"title": "IMTEX 2025: 4 Reasons Span Filtration Systems (SFS) Should Be Your First Stop",
+"subtitle": "Span Filtration Systems Pvt. Ltd.",
+"link": "https://www.linkedin.com/pulse/imtex-2025-4-reasons-span-filtration-w7qef?trackingId=rMGzT2%2FQQmWOQzKxeA0cgw%3D%3D",
+"linkLabel": "Open article: IMTEX 2025: 4 Reasons Span Filtration Systems (SFS) Should Be Your First Stop by Span Filtration Systems Pvt. Ltd. \u2022 2 min read",
+"description": "Walking through the halls of IMTEX can feel like a maze. And the question pops up \"What\u2019s actually worth my time?\" At Span Filtration Systems (SFS), w",
+"image": {
+"url": "https://media.licdn.com/dms/image/v2/D4D12AQGmJDrQxG__RQ/article-cover_image-shrink_600_2000/article-cover_image-shrink_600_2000/0/1737103741852?e=1796860800&v=beta&t=o7GyfRrQJHW1bEK_Jw9lcDH7JRHHIfk_2ajXnn1rfO0",
+"width": 935,
+"height": 525
+}
+},
+"newsletterUrl": "https://www.linkedin.com/newsletters/filter-factor-7078148018163621888",
+"newsletterTitle": "Filter Factor",
+"comments": [
+{
+"id": "7288482960406700032",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7285895849488883712?commentUrn=urn%3Ali%3Acomment%3A%28ugcPost%3A7285895849488883712%2C7288482960406700032%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287288482960406700032%2Curn%3Ali%3AugcPost%3A7285895849488883712%29",
+"commentary": "\ud83d\ude0d\ud83d\ude0d",
+"createdAt": "2025-01-24T09:09:11.227Z",
+"createdAtTimestamp": 1737709751227,
+"engagement": {
+"likes": 0,
+"comments": 0,
+"shares": 0,
+"reactions": []
+},
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "ACoAABS2BMoBSqAIuGP2DUgJ-TD0qy8XyNwsiUg",
+"type": "profile",
+"name": "Dhanesh Kanungo \ud83c\uddee\ud83c\uddf3",
+"linkedinUrl": "https://www.linkedin.com/in/dhanesh-kanungo-%F0%9F%87%AE%F0%9F%87%B3-b7644b98",
+"position": "SUPPLY CHAIN @ ALLCON METALS | STAINLESS STEEL & FLANGES MANUFACTURING \ud83d\udd29 | EQUITY & GOLD INVESTOR \ud83d\udcca\ud83d\udfe1 | MARKETING - GROWTH STRATEGIST.",
+"author": false
+},
+"postId": "7285895850210304000"
+}
+],
+"entityId": "7285895850210304000",
+"shareUrn": "urn:li:ugcPost:7285895849488883712",
+"shareLinkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7285895849488883712",
+"engagement": {
+"id": "7285895849488883712",
+"likes": 12,
+"comments": 1,
+"shares": 1,
+"reactions": [
+{
+"type": "LIKE",
+"count": 12
+}
+]
+},
+"reactions": [
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAGLIwYBcwgc5VcvSqtDS_Gk_cS59l-cERM,urn:li:ugcPost:7285895849488883712,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAGLIwYBcwgc5VcvSqtDS_Gk_cS59l-cERM",
+"name": "Pranav Dixit",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAGLIwYBcwgc5VcvSqtDS_Gk_cS59l-cERM",
+"position": "Strategies to enable high ROI marketing"
+},
+"postId": "7285895850210304000"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_company:13182208,urn:li:ugcPost:7285895849488883712,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "13182208",
+"name": "Span Filtration Systems Pvt. Ltd.",
+"linkedinUrl": "https://www.linkedin.com/company/span-filtration-systems-pvt-ltd-/",
+"position": "8,113 followers"
+},
+"postId": "7285895850210304000"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAB_EJzYBKTB4VQqFjdEmQtCANffGoV0E9xs,urn:li:ugcPost:7285895849488883712,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAB_EJzYBKTB4VQqFjdEmQtCANffGoV0E9xs",
+"name": "Bimal Rawal",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAB_EJzYBKTB4VQqFjdEmQtCANffGoV0E9xs",
+"position": "Senior Engineer sales and service."
+},
+"postId": "7285895850210304000"
+}
+],
+"reactionIds": [
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAGLIwYBcwgc5VcvSqtDS_Gk_cS59l-cERM,urn:li:ugcPost:7285895849488883712,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_company:13182208,urn:li:ugcPost:7285895849488883712,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAB_EJzYBKTB4VQqFjdEmQtCANffGoV0E9xs,urn:li:ugcPost:7285895849488883712,0)"
+],
+"commentIds": [
+"7288482960406700032"
+],
+"query": {
+"sortBy": "relevance",
+"page": 1,
+"search": "\"IMTEX 2025\""
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAGHt3MBMWnr2mfiStrrE3Tms00niWHxAdA,urn:li:activity:7411350212931190785,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAGHt3MBMWnr2mfiStrrE3Tms00niWHxAdA",
+"name": "Mansoor Hamza",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAGHt3MBMWnr2mfiStrrE3Tms00niWHxAdA",
+"position": "General Manager at Amul Industries Pvt. Ltd. (ACPL)"
+},
+"postId": "7411350212931190785",
+"query": {
+"post": "https://www.linkedin.com/posts/leanworx-technologies_a-year-of-growth-that-was-2025-was-all-activity-7411350212931190785-sD2R"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAA47cOYB3cuEvSBu1vuCaok8UGbvKFxiKNc,urn:li:activity:7411350212931190785,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAA47cOYB3cuEvSBu1vuCaok8UGbvKFxiKNc",
+"name": "Harish Badanidyoor",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAA47cOYB3cuEvSBu1vuCaok8UGbvKFxiKNc",
+"position": "Director at Ace Designers Ltd. (Ace Micromatic Group)"
+},
+"postId": "7411350212931190785",
+"query": {
+"post": "https://www.linkedin.com/posts/leanworx-technologies_a-year-of-growth-that-was-2025-was-all-activity-7411350212931190785-sD2R"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAB7-QcBxuEJpciXl-uqkaB7byUaNWZTykY,urn:li:activity:7411350212931190785,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAB7-QcBxuEJpciXl-uqkaB7byUaNWZTykY",
+"name": "Sridar Govindan",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAB7-QcBxuEJpciXl-uqkaB7byUaNWZTykY",
+"position": "Sales & Business Development,Growth,Partnership"
+},
+"postId": "7411350212931190785",
+"query": {
+"post": "https://www.linkedin.com/posts/leanworx-technologies_a-year-of-growth-that-was-2025-was-all-activity-7411350212931190785-sD2R"
+}
+},
+{
+"type": "comment",
+"id": "7411441006190997504",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:activity:7411350212931190785?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7411350212931190785%2C7411441006190997504%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287411441006190997504%2Curn%3Ali%3Aactivity%3A7411350212931190785%29",
+"commentary": "A huge year of momentum for Leanworx \ud83d\udc4f\n\nFrom platform capability to security, analytics and real-world adoption, this is exactly why we\u2019re proud to be bringing Leanworx to UK manufacturers through SMRTWORX.\n\nExcited for what\u2019s next in 2026.",
+"createdAt": "2025-12-29T16:20:33.791Z",
+"createdAtTimestamp": 1767025233791,
+"engagement": {
+"likes": 2,
+"comments": 1,
+"shares": 0,
+"reactions": [
+{
+"type": "LIKE",
+"count": 2
+}
+]
+},
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "109224492",
+"type": "company",
+"universalName": "smrtworx-ltd",
+"name": "SMRTWORX LTD",
+"linkedinUrl": "https://www.linkedin.com/company/smrtworx-ltd/posts",
+"position": "70 followers",
+"author": false
+},
+"replies": [
+{
+"id": "7411584832285151232",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:activity:7411350212931190785?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7411350212931190785%2C7411441006190997504%29&replyUrn=urn%3Ali%3Acomment%3A%28activity%3A7411350212931190785%2C7411584832285151232%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287411441006190997504%2Curn%3Ali%3Aactivity%3A7411350212931190785%29&dashReplyUrn=urn%3Ali%3Afsd_comment%3A%287411584832285151232%2Curn%3Ali%3Aactivity%3A7411350212931190785%29",
+"commentary": "SMRTWORX LTD \n2026 will be a year of hyper-growth, driven by technology-led execution and strong collaborations.",
+"createdAt": "2025-12-30T01:52:04.604Z",
+"createdAtTimestamp": 1767059524604,
+"engagement": {
+"likes": 1,
+"comments": 0,
+"shares": 0,
+"reactions": [
+{
+"type": "LIKE",
+"count": 1
+}
+]
+},
+"postId": "urn:li:activity:7411350212931190785",
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "ACoAAAD4TzMBcv05TDll9wD7yhl4_Rm2p0VgEZY",
+"type": "profile",
+"name": "Srihari D",
+"linkedinUrl": "https://www.linkedin.com/in/srihari-leanworx",
+"position": "Making machines on the shop floor talk to the suits on the top floor.",
+"author": false
+}
+}
+],
+"postId": "7411350212931190785",
+"query": {
+"post": "https://www.linkedin.com/posts/leanworx-technologies_a-year-of-growth-that-was-2025-was-all-activity-7411350212931190785-sD2R"
+}
+},
+{
+"type": "post",
+"id": "7411350212931190785",
+"linkedinUrl": "https://www.linkedin.com/posts/leanworx-technologies_a-year-of-growth-that-was-2025-was-all-activity-7411350212931190785-sD2R",
+"content": "A Year of Growth That Was \ud83d\ude80\n\n2025 was all about building, improving, and scaling , one month at a time.\n\nHere\u2019s a quick look back \ud83d\udc47\n\n1. Participated in IMTEX 2025\n\n2. Upgraded security & encryption in IoT hardware\n\n3. Improved autonomous & preventive maintenance\n\n4. Upgraded on-machine & patrol inspection features\n\n5. Launched CEO dashboard with multi-plant analytics\n\n6. Announced UK reseller partnership SMRTWORX LTD\n\n7. Leanworx funded \u20b98 Cr by The Chennai Angels , led by YourNest Venture Capital \n\n8. Participated in ANUGA Food Tech and expanded into the FMCG market \n\n9. Launched our new website -  leanworx.ai\n\n10. Participated in ENGIMAC \n\n11. Team grew from 20 to 30  \n\n12. Launched new IoT hardware \n\nDasarathi GV Srihari D Ragavendra Sandesh Bhagavan S K Kaushik D. Shyamraj Sathish",
+"author": {
+"id": "79084768",
+"universalName": "leanworx-technologies",
+"publicIdentifier": null,
+"type": "company",
+"name": "Leanworx Technologies Pvt. Ltd.",
+"linkedinUrl": "https://www.linkedin.com/company/leanworx-technologies/posts",
+"info": "3,792 followers",
+"website": null,
+"websiteLabel": null,
+"urn": "79084768",
+"companyId": "79084768"
+},
+"postedAt": {
+"timestamp": 1767003586991,
+"date": "2025-12-29T10:19:46.991Z",
+"postedAgoShort": "10mo",
+"postedAgoText": "10 months ago \u2022 Visible to anyone on or off LinkedIn"
+},
+"comments": [
+{
+"id": "7411441006190997504",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:activity:7411350212931190785?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7411350212931190785%2C7411441006190997504%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287411441006190997504%2Curn%3Ali%3Aactivity%3A7411350212931190785%29",
+"commentary": "A huge year of momentum for Leanworx \ud83d\udc4f\n\nFrom platform capability to security, analytics and real-world adoption, this is exactly why we\u2019re proud to be bringing Leanworx to UK manufacturers through SMRTWORX.\n\nExcited for what\u2019s next in 2026.",
+"createdAt": "2025-12-29T16:20:33.791Z",
+"createdAtTimestamp": 1767025233791,
+"engagement": {
+"likes": 2,
+"comments": 1,
+"shares": 0,
+"reactions": [
+{
+"type": "LIKE",
+"count": 2
+}
+]
+},
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "109224492",
+"type": "company",
+"universalName": "smrtworx-ltd",
+"name": "SMRTWORX LTD",
+"linkedinUrl": "https://www.linkedin.com/company/smrtworx-ltd/posts",
+"position": "70 followers",
+"author": false
+},
+"replies": [
+{
+"id": "7411584832285151232",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:activity:7411350212931190785?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7411350212931190785%2C7411441006190997504%29&replyUrn=urn%3Ali%3Acomment%3A%28activity%3A7411350212931190785%2C7411584832285151232%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287411441006190997504%2Curn%3Ali%3Aactivity%3A7411350212931190785%29&dashReplyUrn=urn%3Ali%3Afsd_comment%3A%287411584832285151232%2Curn%3Ali%3Aactivity%3A7411350212931190785%29",
+"commentary": "SMRTWORX LTD \n2026 will be a year of hyper-growth, driven by technology-led execution and strong collaborations.",
+"createdAt": "2025-12-30T01:52:04.604Z",
+"createdAtTimestamp": 1767059524604,
+"engagement": {
+"likes": 1,
+"comments": 0,
+"shares": 0,
+"reactions": [
+{
+"type": "LIKE",
+"count": 1
+}
+]
+},
+"postId": "urn:li:activity:7411350212931190785",
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "ACoAAAD4TzMBcv05TDll9wD7yhl4_Rm2p0VgEZY",
+"type": "profile",
+"name": "Srihari D",
+"linkedinUrl": "https://www.linkedin.com/in/srihari-leanworx",
+"position": "Making machines on the shop floor talk to the suits on the top floor.",
+"author": false
+}
+}
+],
+"postId": "7411350212931190785"
+}
+],
+"entityId": "7411350212931190785",
+"shareUrn": "urn:li:share:7411350211496689664",
+"shareLinkedinUrl": "https://www.linkedin.com/feed/update/urn:li:share:7411350211496689664",
+"engagement": {
+"id": "7411350212931190785",
+"likes": 38,
+"comments": 2,
+"shares": 2,
+"reactions": [
+{
+"type": "LIKE",
+"count": 29
+},
+{
+"type": "EMPATHY",
+"count": 5
+},
+{
+"type": "PRAISE",
+"count": 2
+},
+{
+"type": "APPRECIATION",
+"count": 2
+}
+]
+},
+"reactions": [
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAB7-QcBxuEJpciXl-uqkaB7byUaNWZTykY,urn:li:activity:7411350212931190785,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAB7-QcBxuEJpciXl-uqkaB7byUaNWZTykY",
+"name": "Sridar Govindan",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAB7-QcBxuEJpciXl-uqkaB7byUaNWZTykY",
+"position": "Sales & Business Development,Growth,Partnership"
+},
+"postId": "7411350212931190785"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAA47cOYB3cuEvSBu1vuCaok8UGbvKFxiKNc,urn:li:activity:7411350212931190785,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAA47cOYB3cuEvSBu1vuCaok8UGbvKFxiKNc",
+"name": "Harish Badanidyoor",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAA47cOYB3cuEvSBu1vuCaok8UGbvKFxiKNc",
+"position": "Director at Ace Designers Ltd. (Ace Micromatic Group)"
+},
+"postId": "7411350212931190785"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAGHt3MBMWnr2mfiStrrE3Tms00niWHxAdA,urn:li:activity:7411350212931190785,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAGHt3MBMWnr2mfiStrrE3Tms00niWHxAdA",
+"name": "Mansoor Hamza",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAGHt3MBMWnr2mfiStrrE3Tms00niWHxAdA",
+"position": "General Manager at Amul Industries Pvt. Ltd. (ACPL)"
+},
+"postId": "7411350212931190785"
+}
+],
+"reactionIds": [
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAB7-QcBxuEJpciXl-uqkaB7byUaNWZTykY,urn:li:activity:7411350212931190785,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAA47cOYB3cuEvSBu1vuCaok8UGbvKFxiKNc,urn:li:activity:7411350212931190785,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAGHt3MBMWnr2mfiStrrE3Tms00niWHxAdA,urn:li:activity:7411350212931190785,0)"
+],
+"commentIds": [
+"7411441006190997504"
+],
+"query": {
+"sortBy": "relevance",
+"page": 1,
+"search": "\"IMTEX 2025\""
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAB7ECp8BO-Te4JCQKg3IY9aeHTbrCBCTMTc,urn:li:ugcPost:7263141746945970176,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAB7ECp8BO-Te4JCQKg3IY9aeHTbrCBCTMTc",
+"name": "Poovanna KS",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAB7ECp8BO-Te4JCQKg3IY9aeHTbrCBCTMTc",
+"position": "Business Head @ IH Global Pvt. Ltd."
+},
+"postId": "7263141747562569730",
+"query": {
+"post": "https://www.linkedin.com/posts/s-k-b-machine-tools-pvt%2E-ltd%2E-_welcome-to-our-stall-at-imtex-2025-activity-7263141747562569730-T4-N"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAIAw4gBmCTHp--GupQChFPca5d664BQYlE,urn:li:ugcPost:7263141746945970176,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAIAw4gBmCTHp--GupQChFPca5d664BQYlE",
+"name": "Sonal Dhar",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAIAw4gBmCTHp--GupQChFPca5d664BQYlE",
+"position": "Representative @ WILHELM K\u00d6NIG MTM GmbH | High Precision Clamping | EIFCO MACHINE TOOLS | Gear Manufacturing Solutions"
+},
+"postId": "7263141747562569730",
+"query": {
+"post": "https://www.linkedin.com/posts/s-k-b-machine-tools-pvt%2E-ltd%2E-_welcome-to-our-stall-at-imtex-2025-activity-7263141747562569730-T4-N"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAFlt-LkBqnnekLYcGKiCiw2NwN0EiOoxZEY,urn:li:ugcPost:7263141746945970176,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAFlt-LkBqnnekLYcGKiCiw2NwN0EiOoxZEY",
+"name": "Austin Michaelraj",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAFlt-LkBqnnekLYcGKiCiw2NwN0EiOoxZEY",
+"position": "Team Member (Quality Control Paint Shop) at Vinfast India"
+},
+"postId": "7263141747562569730",
+"query": {
+"post": "https://www.linkedin.com/posts/s-k-b-machine-tools-pvt%2E-ltd%2E-_welcome-to-our-stall-at-imtex-2025-activity-7263141747562569730-T4-N"
+}
+},
+{
+"type": "post",
+"id": "7263141747562569730",
+"linkedinUrl": "https://www.linkedin.com/posts/s-k-b-machine-tools-pvt%2E-ltd%2E-_welcome-to-our-stall-at-imtex-2025-activity-7263141747562569730-T4-N",
+"content": "WELCOME TO OUR STALL AT IMTEX 2025",
+"author": {
+"id": "341033",
+"universalName": "s-k-b-machine-tools-pvt.-ltd.-",
+"publicIdentifier": null,
+"type": "company",
+"name": "S K B MACHINE TOOLS",
+"linkedinUrl": "https://www.linkedin.com/company/s-k-b-machine-tools-pvt.-ltd.-/posts",
+"info": "301 followers",
+"website": null,
+"websiteLabel": null,
+"urn": "341033",
+"companyId": "341033"
+},
+"postedAt": {
+"timestamp": 1731667935267,
+"date": "2024-11-15T10:52:15.267Z",
+"postedAgoShort": "2yr",
+"postedAgoText": "2 years ago \u2022 Visible to anyone on or off LinkedIn"
+},
+"article": {
+"title": "S K B MACHINE TOOLS \u2013 ONE STOP GRINDING SOLUTIONS FOR INDEXABLE INSERT TIPS",
+"subtitle": "S K B MACHINE TOOLS",
+"link": "https://www.linkedin.com/pulse/k-b-machine-tools-one-stop-grinding-solutions-cnrbf?trackingId=PvbyYbY%2BSY6pwcTz%2FcphFQ%3D%3D",
+"linkLabel": "Open article: S K B MACHINE TOOLS \u2013 ONE STOP GRINDING SOLUTIONS FOR INDEXABLE INSERT TIPS\n\n  by S K B MACHINE TOOLS \u2022 2 min read",
+"description": "NISSEI INDUSTRY CORP., TOYAMA, JAPAN, PIONEERS OF DOUBLE DISC GRINDING TECHNOLOGY AND WAIDA MFG. CO. LTD., TAKAYAMA, JAPAN PIONEERS OF INDEXABLE INSER",
+"image": {
+"url": "https://media.licdn.com/dms/image/v2/D4D12AQGdFR8GWudnoQ/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1731666459611?e=1796860800&v=beta&t=03k72Pi7LcBugy3ujqXHdzoolmaB90QLEvOBDtiOC5Y",
+"width": 1278,
+"height": 720
+}
+},
+"comments": [],
+"entityId": "7263141747562569730",
+"shareUrn": "urn:li:ugcPost:7263141746945970176",
+"shareLinkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7263141746945970176",
+"engagement": {
+"id": "7263141746945970176",
+"likes": 9,
+"comments": 0,
+"shares": 5,
+"reactions": [
+{
+"type": "LIKE",
+"count": 9
+}
+]
+},
+"reactions": [
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAFlt-LkBqnnekLYcGKiCiw2NwN0EiOoxZEY,urn:li:ugcPost:7263141746945970176,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAFlt-LkBqnnekLYcGKiCiw2NwN0EiOoxZEY",
+"name": "Austin Michaelraj",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAFlt-LkBqnnekLYcGKiCiw2NwN0EiOoxZEY",
+"position": "Team Member (Quality Control Paint Shop) at Vinfast India"
+},
+"postId": "7263141747562569730"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAB7ECp8BO-Te4JCQKg3IY9aeHTbrCBCTMTc,urn:li:ugcPost:7263141746945970176,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAB7ECp8BO-Te4JCQKg3IY9aeHTbrCBCTMTc",
+"name": "Poovanna KS",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAB7ECp8BO-Te4JCQKg3IY9aeHTbrCBCTMTc",
+"position": "Business Head @ IH Global Pvt. Ltd."
+},
+"postId": "7263141747562569730"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAIAw4gBmCTHp--GupQChFPca5d664BQYlE,urn:li:ugcPost:7263141746945970176,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAAIAw4gBmCTHp--GupQChFPca5d664BQYlE",
+"name": "Sonal Dhar",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAAIAw4gBmCTHp--GupQChFPca5d664BQYlE",
+"position": "Representative @ WILHELM K\u00d6NIG MTM GmbH | High Precision Clamping | EIFCO MACHINE TOOLS | Gear Manufacturing Solutions"
+},
+"postId": "7263141747562569730"
+}
+],
+"reactionIds": [
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAFlt-LkBqnnekLYcGKiCiw2NwN0EiOoxZEY,urn:li:ugcPost:7263141746945970176,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAB7ECp8BO-Te4JCQKg3IY9aeHTbrCBCTMTc,urn:li:ugcPost:7263141746945970176,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAAIAw4gBmCTHp--GupQChFPca5d664BQYlE,urn:li:ugcPost:7263141746945970176,0)"
+],
+"commentIds": [],
+"query": {
+"sortBy": "relevance",
+"page": 1,
+"search": "\"IMTEX 2025\""
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_company:13736841,urn:li:ugcPost:7285979469197041664,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "13736841",
+"name": "CalibroMeasure Equipments Pvt. Ltd",
+"linkedinUrl": "https://www.linkedin.com/company/calibromeasure-equipments/",
+"position": "2,850 followers"
+},
+"postId": "7285979469733916675",
+"query": {
+"post": "https://www.linkedin.com/posts/calibromeasure-equipments_calibromeasure-imtex2025-manufacturinginnovation-activity-7285979469733916675-LGw8"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAEQXNyMBDfR3U15HhlhQ6gtFlPbUWfe0oGI,urn:li:ugcPost:7285979469197041664,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAEQXNyMBDfR3U15HhlhQ6gtFlPbUWfe0oGI",
+"name": "Aditya Bhatpude",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAEQXNyMBDfR3U15HhlhQ6gtFlPbUWfe0oGI",
+"position": "Quality Assurance (GET)@Dhoot Electrical Systems Pvt Ltd (DESPL) Btech in MECH||From DIEMS. Diploma in MECH||From Mgm Polytechnic Ch.Sambhajinagar. PTC in Creo Parametric||BMS||PLC From IGTR.Mechanical Engineer."
+},
+"postId": "7285979469733916675",
+"query": {
+"post": "https://www.linkedin.com/posts/calibromeasure-equipments_calibromeasure-imtex2025-manufacturinginnovation-activity-7285979469733916675-LGw8"
+}
+},
+{
+"type": "reaction",
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAADtgXHsBaNUzzBD-K3ok-0XuXB8ORJNQXNo,urn:li:ugcPost:7285979469197041664,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAADtgXHsBaNUzzBD-K3ok-0XuXB8ORJNQXNo",
+"name": "Shaikh Faizan",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAADtgXHsBaNUzzBD-K3ok-0XuXB8ORJNQXNo",
+"position": "Sr. Application & Solutions Engineer at Calibromeasure Equipment Pvt Ltd"
+},
+"postId": "7285979469733916675",
+"query": {
+"post": "https://www.linkedin.com/posts/calibromeasure-equipments_calibromeasure-imtex2025-manufacturinginnovation-activity-7285979469733916675-LGw8"
+}
+},
+{
+"type": "comment",
+"id": "7285983510677360641",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7285979469197041664?commentUrn=urn%3Ali%3Acomment%3A%28ugcPost%3A7285979469197041664%2C7285983510677360641%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287285983510677360641%2Curn%3Ali%3AugcPost%3A7285979469197041664%29",
+"commentary": "All the best for the show Team Calibro Measure",
+"createdAt": "2025-01-17T11:37:15.974Z",
+"createdAtTimestamp": 1737113835974,
+"engagement": {
+"likes": 0,
+"comments": 1,
+"shares": 0,
+"reactions": []
+},
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "ACoAAAkdfKsB-1fDUGd-hkDInBwbyvZpK2Pp2zY",
+"type": "profile",
+"name": "Vasant Mudholkar",
+"linkedinUrl": "https://www.linkedin.com/in/vasant-mudholkar-7a326b43",
+"position": "CO OWNER at MGM ENGINEERING CORPORATION/ PROFESSIONAL ENGINEERING",
+"author": false
+},
+"replies": [
+{
+"id": "7286000487777062912",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7285979469197041664?commentUrn=urn%3Ali%3Acomment%3A%28ugcPost%3A7285979469197041664%2C7285983510677360641%29&replyUrn=urn%3Ali%3Acomment%3A%28ugcPost%3A7285979469197041664%2C7286000487777062912%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287285983510677360641%2Curn%3Ali%3AugcPost%3A7285979469197041664%29&dashReplyUrn=urn%3Ali%3Afsd_comment%3A%287286000487777062912%2Curn%3Ali%3AugcPost%3A7285979469197041664%29",
+"commentary": "Vasant Mudholkar Thanks a lot \ud83d\ude4f",
+"createdAt": "2025-01-17T12:44:43.630Z",
+"createdAtTimestamp": 1737117883630,
+"engagement": {
+"likes": 0,
+"comments": 0,
+"shares": 0,
+"reactions": []
+},
+"postId": "urn:li:ugcPost:7285979469197041664",
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "13736841",
+"type": "company",
+"universalName": "calibromeasure-equipments",
+"name": "CalibroMeasure Equipments Pvt. Ltd",
+"linkedinUrl": "https://www.linkedin.com/company/calibromeasure-equipments/posts",
+"position": "2,850 followers",
+"author": false
+}
+}
+],
+"postId": "7285979469733916675",
+"query": {
+"post": "https://www.linkedin.com/posts/calibromeasure-equipments_calibromeasure-imtex2025-manufacturinginnovation-activity-7285979469733916675-LGw8"
+}
+},
+{
+"type": "post",
+"id": "7285979469733916675",
+"linkedinUrl": "https://www.linkedin.com/posts/calibromeasure-equipments_calibromeasure-imtex2025-manufacturinginnovation-activity-7285979469733916675-LGw8",
+"content": "\ud83d\ude80 Ready to take your manufacturing to the next level? Visit CalibroMeasure at IMTEX 2025 and unlock 3 BIG advantages that could transform your production process:\n1\ufe0f\u20e3 Save Up to \u20b98 Lakhs Annually with smarter inspections\u2014cut down on rework, scrap and downtime.\n2\ufe0f\u20e3 Optimize Manpower while maintaining precision with automated inspection systems.\n3\ufe0f\u20e3 Tailored Expertise for complex challenges\u2014get insights that solve problems others won\u2019t touch.\nDon\u2019t miss this chance to revolutionize your manufacturing. \n\n\ud83d\udccd Visit us at Hall 7, Stall A129 at IMTEX 2025. \n\n#CalibroMeasure #IMTEX2025 #ManufacturingInnovation #SmartInspection #PrecisionManufacturing #OptimizeYourProcess #SaveBig #PCDrunout",
+"author": {
+"id": "13736841",
+"universalName": "calibromeasure-equipments",
+"publicIdentifier": null,
+"type": "company",
+"name": "CalibroMeasure Equipments Pvt. Ltd",
+"linkedinUrl": "https://www.linkedin.com/company/calibromeasure-equipments/posts",
+"info": "2,850 followers",
+"website": null,
+"websiteLabel": null,
+"urn": "13736841",
+"companyId": "13736841"
+},
+"postedAt": {
+"timestamp": 1737112872537,
+"date": "2025-01-17T11:21:12.537Z",
+"postedAgoShort": "1yr",
+"postedAgoText": "1 year ago \u2022 Visible to anyone on or off LinkedIn"
+},
+"article": {
+"title": "3 Big Advantages Waiting for You at CalibroMeasure\u2019s IMTEX Booth",
+"subtitle": "CalibroMeasure Equipments Pvt. Ltd",
+"link": "https://www.linkedin.com/pulse/3-big-advantages-waiting-you-calibromeasures-lifuf?trackingId=dpSEkTzkTzWrOQp6OGENNg%3D%3D",
+"linkLabel": "Open article: 3 Big Advantages Waiting for You at CalibroMeasure\u2019s IMTEX Booth by CalibroMeasure Equipments Pvt. Ltd \u2022 2 min read",
+"description": "Let\u2019s be honest, time is tight, production pressures are high, and inspection bottlenecks are costing you more than just time. At IMTEX 2025, a visit ",
+"image": {
+"url": "https://media.licdn.com/dms/image/v2/D4D12AQHfX2g_DEpT2g/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1737112348296?e=1796860800&v=beta&t=w7WtyCmip5hOqF-lqS3vUnV1ZSj_6W8esVuW_hRofTc",
+"width": 1280,
+"height": 720
+}
+},
+"newsletterUrl": "https://www.linkedin.com/newsletters/quality-matters-7079705236759547904",
+"newsletterTitle": "Quality Matters",
+"comments": [
+{
+"id": "7285983510677360641",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7285979469197041664?commentUrn=urn%3Ali%3Acomment%3A%28ugcPost%3A7285979469197041664%2C7285983510677360641%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287285983510677360641%2Curn%3Ali%3AugcPost%3A7285979469197041664%29",
+"commentary": "All the best for the show Team Calibro Measure",
+"createdAt": "2025-01-17T11:37:15.974Z",
+"createdAtTimestamp": 1737113835974,
+"engagement": {
+"likes": 0,
+"comments": 1,
+"shares": 0,
+"reactions": []
+},
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "ACoAAAkdfKsB-1fDUGd-hkDInBwbyvZpK2Pp2zY",
+"type": "profile",
+"name": "Vasant Mudholkar",
+"linkedinUrl": "https://www.linkedin.com/in/vasant-mudholkar-7a326b43",
+"position": "CO OWNER at MGM ENGINEERING CORPORATION/ PROFESSIONAL ENGINEERING",
+"author": false
+},
+"replies": [
+{
+"id": "7286000487777062912",
+"linkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7285979469197041664?commentUrn=urn%3Ali%3Acomment%3A%28ugcPost%3A7285979469197041664%2C7285983510677360641%29&replyUrn=urn%3Ali%3Acomment%3A%28ugcPost%3A7285979469197041664%2C7286000487777062912%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287285983510677360641%2Curn%3Ali%3AugcPost%3A7285979469197041664%29&dashReplyUrn=urn%3Ali%3Afsd_comment%3A%287286000487777062912%2Curn%3Ali%3AugcPost%3A7285979469197041664%29",
+"commentary": "Vasant Mudholkar Thanks a lot \ud83d\ude4f",
+"createdAt": "2025-01-17T12:44:43.630Z",
+"createdAtTimestamp": 1737117883630,
+"engagement": {
+"likes": 0,
+"comments": 0,
+"shares": 0,
+"reactions": []
+},
+"postId": "urn:li:ugcPost:7285979469197041664",
+"pinned": false,
+"contributed": false,
+"edited": false,
+"actor": {
+"id": "13736841",
+"type": "company",
+"universalName": "calibromeasure-equipments",
+"name": "CalibroMeasure Equipments Pvt. Ltd",
+"linkedinUrl": "https://www.linkedin.com/company/calibromeasure-equipments/posts",
+"position": "2,850 followers",
+"author": false
+}
+}
+],
+"postId": "7285979469733916675"
+}
+],
+"entityId": "7285979469733916675",
+"shareUrn": "urn:li:ugcPost:7285979469197041664",
+"shareLinkedinUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7285979469197041664",
+"engagement": {
+"id": "7285979469197041664",
+"likes": 9,
+"comments": 2,
+"shares": 1,
+"reactions": [
+{
+"type": "LIKE",
+"count": 9
+}
+]
+},
+"reactions": [
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_company:13736841,urn:li:ugcPost:7285979469197041664,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "13736841",
+"name": "CalibroMeasure Equipments Pvt. Ltd",
+"linkedinUrl": "https://www.linkedin.com/company/calibromeasure-equipments/",
+"position": "2,850 followers"
+},
+"postId": "7285979469733916675"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAEQXNyMBDfR3U15HhlhQ6gtFlPbUWfe0oGI,urn:li:ugcPost:7285979469197041664,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAAEQXNyMBDfR3U15HhlhQ6gtFlPbUWfe0oGI",
+"name": "Aditya Bhatpude",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAAEQXNyMBDfR3U15HhlhQ6gtFlPbUWfe0oGI",
+"position": "Quality Assurance (GET)@Dhoot Electrical Systems Pvt Ltd (DESPL) Btech in MECH||From DIEMS. Diploma in MECH||From Mgm Polytechnic Ch.Sambhajinagar. PTC in Creo Parametric||BMS||PLC From IGTR.Mechanical Engineer."
+},
+"postId": "7285979469733916675"
+},
+{
+"id": "urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAADtgXHsBaNUzzBD-K3ok-0XuXB8ORJNQXNo,urn:li:ugcPost:7285979469197041664,0)",
+"reactionType": "LIKE",
+"actor": {
+"id": "ACoAADtgXHsBaNUzzBD-K3ok-0XuXB8ORJNQXNo",
+"name": "Shaikh Faizan",
+"linkedinUrl": "https://www.linkedin.com/in/ACoAADtgXHsBaNUzzBD-K3ok-0XuXB8ORJNQXNo",
+"position": "Sr. Application & Solutions Engineer at Calibromeasure Equipment Pvt Ltd"
+},
+"postId": "7285979469733916675"
+}
+],
+"reactionIds": [
+"urn:li:fsd_reaction:(urn:li:fsd_company:13736841,urn:li:ugcPost:7285979469197041664,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAAEQXNyMBDfR3U15HhlhQ6gtFlPbUWfe0oGI,urn:li:ugcPost:7285979469197041664,0)",
+"urn:li:fsd_reaction:(urn:li:fsd_profile:ACoAADtgXHsBaNUzzBD-K3ok-0XuXB8ORJNQXNo,urn:li:ugcPost:7285979469197041664,0)"
+],
+"commentIds": [
+"7285983510677360641"
+],
+"query": {
+"sortBy": "relevance",
+"page": 1,
+"search": "\"IMTEX 2025\""
+}
+}
+]

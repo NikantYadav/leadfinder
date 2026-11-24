@@ -61,38 +61,72 @@ def sync_tracker(con, industry):
     return n
 
 
+def at_show_label(lead):
+    """Seen at a show = the person's own post/photo/listing; company at a show = only their employer is on record;
+    engaged = they liked / commented on a post about the show (not proof they were there); customer = their company is
+    named as a customer on an exhibitor's website."""
+    if lead.get("seen"):
+        return "seen at a show"
+    if lead["confidence"] in ("confirmed", "likely"):
+        return "company at a show"
+    if lead.get("engaged"):
+        return "engaged with a show post"
+    if lead.get("customer"):
+        return "buys from an exhibitor"
+    return "profile match"
+
+
 def build_leads(con, industry, min_shows=None):
     from .people import effective_min_shows
     min_shows = min_shows or effective_min_shows(industry)
     icps = load_icps(industry)
+    # people at this search's companies, plus people with their own evidence at this search's shows whose company is
+    # unknown or not in the search's pool (e.g. someone who commented on a show post: their company isn't added)
     people = con.execute("""SELECT p.*, c.name AS company, c.domain FROM people p
                             JOIN companies c ON c.id=p.company_id
-                            JOIN company_industries ci ON ci.company_id=c.id AND ci.industry_id=?""",
-                         (industry["id"],)).fetchall()
+                            JOIN company_industries ci ON ci.company_id=c.id AND ci.industry_id=?
+                            UNION
+                            SELECT p.*, c.name AS company, c.domain FROM people p
+                            LEFT JOIN companies c ON c.id=p.company_id
+                            WHERE (p.company_id IS NULL OR p.company_id NOT IN (
+                                     SELECT company_id FROM company_industries WHERE industry_id=?))
+                              AND p.id IN (SELECT e.entity_id FROM evidence e JOIN shows s ON s.id=e.show_id
+                                           WHERE e.entity='person' AND s.industry_id=?)""",
+                         (industry["id"], industry["id"], industry["id"])).fetchall()
+    own_shows = {r[0] for r in con.execute("SELECT id FROM shows WHERE industry_id=?", (industry["id"],))}
     from .people import classify
+    from .scoring import ATTEND_KINDS
     leads = []
     facts_cache = {}
+    groups = db.groups_for(con, industry["id"])   # this search's groups only; other searches keep theirs
     for p in people:
-        if not p["icp_locked"]:
-            icp = classify(con, icps, p["title"], p["company_id"], min_shows)
-            if icp != p["icp"]:
-                con.execute("UPDATE people SET icp=? WHERE id=?", (icp, p["id"]))
-            p = dict(p, icp=icp)
+        pev = con.execute("SELECT * FROM evidence WHERE entity='person' AND entity_id=?", (p["id"],)).fetchall()
+        seen = any(e["kind"] in ATTEND_KINDS for e in pev)  # the person themself was at a show
+        # liked / commented on a post about one of THIS search's shows: weaker than seen (see people.ENGAGED_RULES)
+        engaged = not seen and any(e["kind"] == "post_engaged" and e["show_id"] in own_shows for e in pev)
+        stored, locked = groups.get(p["id"], (None, 0))
+        if locked:
+            icp = stored
         else:
-            p = dict(p)
+            icp = classify(con, icps, p["title"], p["company_id"], min_shows, seen=seen, engaged=engaged)
+            if p["id"] not in groups or icp != stored:
+                db.set_group(con, p["id"], industry["id"], icp)
+        p = dict(p, icp=icp)
         if not p["icp"]:
             continue  # title doesn't fit any ICP
-        pev = con.execute("SELECT * FROM evidence WHERE entity='person' AND entity_id=?", (p["id"],)).fetchall()
         cev = con.execute("SELECT * FROM evidence WHERE entity='company' AND entity_id=?", (p["company_id"],)).fetchall()
         if p["company_id"] not in facts_cache:
-            facts_cache[p["company_id"]] = company_facts(con, p["company_id"])
+            facts_cache[p["company_id"]] = company_facts(con, p["company_id"]) if p["company_id"] else \
+                {"exhibitor_window_count": 0}
         f = facts_cache[p["company_id"]]
         score, conf, why = score_person(p, pev, cev, f["exhibitor_window_count"], min_shows)
         ev = sorted(pev + cev, key=lambda e: {"confirmed": 0, "likely": 1, "inferred": 2}[e["confidence"]])
         att = [e for e in ev if e["kind"] != "linkedin_profile"]
         best = (att or ev or [None])[0]
         shows = _show_names(con, [e["show_id"] for e in pev + cev if e["show_id"]])
-        leads.append({**p, "score": score, "confidence": conf, "why": why, "shows": shows,
+        customer = any(e["kind"] == "customer_of_exhibitor" for e in cev)
+        leads.append({**p, "score": score, "confidence": conf, "seen": seen, "engaged": engaged, "customer": customer,
+                      "why": why, "shows": shows,
                       "evidence_url": best["url"] if best else "", "evidence_kind": best["kind"] if best else "",
                       "show_ids": sorted({e["show_id"] for e in pev + cev if e["show_id"]})})
     con.commit()
@@ -145,14 +179,14 @@ def export(con, industry, min_shows=None):
     wb.remove(wb.active)
 
     # Leads
-    head = ["lead_id", "icp", "score", "confidence", "name", "title", "company", "location", "country", "check",
+    head = ["lead_id", "icp", "score", "at_show", "name", "title", "company", "location", "country", "check",
             "linkedin", "email", "email_status", "email_source", "shows", "evidence_kind", "evidence_url", "why",
             "google_check"]
-    rows = [[l["id"], l["icp"], l["score"], l["confidence"], l["name"], l["title"], l["company"], l["location"],
+    rows = [[l["id"], l["icp"], l["score"], at_show_label(l), l["name"], l["title"], l["company"] or "", l["location"],
              l.get("country") or "", l.get("profile_flag") or ("ok" if l.get("li_checked_at") else ""),
              l["linkedin_url"] or "", l["email"] or "", l.get("email_status") or "", l.get("email_source") or "",
              l["shows"], l["evidence_kind"], l["evidence_url"], l["why"],
-             "https://www.google.com/search?q=" + quote_plus(f'"{l["name"]}" "{l["company"]}"')]
+             "https://www.google.com/search?q=" + quote_plus(f'"{l["name"]}" "{l["company"] or ""}"'.replace(' ""', ''))]
             for l in leads]
     ws = _sheet(wb, "Leads", head, rows, {"title": 34, "why": 60, "evidence_url": 40, "linkedin": 36, "shows": 30,
                                           "company": 28, "email": 30, "check": 26})
@@ -166,7 +200,9 @@ def export(con, industry, min_shows=None):
     crow = []
     for c in comps:
         f = company_facts(con, c["id"])
-        n_people = con.execute("SELECT COUNT(*) FROM people WHERE company_id=? AND icp IS NOT NULL", (c["id"],)).fetchone()[0]
+        n_people = con.execute("""SELECT COUNT(*) FROM person_groups g JOIN people p ON p.id=g.person_id
+                                  WHERE p.company_id=? AND g.industry_id=? AND g.icp IS NOT NULL""",
+                               (c["id"], industry["id"])).fetchone()[0]
         kinds = con.execute("SELECT DISTINCT kind FROM evidence WHERE entity='company' AND entity_id=?", (c["id"],)).fetchall()
         kw = " OR ".join(f'"{k}"' for i in icps for k in (i.get("search_keywords") or i["title_keywords"])[:2])
         fit = [i["code"] for i in icps if i.get("find_via", "company_list") == "company_list"
